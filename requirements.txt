@@ -31,7 +31,7 @@ accelerate
 safetensors
 
 # Explainability
-pytorch-grad-cam
+grad-cam
 
 # Testing
 pytest
