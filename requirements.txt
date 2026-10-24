@@ -1,0 +1,37 @@
+# Core
+torch
+torchvision
+timm
+numpy
+pandas
+pyyaml
+tqdm
+
+# Image processing / augmentation
+opencv-python
+albumentations
+scikit-image
+pillow
+
+# Segmentation / models
+segmentation-models-pytorch
+
+# Metrics / ML
+scikit-learn
+imbalanced-learn
+
+# Visualization
+matplotlib
+seaborn
+
+# Generative (for self-generation of AI-forged samples)
+diffusers
+transformers
+accelerate
+safetensors
+
+# Explainability
+pytorch-grad-cam
+
+# Testing
+pytest
