@@ -30,8 +30,8 @@ def maybe_subset(ds, max_n, seed=0):
     return Subset(ds, idx.tolist())
 
 
-def forged_dataset(items, size):
-    return ItemsDataset([it for it in items if it[2] == 1], size=size)
+def forged_dataset(items, size, freq=False):
+    return ItemsDataset([it for it in items if it[2] == 1], size=size, freq=freq)
 
 
 def dice_loss(logits, target):
@@ -96,6 +96,7 @@ def main():
     ap.add_argument("--max-train", type=int, default=None)
     ap.add_argument("--max-val", type=int, default=None)
     ap.add_argument("--augment", action="store_true")
+    ap.add_argument("--freq", action="store_true", help="dung 6 kenh: RGB + tan so/nhieu")
     ap.add_argument("--out", default="results/seg")
     args = ap.parse_args()
 
@@ -106,14 +107,14 @@ def main():
     test_names = [k for k in raw if k != "train"]
 
     train_aug = build_train_augment() if args.augment else None
-    train_ds = maybe_subset(ItemsDataset(raw["train"], size=args.size, augment=train_aug), args.max_train)
+    train_ds = maybe_subset(ItemsDataset(raw["train"], size=args.size, augment=train_aug, freq=args.freq), args.max_train)
     pixel_loaders = {
-        name: DataLoader(maybe_subset(forged_dataset(raw[name], args.size), args.max_val),
+        name: DataLoader(maybe_subset(forged_dataset(raw[name], args.size, args.freq), args.max_val),
                          batch_size=args.batch_size, shuffle=False, num_workers=0)
         for name in test_names
     }
     auc_loaders = {
-        name: DataLoader(maybe_subset(ItemsDataset(raw[name], args.size), args.max_val),
+        name: DataLoader(maybe_subset(ItemsDataset(raw[name], args.size, freq=args.freq), args.max_val),
                          batch_size=args.batch_size, shuffle=False, num_workers=0)
         for name in test_names
     }
@@ -121,7 +122,8 @@ def main():
     print(f"Train: {len(train_ds)}")
     train_loader = DataLoader(train_ds, batch_size=args.batch_size, shuffle=True, num_workers=0)
 
-    model = build_segmentation(args.encoder).to(device)
+    in_channels = 6 if args.freq else 3
+    model = build_segmentation(args.encoder, in_channels=in_channels).to(device)
     bce = nn.BCEWithLogitsLoss(pos_weight=torch.tensor(args.pos_weight, device=device))
     optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
 

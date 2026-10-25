@@ -17,6 +17,22 @@ def list_images(folder):
     return sorted([p for p in folder.rglob("*") if p.suffix.lower() in EXTS])
 
 
+def freq_channels(raw):
+    """raw: HxWx3 float [0,1] -> 3 kenh tan so/nhieu (z-score)."""
+    import cv2
+
+    gray = raw.mean(axis=2).astype(np.float32)
+    hp = gray - cv2.GaussianBlur(gray, (5, 5), 0)
+    lap = cv2.Laplacian(gray, cv2.CV_32F)
+    spec = np.fft.fftshift(np.fft.fft2(gray))
+    mag = np.log1p(np.abs(spec)).astype(np.float32)
+
+    def z(x):
+        return (x - x.mean()) / (x.std() + 1e-6)
+
+    return np.stack([z(hp), z(lap), z(mag)], axis=0)
+
+
 def letterbox(img, mask, size):
     """Resize giu ti le roi pad thanh size x size (anh + mask cung phep bien doi)."""
     w, h = img.size
@@ -38,11 +54,12 @@ def letterbox(img, mask, size):
 class _BaseForgeryDataset(Dataset):
     """items = [(image_path, mask_path_or_None, label)]. label: 0=that, 1=gia."""
 
-    def __init__(self, items, size=512, return_mask=True, augment=None):
+    def __init__(self, items, size=512, return_mask=True, augment=None, freq=False):
         self.items = list(items)
         self.size = size
         self.return_mask = return_mask
         self.augment = augment
+        self.freq = freq
 
     def __len__(self):
         return len(self.items)
@@ -63,9 +80,14 @@ class _BaseForgeryDataset(Dataset):
 
         img, mask = letterbox(img, mask, self.size)
 
-        arr = np.asarray(img, dtype=np.float32) / 255.0
-        arr = (arr - IMAGENET_MEAN) / IMAGENET_STD
-        image = torch.from_numpy(arr).permute(2, 0, 1).contiguous()
+        raw = np.asarray(img, dtype=np.float32) / 255.0
+        rgb = (raw - IMAGENET_MEAN) / IMAGENET_STD
+        rgb = np.transpose(rgb, (2, 0, 1))
+        if self.freq:
+            f = freq_channels(raw)
+            image = torch.from_numpy(np.concatenate([rgb, f], axis=0)).contiguous()
+        else:
+            image = torch.from_numpy(rgb).contiguous()
 
         binary_mask = (np.asarray(mask) > 127).astype(np.float32)
         mask_t = torch.from_numpy(binary_mask).unsqueeze(0)
@@ -79,7 +101,7 @@ class _BaseForgeryDataset(Dataset):
 
 
 class DocumentForgeryDataset(_BaseForgeryDataset):
-    def __init__(self, forged_dir, mask_dir, authentic_dir=None, size=512, return_mask=True, augment=None):
+    def __init__(self, forged_dir, mask_dir, authentic_dir=None, size=512, return_mask=True, augment=None, freq=False):
         items = []
         for img_path in list_images(forged_dir):
             msk = Path(mask_dir) / (img_path.stem + ".png")
@@ -90,11 +112,11 @@ class DocumentForgeryDataset(_BaseForgeryDataset):
         if authentic_dir:
             for img_path in list_images(authentic_dir):
                 items.append((img_path, None, 0))
-        super().__init__(items, size=size, return_mask=return_mask, augment=augment)
+        super().__init__(items, size=size, return_mask=return_mask, augment=augment, freq=freq)
 
 
 class ItemsDataset(_BaseForgeryDataset):
     """Dung khi da co danh sach item (vd: chia theo generator)."""
 
-    def __init__(self, items, size=512, return_mask=True, augment=None):
-        super().__init__(items, size=size, return_mask=return_mask, augment=augment)
+    def __init__(self, items, size=512, return_mask=True, augment=None, freq=False):
+        super().__init__(items, size=size, return_mask=return_mask, augment=augment, freq=freq)
