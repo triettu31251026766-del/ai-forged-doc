@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from src.data.dataset import ItemsDataset  # noqa: E402
-from src.data.splits import build_fewshot_splits  # noqa: E402
+from src.data.splits import build_fewshot_splits, build_protocol_splits  # noqa: E402
 from src.models.segmentation import build_segmentation  # noqa: E402
 from src.train_seg import dice_loss, eval_image_auc, eval_pixel  # noqa: E402
 
@@ -36,6 +36,8 @@ def main():
     ap.add_argument("--batch-size", type=int, default=8)
     ap.add_argument("--init", default="results/seg/unet_resnet18.pth")
     ap.add_argument("--scratch", action="store_true")
+    ap.add_argument("--freeze-encoder", action="store_true")
+    ap.add_argument("--replay", type=int, default=0, help="so mau generator cu them vao fine-tune")
     ap.add_argument("--max-val", type=int, default=None)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--out", default="results/fewshot")
@@ -47,6 +49,15 @@ def main():
     print(f"Device: {device} | k={args.k} | seed={args.seed} | scratch={args.scratch}")
 
     raw = build_fewshot_splits(args.k, seed=args.seed)
+    if args.replay and not args.scratch:
+        import random
+        old = build_protocol_splits("p1")["train"]
+        old_f = [it for it in old if it[2] == 1]
+        old_a = [it for it in old if it[2] == 0]
+        rr = random.Random(args.seed)
+        raw["train"] = (raw["train"]
+                        + rr.sample(old_f, min(args.replay, len(old_f)))
+                        + rr.sample(old_a, min(args.replay, len(old_a))))
     train_ds = ItemsDataset(raw["train"], size=args.size)
     test_names = [k for k in raw if k != "train"]
 
@@ -73,8 +84,14 @@ def main():
     else:
         print("Train from scratch")
 
+    if args.freeze_encoder:
+        for p in model.encoder.parameters():
+            p.requires_grad = False
+        print("Frozen encoder (chi tune decoder)")
+
     bce = nn.BCEWithLogitsLoss(pos_weight=torch.tensor(20.0, device=device))
-    optimizer = torch.optim.AdamW(model.parameters(), lr=args.lr)
+    params = [p for p in model.parameters() if p.requires_grad]
+    optimizer = torch.optim.AdamW(params, lr=args.lr)
 
     t0 = time.time()
     for epoch in range(1, args.epochs + 1):
@@ -102,7 +119,10 @@ def main():
 
     out_dir = ROOT / args.out
     out_dir.mkdir(parents=True, exist_ok=True)
-    tag = f"k{args.k}_s{args.seed}" + ("_scratch" if args.scratch else "")
+    tag = (f"k{args.k}_s{args.seed}"
+           + ("_scratch" if args.scratch else "")
+           + ("_fz" if args.freeze_encoder else "")
+           + (f"_rp{args.replay}" if args.replay else ""))
     torch.save(model.state_dict(), out_dir / f"{tag}.pth")
     with open(out_dir / f"{tag}.json", "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)

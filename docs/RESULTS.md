@@ -210,6 +210,19 @@ Kết luận:
 - Forgetting: Gemini giảm 0.669 → 0.494 (~26%) ở k=100.
 - Variance đáng kể giữa seed (đặc biệt k=100: 0.158–0.231) → phải báo mean ± std.
 
+### B12 — Forgetting mitigation (k=100, seed 0) — 2026-10-25
+
+| Phương pháp | GPT IoU | Gemini IoU (quên) | Ideogram IoU |
+|---|---|---|---|
+| Full fine-tune | 0.1582 | 0.5552 | 0.1102 |
+| Freeze encoder (tune decoder) | 0.1133 | 0.0869 | 0.0794 |
+| **Replay 100 mẫu cũ** | **0.1543** | **0.6750** | 0.1108 |
+
+Kết luận:
+- **Replay loại bỏ forgetting gần như hoàn toàn**: Gemini 0.675 (gần mức zero-shot 0.669) trong khi GPT vẫn 0.154 (gần full fine-tune 0.158).
+- **Freeze encoder thất bại** (Gemini sụp 0.087) → không dùng.
+- Đây là đóng góp thực tiễn mạnh: *fine-tune ít nhãn + replay để không quên generator cũ*.
+
 ## Cảnh báo cần kiểm tra
 
 - Model có thể "ăn gian" nhờ khác biệt **độ phân giải / kiểu nén** giữa authentic và forged → cần augmentation (JPEG, resize, blur) để kiểm chứng.
