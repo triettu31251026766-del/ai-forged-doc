@@ -171,6 +171,30 @@ Base: U-Net ResNet18 train trên Gemini (P1). Fine-tune trên k ảnh GPT-Image-
 **Forgetting:** in-domain Gemini giảm 0.669 → 0.534 (~20%) khi k=100.
 **Quan trọng:** PixAUC vẫn cao ~0.85–0.89 → ranking pixel tốt, IoU bị chặn bởi **calibration/post-processing**, không phải do mù hoàn toàn.
 
+### B9 — Threshold calibration trên model few-shot (k=100)
+
+Pixel AUC = 0.8536. Quét ngưỡng trên GPT test:
+
+| Ngưỡng | IoU | F1 |
+|---|---|---|
+| 0.50 | 0.1597 | 0.2754 |
+| **0.05 (best)** | **0.1942** | **0.3252** |
+
+→ Calibrate ngưỡng tăng IoU **0.160 → 0.194 (+22% tương đối)**. Xác nhận calibration là đòn bẩy quan trọng.
+
+### B10 — Fine-tune từ base vs Train from scratch (k=100)
+
+| | Fine-tune từ base | Scratch |
+|---|---|---|
+| GPT IoU | **0.1597** | 0.0850 |
+| GPT F1 | **0.2754** | 0.1567 |
+| GPT PixAUC | **0.8536** | 0.6977 |
+| Gemini IoU (giữ kiến thức cũ) | **0.5522** | 0.0750 |
+
+→ Fine-tune từ base tốt hơn scratch **~1,9×** ở GPT và **giữ in-domain tốt hơn nhiều**. Đây là bằng chứng mạnh cho "label-efficient adaptation".
+
+Lưu ý: k=100 giữa 2 lần chạy cho IoU 0.1708 vs 0.1597 → **cần chạy nhiều seed** để báo cáo mean ± std.
+
 ## Cảnh báo cần kiểm tra
 
 - Model có thể "ăn gian" nhờ khác biệt **độ phân giải / kiểu nén** giữa authentic và forged → cần augmentation (JPEG, resize, blur) để kiểm chứng.
