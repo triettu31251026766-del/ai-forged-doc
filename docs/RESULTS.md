@@ -59,6 +59,27 @@ Nhận xét:
 - **Cross-generator vẫn kém** (Ideogram IoU ~0.10, GPT ~0.05) → generator shift vẫn còn, kể cả với localization.
 - Đây là động lực cho **self-supervised + domain generalization** (đóng góp chính).
 
+### B3 — Segmentation + augmentation (2026-10-25)
+
+Augmentation: HorizontalFlip, BrightnessContrast, GaussianBlur, GaussNoise, JPEG (quality 30–90).
+
+| Epoch | in-domain IoU / F1 / Dice / ImgAUC | Ideogram IoU / F1 / Dice / ImgAUC | GPT-Image-2 IoU / F1 / Dice / ImgAUC |
+|---|---|---|---|
+| 1 | 0.404 / 0.576 / 0.416 / 0.836 | 0.052 / 0.100 / 0.037 / 0.502 | 0.012 / 0.024 / 0.012 / 0.509 |
+| 2 | 0.541 / 0.702 / 0.572 / 0.892 | 0.105 / 0.189 / 0.087 / 0.487 | 0.038 / 0.072 / 0.054 / 0.567 |
+| 3 | 0.589 / 0.741 / 0.637 / 0.894 | 0.104 / 0.188 / 0.084 / 0.527 | 0.054 / 0.103 / 0.084 / 0.525 |
+
+So sánh epoch 3 (có vs không augmentation):
+
+| Bộ test | Không aug (B2) | Có aug (B3) |
+|---|---|---|
+| in-domain IoU | 0.669 | 0.589 (giảm) |
+| Ideogram IoU | 0.098 | 0.104 (tăng nhẹ) |
+| GPT-Image-2 IoU | 0.052 | 0.054 (tăng nhẹ) |
+| GPT ImgAUC | 0.520 | 0.525 |
+
+Nhận xét: augmentation **giảm in-domain**, **chỉ nhích nhẹ cross-generator** → generator shift **không chỉ do nén/độ phân giải**; cần phương pháp mạnh hơn (multi-generator training / self-supervised / domain generalization).
+
 ## Cảnh báo cần kiểm tra
 
 - Model có thể "ăn gian" nhờ khác biệt **độ phân giải / kiểu nén** giữa authentic và forged → cần augmentation (JPEG, resize, blur) để kiểm chứng.
