@@ -32,6 +32,18 @@ Nhận xét: model tốt trên v1 nhưng **sụp trên v2** (AUC < 0.5) → bằ
 
 (Chỉ để kiểm pipeline, không phải kết quả thật.)
 
+**B1.3 Baseline chính thức — protocol generator-shift (ResNet18, 3 epochs, 384px)**
+
+Train: v1 Gemini (2.912 forged + 2.912 authentic).
+
+| Epoch | Loss | in-domain (Gemini) AUC / AP | unseen Ideogram AUC / AP | unseen GPT-Image-2 AUC / AP |
+|---|---|---|---|---|
+| 1 | 0.574 | 0.8961 / 0.9210 | 0.6061 / 0.5843 | 0.4775 / 0.4878 |
+| 2 | 0.342 | 0.9047 / 0.9326 | 0.5742 / 0.6103 | 0.4506 / 0.4870 |
+| 3 | 0.273 | **0.9185 / 0.9419** | **0.5810 / 0.5885** | **0.4777 / 0.5065** |
+
+Nhận xét: in-domain rất tốt (AUC 0.92) nhưng **sụp khi đổi generator** — Ideogram chỉ ~0.58, GPT-Image-2 ~0.48 (ngang/ngược đoán mò). Đây là **bằng chứng định lượng cho generator shift** — đóng góp chính của paper.
+
 ## Cảnh báo cần kiểm tra
 
 - Model có thể "ăn gian" nhờ khác biệt **độ phân giải / kiểu nén** giữa authentic và forged → cần augmentation (JPEG, resize, blur) để kiểm chứng.
