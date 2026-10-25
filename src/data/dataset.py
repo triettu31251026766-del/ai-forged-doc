@@ -38,10 +38,11 @@ def letterbox(img, mask, size):
 class _BaseForgeryDataset(Dataset):
     """items = [(image_path, mask_path_or_None, label)]. label: 0=that, 1=gia."""
 
-    def __init__(self, items, size=512, return_mask=True):
+    def __init__(self, items, size=512, return_mask=True, augment=None):
         self.items = list(items)
         self.size = size
         self.return_mask = return_mask
+        self.augment = augment
 
     def __len__(self):
         return len(self.items)
@@ -54,6 +55,11 @@ class _BaseForgeryDataset(Dataset):
             mask = Image.open(mask_path).convert("L")
         else:
             mask = Image.new("L", img.size, 0)
+
+        if self.augment is not None:
+            out = self.augment(image=np.asarray(img), mask=np.asarray(mask))
+            img = Image.fromarray(out["image"])
+            mask = Image.fromarray(out["mask"])
 
         img, mask = letterbox(img, mask, self.size)
 
@@ -73,7 +79,7 @@ class _BaseForgeryDataset(Dataset):
 
 
 class DocumentForgeryDataset(_BaseForgeryDataset):
-    def __init__(self, forged_dir, mask_dir, authentic_dir=None, size=512, return_mask=True):
+    def __init__(self, forged_dir, mask_dir, authentic_dir=None, size=512, return_mask=True, augment=None):
         items = []
         for img_path in list_images(forged_dir):
             msk = Path(mask_dir) / (img_path.stem + ".png")
@@ -84,11 +90,11 @@ class DocumentForgeryDataset(_BaseForgeryDataset):
         if authentic_dir:
             for img_path in list_images(authentic_dir):
                 items.append((img_path, None, 0))
-        super().__init__(items, size=size, return_mask=return_mask)
+        super().__init__(items, size=size, return_mask=return_mask, augment=augment)
 
 
 class ItemsDataset(_BaseForgeryDataset):
     """Dung khi da co danh sach item (vd: chia theo generator)."""
 
-    def __init__(self, items, size=512, return_mask=True):
-        super().__init__(items, size=size, return_mask=return_mask)
+    def __init__(self, items, size=512, return_mask=True, augment=None):
+        super().__init__(items, size=size, return_mask=return_mask, augment=augment)

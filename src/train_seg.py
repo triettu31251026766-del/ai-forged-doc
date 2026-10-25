@@ -14,6 +14,7 @@ from tqdm import tqdm
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+from src.data.augment import build_train_augment  # noqa: E402
 from src.data.dataset import ItemsDataset  # noqa: E402
 from src.data.splits import build_generator_splits  # noqa: E402
 from src.models.segmentation import build_segmentation  # noqa: E402
@@ -93,6 +94,7 @@ def main():
     ap.add_argument("--pos-weight", type=float, default=20.0)
     ap.add_argument("--max-train", type=int, default=None)
     ap.add_argument("--max-val", type=int, default=None)
+    ap.add_argument("--augment", action="store_true")
     ap.add_argument("--out", default="results/seg")
     args = ap.parse_args()
 
@@ -101,7 +103,8 @@ def main():
 
     raw = build_generator_splits()
 
-    train_ds = maybe_subset(ItemsDataset(raw["train"], size=args.size), args.max_train)
+    train_aug = build_train_augment() if args.augment else None
+    train_ds = maybe_subset(ItemsDataset(raw["train"], size=args.size, augment=train_aug), args.max_train)
     pixel_loaders = {
         name: DataLoader(maybe_subset(forged_dataset(raw[name], args.size), args.max_val),
                          batch_size=args.batch_size, shuffle=False, num_workers=0)
