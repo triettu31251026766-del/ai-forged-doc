@@ -118,6 +118,25 @@ def _common_tests(v1_meta, v2_meta, seed):
     }
 
 
+def build_fewshot_splits(k, seed=0):
+    """Fine-tune tren k anh GPT-Image-2 (v2 train) + k anh that.
+    Test: GPT (adapt), Gemini (quen?), Ideogram (quen?)."""
+    v1_meta = load_meta(V1 / "metadata.jsonl")
+    v2_meta = load_meta(V2 / "metadata.jsonl")
+    rng = random.Random(seed)
+
+    gpt_train = forged_items(v2_meta, V2, tool=GPTIMAGE, split="training")
+    auth_train = authentic_items(V1, "training")
+
+    n_f = min(k, len(gpt_train))
+    n_a = min(k, len(auth_train))
+    train = rng.sample(gpt_train, n_f) + rng.sample(auth_train, n_a)
+
+    splits = {"train": train}
+    splits.update(_common_tests(v1_meta, v2_meta, seed))
+    return splits
+
+
 def build_protocol_splits(protocol="p1", seed=0):
     """Leave-One-Generator-Out:
     p1: train Gemini            -> test Ideogram (unseen), GPT (unseen)

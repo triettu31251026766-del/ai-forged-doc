@@ -145,6 +145,15 @@ So sánh epoch 3 với baseline RGB (P1):
 
 Kết luận: kênh tần số giúp **GPT nhích nhẹ** nhưng **hại in-domain**; không đủ để tạo phương pháp thắng. Trên benchmark này, các hướng tổng quát đều bị chặn bởi bản chất sửa đổi quá tinh vi.
 
+### B7 — Threshold sweep & pixel AUC (P1 model, GPT test) — 2026-10-25
+
+Quét ngưỡng 0.05–0.95 trên 613 ảnh forged GPT-Image-2:
+
+- **Pixel AUC (mean per-image) = 0.8988**
+- IoU tốt nhất = 0.0665 (tại thr=0.05); tại 0.5 = 0.0520.
+
+Kết luận quan trọng: **model KHÔNG mù** — nó xếp hạng pixel khá tốt (AUC 0.90) ngay cả trên generator chưa thấy. Nhưng **mask dự đoán bị loãng/lệch** (nhiều false positive) → IoU thấp. Đây là vấn đề **calibration/localization**, có thể cải thiện bằng few-shot fine-tuning + post-processing.
+
 ## Cảnh báo cần kiểm tra
 
 - Model có thể "ăn gian" nhờ khác biệt **độ phân giải / kiểu nén** giữa authentic và forged → cần augmentation (JPEG, resize, blur) để kiểm chứng.

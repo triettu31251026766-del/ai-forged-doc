@@ -47,6 +47,7 @@ def eval_pixel(model, loader, device, thr=0.5):
     inter = union = tp = fp = fn = 0
     dice_sum = 0.0
     n = 0
+    paucs = []
     for batch in loader:
         x = batch["image"].to(device, non_blocking=True)
         tgt = batch["mask"].to(device).bool()
@@ -61,10 +62,15 @@ def eval_pixel(model, loader, device, thr=0.5):
             p, t = pred[i], tgt[i]
             dice_sum += (2 * (p & t).sum().item()) / (p.sum().item() + t.sum().item() + 1e-6)
             n += 1
+            tn = t.flatten().cpu().numpy()
+            if tn.max() > 0:
+                pn = prob[i].flatten().cpu().numpy()
+                paucs.append(roc_auc_score(tn, pn))
     return {
         "iou": inter / max(union, 1),
         "f1": 2 * tp / max(2 * tp + fp + fn, 1),
         "dice": dice_sum / max(n, 1),
+        "pixel_auc": float(np.mean(paucs)) if paucs else 0.0,
         "n": n,
     }
 
