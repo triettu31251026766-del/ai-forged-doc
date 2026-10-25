@@ -80,6 +80,22 @@ So sánh epoch 3 (có vs không augmentation):
 
 Nhận xét: augmentation **giảm in-domain**, **chỉ nhích nhẹ cross-generator** → generator shift **không chỉ do nén/độ phân giải**; cần phương pháp mạnh hơn (multi-generator training / self-supervised / domain generalization).
 
+### B4 — Leave-One-Generator-Out (2026-10-25)
+
+U-Net ResNet18, 3 epochs, 384px. Cùng bộ test, khác dữ liệu train.
+
+| Protocol | Train | in-domain IoU/F1/ImgAUC | Ideogram IoU/F1/ImgAUC | GPT-Image-2 IoU/F1/ImgAUC |
+|---|---|---|---|---|
+| P1 | Gemini | 0.669 / 0.802 / 0.946 | **0.098** / 0.179 / 0.546 | **0.052** / 0.099 / 0.520 |
+| P2 | Gemini + Ideogram | 0.670 / 0.803 / 0.934 | 0.233 / 0.377 / 0.702 (seen) | **0.058** / 0.109 / 0.537 |
+| P3 | Gemini + GPT | 0.539 / 0.701 / 0.865 | **0.121** / 0.215 / 0.494 | 0.363 / 0.533 / 0.674 (seen) |
+
+So sánh trên generator **chưa thấy**:
+- GPT (P1 → P2): IoU 0.052 → 0.058 (tăng nhẹ), ImgAUC 0.520 → 0.537.
+- Ideogram (P1 → P3): IoU 0.098 → 0.121 (tăng ~22% tương đối), ImgAUC 0.546 → 0.494 (giảm).
+
+Nhận xét: thêm 1 generator giúp **localization trên generator chưa thấy tăng nhẹ**, nhưng **vẫn rất thấp** so với in-domain; image-level AUC không nhất quán. → Multi-generator đơn thuần **chưa đủ**; cần self-supervised / domain generalization / foundation features.
+
 ## Cảnh báo cần kiểm tra
 
 - Model có thể "ăn gian" nhờ khác biệt **độ phân giải / kiểu nén** giữa authentic và forged → cần augmentation (JPEG, resize, blur) để kiểm chứng.
