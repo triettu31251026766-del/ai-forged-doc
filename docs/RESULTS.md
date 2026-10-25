@@ -96,6 +96,19 @@ So sánh trên generator **chưa thấy**:
 
 Nhận xét: thêm 1 generator giúp **localization trên generator chưa thấy tăng nhẹ**, nhưng **vẫn rất thấp** so với in-domain; image-level AUC không nhất quán. → Multi-generator đơn thuần **chưa đủ**; cần self-supervised / domain generalization / foundation features.
 
+### B5 — PatchCore-style anomaly detection (ResNet18, 400 ảnh bank, 256px) — thử nghiệm
+
+Học chỉ từ ảnh thật (memory bank 6.400 patch), ngưỡng p99.5 của ảnh thật.
+
+| Bộ test | IoU | F1 | Dice | ImgAUC |
+|---|---|---|---|---|
+| in-domain | 0.0001 | 0.0001 | 0.0000 | 0.502 |
+| Ideogram | 0.0000 | 0.0000 | 0.0000 | 0.357 |
+| GPT-Image-2 | 0.0000 | 0.0000 | 0.0000 | 0.558 |
+
+**Chưa kết luận** vì bank quá nhỏ (400 ảnh). Cần chạy full bank (3.249 ảnh, ~52k patch) mới công bằng.
+Cảnh báo sớm: đặc trưng ResNet18 có thể **không đủ nhạy** với vùng chữ bị sửa rất nhỏ (~1% pixel) → có thể cần backbone mạnh hơn (DINOv2) hoặc đặc trưng tần số.
+
 ## Cảnh báo cần kiểm tra
 
 - Model có thể "ăn gian" nhờ khác biệt **độ phân giải / kiểu nén** giữa authentic và forged → cần augmentation (JPEG, resize, blur) để kiểm chứng.
