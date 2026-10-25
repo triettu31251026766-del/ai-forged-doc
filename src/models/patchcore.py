@@ -25,6 +25,29 @@ class PatchFeatureExtractor(nn.Module):
         return torch.cat([f2, f3], dim=1)
 
 
+class DinoFeatureExtractor(nn.Module):
+    """DINOv2 ViT-S/14: dac trung giau ngu nghia, tot hon cho chu/noi dung."""
+
+    def __init__(self, name="vit_small_patch14_dinov2.lvd142m"):
+        super().__init__()
+        import timm
+        self.model = timm.create_model(name, pretrained=True, num_classes=0, dynamic_img_size=True)
+        self.out_channels = self.model.num_features
+
+    def forward(self, x):
+        feats = self.model.forward_features(x)  # [B, N, C] (co CLS)
+        feats = feats[:, 1:, :]                 # bo token CLS
+        b, n, c = feats.shape
+        h = w = int(n ** 0.5)
+        return feats.transpose(1, 2).reshape(b, c, h, w)
+
+
+def build_feature_extractor(name="resnet18"):
+    if name == "dinov2":
+        return DinoFeatureExtractor()
+    return PatchFeatureExtractor(pretrained=True)
+
+
 def features_to_patches(feats):
     """feats [B,C,h,w] -> [B*h*w, C] (da L2-normalize)."""
     b, c, h, w = feats.shape

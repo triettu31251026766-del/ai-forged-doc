@@ -114,7 +114,17 @@ Học chỉ từ ảnh thật (memory bank 6.400 patch), ngưỡng p99.5 của �
 | Ideogram | 0.0010 | 0.0019 | 0.0025 | 0.363 |
 | GPT-Image-2 | 0.0000 | 0.0001 | 0.0001 | 0.535 |
 
-Kết luận: **PatchCore + ResNet18 thất bại** — không phát hiện được vùng chữ bị AI sửa. Đặc trưng CNN tổng quát không đủ nhạy với sửa đổi chữ rất nhỏ (~1% pixel) và font khớp. Cần backbone mạnh hơn (DINOv2) hoặc đặc trưng chuyên biệt (tần số / OCR).
+Kết luận: **PatchCore + ResNet18 thất bại** — không phát hiện được vùng chữ bị AI sửa. Đặc trưng CNN tổng quát không đủ nhạy với sửa đổi chữ rất nhỏ (~1% pixel) và font khớp.
+
+**B5.2 — PatchCore + DINOv2 ViT-S/14 (448px, bank 400 ảnh, test 200):**
+
+| Bộ test | IoU | ImgAUC |
+|---|---|---|
+| in-domain | 0.0001 | 0.548 |
+| Ideogram | 0.0000 | 0.418 |
+| GPT-Image-2 | 0.0000 | 0.500 |
+
+Kết luận: **DINOv2 cũng không cải thiện** → vấn đề không nằm ở backbone, mà ở bản chất sửa đổi quá tinh vi (font khớp, vùng cực nhỏ). Anomaly detection tổng quát không giải được bài toán này.
 
 ## Cảnh báo cần kiểm tra
 

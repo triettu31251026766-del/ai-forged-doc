@@ -16,7 +16,7 @@ sys.path.insert(0, str(ROOT))
 
 from src.data.dataset import ItemsDataset  # noqa: E402
 from src.data.splits import authentic_items, build_protocol_splits, V1  # noqa: E402
-from src.models.patchcore import PatchFeatureExtractor, features_to_patches, patch_distances  # noqa: E402
+from src.models.patchcore import build_feature_extractor, features_to_patches, patch_distances  # noqa: E402
 
 
 def build_bank(model, loader, device, patches_per_batch, bank_max, seed=0):
@@ -106,6 +106,7 @@ def evaluate(model, loader, bank, device, thr, out_size):
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument("--backbone", default="resnet18", choices=["resnet18", "dinov2"])
     ap.add_argument("--size", type=int, default=384)
     ap.add_argument("--batch-size", type=int, default=8)
     ap.add_argument("--patches-per-image", type=int, default=16)
@@ -119,7 +120,7 @@ def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print("Device:", device, "| size:", args.size)
 
-    model = PatchFeatureExtractor(pretrained=True).to(device).eval()
+    model = build_feature_extractor(args.backbone).to(device).eval()
 
     auth_train = authentic_items(V1, "training")
     if args.max_bank:
