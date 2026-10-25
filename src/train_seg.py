@@ -16,7 +16,7 @@ sys.path.insert(0, str(ROOT))
 
 from src.data.augment import build_train_augment  # noqa: E402
 from src.data.dataset import ItemsDataset  # noqa: E402
-from src.data.splits import build_generator_splits  # noqa: E402
+from src.data.splits import build_protocol_splits  # noqa: E402
 from src.models.segmentation import build_segmentation  # noqa: E402
 
 TESTS = ["test_in_domain", "test_ideogram", "test_gptimage"]
@@ -86,6 +86,7 @@ def eval_image_auc(model, loader, device):
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument("--protocol", default="p1", choices=["p1", "p2", "p3"])
     ap.add_argument("--encoder", default="resnet18")
     ap.add_argument("--epochs", type=int, default=3)
     ap.add_argument("--batch-size", type=int, default=8)
@@ -101,19 +102,20 @@ def main():
     device = "cuda" if torch.cuda.is_available() else "cpu"
     print("Device:", device)
 
-    raw = build_generator_splits()
+    raw = build_protocol_splits(args.protocol)
+    test_names = [k for k in raw if k != "train"]
 
     train_aug = build_train_augment() if args.augment else None
     train_ds = maybe_subset(ItemsDataset(raw["train"], size=args.size, augment=train_aug), args.max_train)
     pixel_loaders = {
         name: DataLoader(maybe_subset(forged_dataset(raw[name], args.size), args.max_val),
                          batch_size=args.batch_size, shuffle=False, num_workers=0)
-        for name in TESTS
+        for name in test_names
     }
     auc_loaders = {
         name: DataLoader(maybe_subset(ItemsDataset(raw[name], args.size), args.max_val),
                          batch_size=args.batch_size, shuffle=False, num_workers=0)
-        for name in TESTS
+        for name in test_names
     }
 
     print(f"Train: {len(train_ds)}")
@@ -143,7 +145,7 @@ def main():
 
         row = {"epoch": epoch, "loss": running / len(train_ds), "sec": round(time.time() - t0, 1)}
         msg = f"[ep {epoch}] loss={row['loss']:.4f}"
-        for name in TESTS:
+        for name in test_names:
             px = eval_pixel(model, pixel_loaders[name], device)
             auc = eval_image_auc(model, auc_loaders[name], device)
             row[name] = {"pixel": px, "image_auc": auc}

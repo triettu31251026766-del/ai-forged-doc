@@ -95,3 +95,50 @@ def build_v1_splits(seed=0):
         "train": _balanced(train_f, auth_train, seed),
         "test_in_domain": _balanced(test_f, auth_test, seed),
     }
+
+
+def _balance_classes(forged, authentic, seed):
+    """Can bang 2 lop cho training (sample lop nhieu xuong bang lop it)."""
+    rng = random.Random(seed)
+    n = min(len(forged), len(authentic))
+    f = rng.sample(forged, n) if len(forged) > n else forged
+    a = rng.sample(authentic, n) if len(authentic) > n else authentic
+    return list(f) + list(a)
+
+
+def _common_tests(v1_meta, v2_meta, seed):
+    gem_test = forged_items(v1_meta, V1, tool=GEMINI, split="testing")
+    ideo_all = forged_items(v1_meta, V1, tool=IDEOGRAM)
+    gpt_test = forged_items(v2_meta, V2, tool=GPTIMAGE, split="testing")
+    auth_test = authentic_items(V1, "testing")
+    return {
+        "test_in_domain": _balanced(gem_test, auth_test, seed),
+        "test_ideogram": _balanced(ideo_all, auth_test, seed),
+        "test_gptimage": _balanced(gpt_test, auth_test, seed),
+    }
+
+
+def build_protocol_splits(protocol="p1", seed=0):
+    """Leave-One-Generator-Out:
+    p1: train Gemini            -> test Ideogram (unseen), GPT (unseen)
+    p2: train Gemini + Ideogram -> test GPT (unseen)
+    p3: train Gemini + GPT      -> test Ideogram (unseen)
+    """
+    v1_meta = load_meta(V1 / "metadata.jsonl")
+    v2_meta = load_meta(V2 / "metadata.jsonl")
+    auth_train = authentic_items(V1, "training")
+
+    if protocol == "p1":
+        forged = forged_items(v1_meta, V1, tool=GEMINI, split="training")
+    elif protocol == "p2":
+        forged = (forged_items(v1_meta, V1, tool=GEMINI, split="training")
+                  + forged_items(v1_meta, V1, tool=IDEOGRAM, split="training"))
+    elif protocol == "p3":
+        forged = (forged_items(v1_meta, V1, tool=GEMINI, split="training")
+                  + forged_items(v2_meta, V2, tool=GPTIMAGE, split="training"))
+    else:
+        raise ValueError(f"Unknown protocol: {protocol}")
+
+    splits = {"train": _balance_classes(forged, auth_train, seed)}
+    splits.update(_common_tests(v1_meta, v2_meta, seed))
+    return splits
