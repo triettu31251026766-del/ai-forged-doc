@@ -106,8 +106,15 @@ Học chỉ từ ảnh thật (memory bank 6.400 patch), ngưỡng p99.5 của �
 | Ideogram | 0.0000 | 0.0000 | 0.0000 | 0.357 |
 | GPT-Image-2 | 0.0000 | 0.0000 | 0.0000 | 0.558 |
 
-**Chưa kết luận** vì bank quá nhỏ (400 ảnh). Cần chạy full bank (3.249 ảnh, ~52k patch) mới công bằng.
-Cảnh báo sớm: đặc trưng ResNet18 có thể **không đủ nhạy** với vùng chữ bị sửa rất nhỏ (~1% pixel) → có thể cần backbone mạnh hơn (DINOv2) hoặc đặc trưng tần số.
+**B5.1 — Full bank (52.096 patch, 384px, ngưỡng p99.5 = 0.3625):**
+
+| Bộ test | IoU | F1 | Dice | ImgAUC |
+|---|---|---|---|---|
+| in-domain | 0.0016 | 0.0033 | 0.0018 | 0.543 |
+| Ideogram | 0.0010 | 0.0019 | 0.0025 | 0.363 |
+| GPT-Image-2 | 0.0000 | 0.0001 | 0.0001 | 0.535 |
+
+Kết luận: **PatchCore + ResNet18 thất bại** — không phát hiện được vùng chữ bị AI sửa. Đặc trưng CNN tổng quát không đủ nhạy với sửa đổi chữ rất nhỏ (~1% pixel) và font khớp. Cần backbone mạnh hơn (DINOv2) hoặc đặc trưng chuyên biệt (tần số / OCR).
 
 ## Cảnh báo cần kiểm tra
 
