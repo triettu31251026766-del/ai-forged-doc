@@ -100,9 +100,10 @@ def main():
     out_dir = ROOT / args.out
     out_dir.mkdir(parents=True, exist_ok=True)
     tag = f"k{args.k}" + ("_scratch" if args.scratch else "")
+    torch.save(model.state_dict(), out_dir / f"{tag}.pth")
     with open(out_dir / f"{tag}.json", "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)
-    print("Saved:", out_dir / f"{tag}.json")
+    print("Saved:", out_dir / f"{tag}.json", "and", out_dir / f"{tag}.pth")
 
 
 if __name__ == "__main__":

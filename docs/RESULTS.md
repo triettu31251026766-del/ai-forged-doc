@@ -154,6 +154,23 @@ Quét ngưỡng 0.05–0.95 trên 613 ảnh forged GPT-Image-2:
 
 Kết luận quan trọng: **model KHÔNG mù** — nó xếp hạng pixel khá tốt (AUC 0.90) ngay cả trên generator chưa thấy. Nhưng **mask dự đoán bị loãng/lệch** (nhiều false positive) → IoU thấp. Đây là vấn đề **calibration/localization**, có thể cải thiện bằng few-shot fine-tuning + post-processing.
 
+### B8 — Few-shot fine-tuning (Cách 1) — 2026-10-25
+
+Base: U-Net ResNet18 train trên Gemini (P1). Fine-tune trên k ảnh GPT-Image-2 (+k authentic), 10 epochs, lr 1e-4. Test trên tập GPT test (613, disjoint) + Gemini/Ideogram để đo forgetting.
+
+| k | GPT IoU | GPT F1 | GPT Dice | GPT PixAUC | GPT ImgAUC | Gemini IoU (forget) | Ideogram IoU |
+|---|---|---|---|---|---|---|---|
+| 0 (base) | 0.052 | 0.099 | 0.104 | 0.899 | 0.520 | 0.669 | 0.098 |
+| 5 | 0.079 | 0.147 | 0.138 | 0.870 | 0.511 | 0.583 | 0.081 |
+| 10 | 0.101 | 0.183 | 0.153 | 0.864 | 0.538 | 0.616 | 0.099 |
+| 25 | 0.136 | 0.239 | 0.166 | 0.858 | 0.566 | 0.607 | 0.109 |
+| 50 | 0.152 | 0.264 | 0.166 | 0.852 | 0.584 | 0.624 | 0.099 |
+| 100 | **0.171** | **0.292** | **0.202** | **0.885** | 0.559 | 0.534 | 0.110 |
+
+**Kết quả dương:** GPT IoU tăng **0.052 → 0.171 (3,3×)** với 100 nhãn; F1 **0.099 → 0.292 (3×)**.
+**Forgetting:** in-domain Gemini giảm 0.669 → 0.534 (~20%) khi k=100.
+**Quan trọng:** PixAUC vẫn cao ~0.85–0.89 → ranking pixel tốt, IoU bị chặn bởi **calibration/post-processing**, không phải do mù hoàn toàn.
+
 ## Cảnh báo cần kiểm tra
 
 - Model có thể "ăn gian" nhờ khác biệt **độ phân giải / kiểu nén** giữa authentic và forged → cần augmentation (JPEG, resize, blur) để kiểm chứng.
