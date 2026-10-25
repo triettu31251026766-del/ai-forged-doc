@@ -126,6 +126,25 @@ Kết luận: **PatchCore + ResNet18 thất bại** — không phát hiện đư
 
 Kết luận: **DINOv2 cũng không cải thiện** → vấn đề không nằm ở backbone, mà ở bản chất sửa đổi quá tinh vi (font khớp, vùng cực nhỏ). Anomaly detection tổng quát không giải được bài toán này.
 
+### B6 — FR-Net: RGB + frequency/noise (P1, 3 epochs, 384px)
+
+| Epoch | in-domain IoU / ImgAUC | Ideogram IoU / ImgAUC | GPT-Image-2 IoU / ImgAUC |
+|---|---|---|---|
+| 1 | 0.213 / 0.729 | 0.049 / 0.485 | 0.090 / 0.546 |
+| 2 | 0.461 / 0.806 | 0.076 / 0.575 | 0.085 / 0.562 |
+| 3 | 0.561 / 0.830 | 0.098 / 0.509 | 0.061 / 0.547 |
+
+So sánh epoch 3 với baseline RGB (P1):
+
+| | Baseline RGB | FR-Net |
+|---|---|---|
+| in-domain IoU | 0.669 | 0.561 (giảm) |
+| Ideogram IoU | 0.098 | 0.098 (ngang) |
+| GPT IoU | 0.052 | 0.061 (tăng nhẹ) |
+| GPT ImgAUC | 0.520 | 0.547 (tăng nhẹ) |
+
+Kết luận: kênh tần số giúp **GPT nhích nhẹ** nhưng **hại in-domain**; không đủ để tạo phương pháp thắng. Trên benchmark này, các hướng tổng quát đều bị chặn bởi bản chất sửa đổi quá tinh vi.
+
 ## Cảnh báo cần kiểm tra
 
 - Model có thể "ăn gian" nhờ khác biệt **độ phân giải / kiểu nén** giữa authentic và forged → cần augmentation (JPEG, resize, blur) để kiểm chứng.
