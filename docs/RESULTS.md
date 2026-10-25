@@ -195,6 +195,21 @@ Pixel AUC = 0.8536. Quét ngưỡng trên GPT test:
 
 Lưu ý: k=100 giữa 2 lần chạy cho IoU 0.1708 vs 0.1597 → **cần chạy nhiều seed** để báo cáo mean ± std.
 
+### B11 — Few-shot curve, 3 seeds (mean ± std) — 2026-10-25
+
+| k | GPT IoU | GPT PixAUC | Gemini IoU (forgetting) |
+|---|---|---|---|
+| 0 (zero-shot) | 0.052 | 0.899 | 0.669 |
+| 5 | 0.068 ± 0.015 | 0.877 ± 0.020 | 0.624 ± 0.017 |
+| 25 | 0.105 ± 0.031 | 0.830 ± 0.023 | 0.577 ± 0.031 |
+| 100 | **0.195 ± 0.037** | **0.907 ± 0.031** | **0.494 ± 0.054** |
+
+Kết luận:
+- IoU tăng **đơn điệu** theo k: 0.052 → 0.195 (**~3,7×** ở k=100).
+- PixAUC luôn cao (0.83–0.91) → ranking pixel tốt; IoU bị giới hạn bởi calibration/mask.
+- Forgetting: Gemini giảm 0.669 → 0.494 (~26%) ở k=100.
+- Variance đáng kể giữa seed (đặc biệt k=100: 0.158–0.231) → phải báo mean ± std.
+
 ## Cảnh báo cần kiểm tra
 
 - Model có thể "ăn gian" nhờ khác biệt **độ phân giải / kiểu nén** giữa authentic và forged → cần augmentation (JPEG, resize, blur) để kiểm chứng.

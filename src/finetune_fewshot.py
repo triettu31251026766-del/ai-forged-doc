@@ -37,13 +37,16 @@ def main():
     ap.add_argument("--init", default="results/seg/unet_resnet18.pth")
     ap.add_argument("--scratch", action="store_true")
     ap.add_argument("--max-val", type=int, default=None)
+    ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--out", default="results/fewshot")
     args = ap.parse_args()
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    print(f"Device: {device} | k={args.k} | scratch={args.scratch}")
+    torch.manual_seed(args.seed)
+    np.random.seed(args.seed)
+    print(f"Device: {device} | k={args.k} | seed={args.seed} | scratch={args.scratch}")
 
-    raw = build_fewshot_splits(args.k)
+    raw = build_fewshot_splits(args.k, seed=args.seed)
     train_ds = ItemsDataset(raw["train"], size=args.size)
     test_names = [k for k in raw if k != "train"]
 
@@ -99,7 +102,7 @@ def main():
 
     out_dir = ROOT / args.out
     out_dir.mkdir(parents=True, exist_ok=True)
-    tag = f"k{args.k}" + ("_scratch" if args.scratch else "")
+    tag = f"k{args.k}_s{args.seed}" + ("_scratch" if args.scratch else "")
     torch.save(model.state_dict(), out_dir / f"{tag}.pth")
     with open(out_dir / f"{tag}.json", "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)
