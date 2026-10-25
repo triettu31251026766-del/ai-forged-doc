@@ -74,7 +74,18 @@ Bằng chứng (arXiv):
 - 1.000–2.000 ảnh: ~2–3 ngày chạy qua đêm.
 - Setup script + lọc chất lượng: 2–4 ngày công.
 
-## 11. Tài liệu liên quan
+## 11. Hạ tầng & phân công máy
+
+| Máy | Vai trò | Ghi chú |
+|---|---|---|
+| **Laptop RTX 5060** (Windows, Python 3.13, torch CUDA 12.8) | Train chính + phát triển code | 8.55 GB VRAM |
+| **MacBook Pro M4** | **Chỉ dùng để train** khi cần huy động thêm | Apple Silicon, dùng PyTorch MPS hoặc MLX |
+
+- **Vai trò của nhóm trưởng (Từ Minh Triết):** **kiểm soát chất lượng** toàn bộ bài báo cáo/paper — không giao QC cho máy khác.
+- **MacBook M4 chỉ là máy tính toán**, không tham gia quyết định nội dung/đánh giá chất lượng.
+- **Tái lập giữa 2 máy:** luôn set `seed`, ghi rõ backend (`cuda` / `mps` / `cpu`), và dùng chung code + config trong repo. Kết quả train từ M4 đẩy về repo (không commit dữ liệu nặng).
+
+## 12. Tài liệu liên quan
 
 - `README.md` — tổng quan + quick start
 - `GLOSSARY.md` — thuật ngữ cần biết

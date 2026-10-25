@@ -1,0 +1,38 @@
+# RESULTS — Nhật ký thí nghiệm
+
+Ghi mọi kết quả để dùng cho paper. **Không xoá kết quả cũ**, chỉ thêm.
+
+## Protocol
+
+- **v1 / in-domain**: train + test trên AIForge-Doc v1 (Gemini + Ideogram).
+- **generator-shift** (protocol chính):
+  - Train: v1 **Gemini** (2.912 forged + 2.912 authentic).
+  - Test in-domain: v1 Gemini test (727 forged + 727 authentic).
+  - Test unseen-generator #1: v1 **Ideogram** (422 forged + 422 authentic).
+  - Test unseen-generator #2: v2 **GPT-Image-2** (613 forged + 613 authentic).
+
+## Kết quả
+
+### B1 — Baselines (2026-10-25)
+
+**B1.1 ResNet18, train v1 đầy đủ, 3 epochs, 384px**
+
+| Epoch | Loss | v1 test AUC | v1 AP | v2 (GPT) AUC | v2 AP |
+|---|---|---|---|---|---|
+| 1 | 0.558 | 0.850 | 0.881 | 0.465 | 0.397 |
+| 2 | 0.396 | 0.879 | 0.911 | 0.430 | 0.377 |
+| 3 | 0.348 | **0.892** | **0.920** | **0.461** | **0.396** |
+
+Nhận xét: model tốt trên v1 nhưng **sụp trên v2** (AUC < 0.5) → bằng chứng generator shift.
+
+**B1.2 Smoke test — protocol generator (128 mẫu train, 1 epoch, 256px)**
+- in-domain (Gemini): AUC 0.641 / AP 0.546
+- Ideogram (unseen): AUC 0.450 / AP 0.410
+- GPT-Image-2 (unseen): AUC 0.495 / AP 0.464
+
+(Chỉ để kiểm pipeline, không phải kết quả thật.)
+
+## Cảnh báo cần kiểm tra
+
+- Model có thể "ăn gian" nhờ khác biệt **độ phân giải / kiểu nén** giữa authentic và forged → cần augmentation (JPEG, resize, blur) để kiểm chứng.
+- AUC < 0.5 nghĩa là dự đoán **ngược** (không phải chỉ kém).
