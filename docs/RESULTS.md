@@ -44,6 +44,21 @@ Train: v1 Gemini (2.912 forged + 2.912 authentic).
 
 Nhận xét: in-domain rất tốt (AUC 0.92) nhưng **sụp khi đổi generator** — Ideogram chỉ ~0.58, GPT-Image-2 ~0.48 (ngang/ngược đoán mò). Đây là **bằng chứng định lượng cho generator shift** — đóng góp chính của paper.
 
+### B2 — Segmentation (U-Net ResNet18, 3 epochs, 384px) — 2026-10-25
+
+Train: v1 Gemini (2.912 forged + 2.912 authentic, mask rỗng cho authentic).
+
+| Epoch | Loss | in-domain IoU / F1 / Dice / ImgAUC | unseen Ideogram IoU / F1 / Dice / ImgAUC | unseen GPT-Image-2 IoU / F1 / Dice / ImgAUC |
+|---|---|---|---|---|
+| 1 | 1.275 | 0.454 / 0.625 / 0.500 / 0.885 | 0.076 / 0.141 / 0.060 / 0.489 | 0.026 / 0.050 / 0.053 / 0.548 |
+| 2 | 0.951 | 0.424 / 0.596 / 0.537 / 0.665 | 0.047 / 0.090 / 0.080 / 0.685 | 0.039 / 0.076 / 0.057 / 0.438 |
+| 3 | 0.775 | **0.669 / 0.802 / 0.719 / 0.946** | **0.098 / 0.179 / 0.109 / 0.546** | **0.052 / 0.099 / 0.104 / 0.520** |
+
+Nhận xét:
+- **In-domain định vị tốt** (IoU 0.67, F1 0.80, ImgAUC 0.95).
+- **Cross-generator vẫn kém** (Ideogram IoU ~0.10, GPT ~0.05) → generator shift vẫn còn, kể cả với localization.
+- Đây là động lực cho **self-supervised + domain generalization** (đóng góp chính).
+
 ## Cảnh báo cần kiểm tra
 
 - Model có thể "ăn gian" nhờ khác biệt **độ phân giải / kiểu nén** giữa authentic và forged → cần augmentation (JPEG, resize, blur) để kiểm chứng.
