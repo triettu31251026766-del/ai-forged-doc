@@ -235,6 +235,15 @@ Kết luận:
 - Đổi lại GPT giảm nhẹ 0.195 → 0.162 (~17%).
 - Đây là **trade-off rõ ràng**: rehearsal bảo toàn generator cũ với chi phí nhỏ.
 
+### B14 — Phân tích định tính (score maps) — 2026-10-25
+
+So sánh trực quan (xem `paper/figures/fig_xai_*.png`):
+- **Zero-shot GPT:** score map loãng/tán loạn, có ảnh gần như không có tín hiệu, có ảnh highlight sai vùng.
+- **Adapted GPT (k=100):** score map tập trung đúng vùng bị sửa, rõ nét hơn hẳn.
+- **In-domain Gemini:** score map rất sắc, khớp ground-truth.
+
+→ Định tính khớp định lượng: adaptation cải thiện cả chất lượng mask, không chỉ số.
+
 ## Cảnh báo cần kiểm tra
 
 - Model có thể "ăn gian" nhờ khác biệt **độ phân giải / kiểu nén** giữa authentic và forged → cần augmentation (JPEG, resize, blur) để kiểm chứng.
