@@ -38,6 +38,8 @@ def main():
     ap.add_argument("--scratch", action="store_true")
     ap.add_argument("--freeze-encoder", action="store_true")
     ap.add_argument("--replay", type=int, default=0, help="so mau generator cu them vao fine-tune")
+    ap.add_argument("--train-list", default=None, help="json danh sach mau da chon (select_samples.py)")
+    ap.add_argument("--tag", default=None, help="ten file output (tuy chon)")
     ap.add_argument("--max-val", type=int, default=None)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--out", default="results/fewshot")
@@ -58,6 +60,13 @@ def main():
         raw["train"] = (raw["train"]
                         + rr.sample(old_f, min(args.replay, len(old_f)))
                         + rr.sample(old_a, min(args.replay, len(old_a))))
+    if args.train_list:
+        data = json.loads((ROOT / args.train_list).read_text(encoding="utf-8"))
+        items = []
+        for img, msk, lab in data["items"]:
+            items.append((Path(img), Path(msk) if msk else None, int(lab)))
+        raw["train"] = items
+
     train_ds = ItemsDataset(raw["train"], size=args.size)
     test_names = [k for k in raw if k != "train"]
 
@@ -119,10 +128,10 @@ def main():
 
     out_dir = ROOT / args.out
     out_dir.mkdir(parents=True, exist_ok=True)
-    tag = (f"k{args.k}_s{args.seed}"
-           + ("_scratch" if args.scratch else "")
-           + ("_fz" if args.freeze_encoder else "")
-           + (f"_rp{args.replay}" if args.replay else ""))
+    tag = args.tag if args.tag else (f"k{args.k}_s{args.seed}"
+                                     + ("_scratch" if args.scratch else "")
+                                     + ("_fz" if args.freeze_encoder else "")
+                                     + (f"_rp{args.replay}" if args.replay else ""))
     torch.save(model.state_dict(), out_dir / f"{tag}.pth")
     with open(out_dir / f"{tag}.json", "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)

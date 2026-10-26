@@ -6,7 +6,8 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
-FOLDERS = [ROOT / "results" / "fewshot_multi", ROOT / "results" / "fewshot_mit", ROOT / "results" / "fewshot"]
+FOLDERS = [ROOT / "results" / "fewshot_multi", ROOT / "results" / "fewshot_mit",
+           ROOT / "results" / "fewshot", ROOT / "results" / "selection"]
 
 
 def mean_std(vals):
@@ -23,7 +24,7 @@ def main():
             continue
         for f in sorted(folder.glob("k*_s*.json")):
             name = f.stem
-            m = re.match(r"k(\d+)_s(\d+)(?:_(scratch|fz|rp\d+))?", name)
+            m = re.match(r"k(\d+)_s(\d+)(?:_(scratch|fz|rp\d+|sel_\w+))?", name)
             if not m:
                 continue
             k = int(m.group(1))
