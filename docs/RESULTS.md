@@ -223,6 +223,18 @@ Kết luận:
 - **Freeze encoder thất bại** (Gemini sụp 0.087) → không dùng.
 - Đây là đóng góp thực tiễn mạnh: *fine-tune ít nhãn + replay để không quên generator cũ*.
 
+### B13 — Replay 4 seeds (k=100) — 2026-10-25
+
+| Phương pháp | GPT IoU | GPT PixAUC | Gemini IoU | Ideogram IoU |
+|---|---|---|---|---|
+| Standard fine-tune (3 seed) | 0.1947 ± 0.0298 | 0.9066 ± 0.0257 | 0.4942 ± 0.0439 | 0.0959 ± 0.0139 |
+| **Replay 100 (4 seed)** | **0.1620 ± 0.0211** | 0.8986 ± 0.0196 | **0.6722 ± 0.0058** | 0.1077 ± 0.0152 |
+
+Kết luận:
+- Replay đưa Gemini về **0.672 ± 0.006** — gần như **không quên** (zero-shot 0.669).
+- Đổi lại GPT giảm nhẹ 0.195 → 0.162 (~17%).
+- Đây là **trade-off rõ ràng**: rehearsal bảo toàn generator cũ với chi phí nhỏ.
+
 ## Cảnh báo cần kiểm tra
 
 - Model có thể "ăn gian" nhờ khác biệt **độ phân giải / kiểu nén** giữa authentic và forged → cần augmentation (JPEG, resize, blur) để kiểm chứng.
