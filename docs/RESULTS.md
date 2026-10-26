@@ -244,6 +244,19 @@ So sánh trực quan (xem `paper/figures/fig_xai_*.png`):
 
 → Định tính khớp định lượng: adaptation cải thiện cả chất lượng mask, không chỉ số.
 
+### B15 — Sample selection (1 seed) — 2026-10-25
+
+| k | Method | GPT IoU | GPT PixAUC | Gemini IoU | Ideogram IoU |
+|---|---|---|---|---|---|
+| 25 | random | 0.1217 | 0.8576 | 0.5665 | 0.0842 |
+| 25 | kcenter | 0.1207 | 0.8631 | 0.3861 | 0.0622 |
+| 25 | uncertainty | **0.1287** | 0.8753 | **0.6093** | 0.0787 |
+| 50 | random | **0.1574** | 0.8350 | **0.5692** | **0.0985** |
+| 50 | kcenter | 0.1337 | 0.8377 | 0.4748 | 0.0750 |
+| 50 | uncertainty | 0.1257 | 0.8267 | 0.4817 | 0.0813 |
+
+Kết luận: **sample selection không cải thiện nhất quán**. Uncertainty nhỉnh nhẹ ở k=25 nhưng kém hơn random ở k=50; kcenter còn hại forgetting. → **Random là baseline mạnh**; không nên lấy selection làm đóng góp chính.
+
 ## Cảnh báo cần kiểm tra
 
 - Model có thể "ăn gian" nhờ khác biệt **độ phân giải / kiểu nén** giữa authentic và forged → cần augmentation (JPEG, resize, blur) để kiểm chứng.
