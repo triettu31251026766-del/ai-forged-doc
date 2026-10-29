@@ -97,13 +97,14 @@ def main():
 
     fig.tight_layout()
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(OUT, dpi=180)
+    fig.savefig(OUT, dpi=180, bbox_inches="tight", pad_inches=0.15)
     print("Saved:", OUT)
     print("tlhrs", tlhrs, "ideo", ideo_tlhrs, "ceiling", ceiling)
 
 
 if __name__ == "__main__":
     main()
+
 
 
 

@@ -205,11 +205,20 @@ Hình 2 cho thấy bản đồ điểm cho cùng các tài liệu GPT-Image-2 b�
 
 **Hình 2.** Bản đồ điểm dự đoán cho cùng các tài liệu GPT-Image-2 bị sửa. (a) Detector zero-shot: lan toả và thường lệch mục tiêu. (b) Sau thích ứng few-shot (k=100): tập trung vào trường bị sửa. (c) Gemini in-domain: sắc nét và khớp gần đúng ground truth.
 
-<img src="figures/fig_xai_zero_shot_gpt.png" alt="Hình 2a: zero-shot" style="max-height:165mm;width:auto;max-width:100%">
+<div style="page-break-inside:avoid">
+<img src="figures/fig_xai_zero_shot_gpt.png" alt="Hình 2a: zero-shot" style="max-height:150mm;width:auto;max-width:100%">
+<p><b>(a) Detector zero-shot</b></p>
+</div>
 
-<img src="figures/fig_xai_adapted_gpt.png" alt="Hình 2b: đã thích ứng" style="max-height:165mm;width:auto;max-width:100%">
+<div style="page-break-inside:avoid">
+<img src="figures/fig_xai_adapted_gpt.png" alt="Hình 2b: đã thích ứng" style="max-height:150mm;width:auto;max-width:100%">
+<p><b>(b) Sau thích ứng few-shot (k=100)</b></p>
+</div>
 
-<img src="figures/fig_xai_in_domain.png" alt="Hình 2c: in-domain" style="max-height:165mm;width:auto;max-width:100%">
+<div style="page-break-inside:avoid">
+<img src="figures/fig_xai_in_domain.png" alt="Hình 2c: in-domain" style="max-height:150mm;width:auto;max-width:100%">
+<p><b>(c) Gemini in-domain</b></p>
+</div>
 
 ### 6.7 Định vị thất bại ở đâu?
 

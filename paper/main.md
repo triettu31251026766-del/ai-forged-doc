@@ -204,11 +204,20 @@ Figure 2 shows score maps for the same forged GPT-Image-2 documents under three 
 
 **Figure 2.** Predicted score maps for the same GPT-Image-2 forged documents. (a) Zero-shot detector: diffuse and often off-target. (b) After few-shot adaptation (k=100): concentrated on the edited field. (c) In-domain Gemini: sharp and closely matching the ground truth.
 
-<img src="figures/fig_xai_zero_shot_gpt.png" alt="Figure 2a: zero-shot" style="max-height:165mm;width:auto;max-width:100%">
+<div style="page-break-inside:avoid">
+<img src="figures/fig_xai_zero_shot_gpt.png" alt="Figure 2a: zero-shot" style="max-height:150mm;width:auto;max-width:100%">
+<p><b>(a) Zero-shot detector</b></p>
+</div>
 
-<img src="figures/fig_xai_adapted_gpt.png" alt="Figure 2b: adapted" style="max-height:165mm;width:auto;max-width:100%">
+<div style="page-break-inside:avoid">
+<img src="figures/fig_xai_adapted_gpt.png" alt="Figure 2b: adapted" style="max-height:150mm;width:auto;max-width:100%">
+<p><b>(b) After few-shot adaptation (k=100)</b></p>
+</div>
 
-<img src="figures/fig_xai_in_domain.png" alt="Figure 2c: in-domain" style="max-height:165mm;width:auto;max-width:100%">
+<div style="page-break-inside:avoid">
+<img src="figures/fig_xai_in_domain.png" alt="Figure 2c: in-domain" style="max-height:150mm;width:auto;max-width:100%">
+<p><b>(c) In-domain Gemini</b></p>
+</div>
 
 ### 6.7 Where does localization fail?
 

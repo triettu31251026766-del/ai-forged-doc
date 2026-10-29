@@ -400,9 +400,21 @@ p, li { orphans: 2; widows: 2; }
 <h3 id="66-phan-tich-inh-tinh">6.6 Phân tích định tính</h3>
 <p>Hình 2 cho thấy bản đồ điểm cho cùng các tài liệu GPT-Image-2 bị sửa dưới ba thiết lập. Dự đoán zero-shot (Hình 2a) lan toả, thường lệch mục tiêu và đôi khi gần như trống. Sau thích ứng (Hình 2b), bản đồ điểm tập trung vào trường bị sửa. Bản đồ in-domain (Hình 2c) sắc nét và khớp gần đúng ground truth. Sự tiến hoá định tính phản ánh mức tăng định lượng.</p>
 <p><strong>Hình 2.</strong> Bản đồ điểm dự đoán cho cùng các tài liệu GPT-Image-2 bị sửa. (a) Detector zero-shot: lan toả và thường lệch mục tiêu. (b) Sau thích ứng few-shot (k=100): tập trung vào trường bị sửa. (c) Gemini in-domain: sắc nét và khớp gần đúng ground truth.</p>
-<p><img src="figures/fig_xai_zero_shot_gpt.png" alt="Hình 2a: zero-shot" style="max-height:165mm;width:auto;max-width:100%"></p>
-<p><img src="figures/fig_xai_adapted_gpt.png" alt="Hình 2b: đã thích ứng" style="max-height:165mm;width:auto;max-width:100%"></p>
-<p><img src="figures/fig_xai_in_domain.png" alt="Hình 2c: in-domain" style="max-height:165mm;width:auto;max-width:100%"></p>
+<div style="page-break-inside:avoid">
+<img src="figures/fig_xai_zero_shot_gpt.png" alt="Hình 2a: zero-shot" style="max-height:150mm;width:auto;max-width:100%">
+<p><b>(a) Detector zero-shot</b></p>
+</div>
+
+<div style="page-break-inside:avoid">
+<img src="figures/fig_xai_adapted_gpt.png" alt="Hình 2b: đã thích ứng" style="max-height:150mm;width:auto;max-width:100%">
+<p><b>(b) Sau thích ứng few-shot (k=100)</b></p>
+</div>
+
+<div style="page-break-inside:avoid">
+<img src="figures/fig_xai_in_domain.png" alt="Hình 2c: in-domain" style="max-height:150mm;width:auto;max-width:100%">
+<p><b>(c) Gemini in-domain</b></p>
+</div>
+
 <h3 id="67-inh-vi-that-bai-o-au">6.7 Định vị thất bại ở đâu?</h3>
 <p>Chúng tôi phân rã IoU theo ảnh theo nguồn tài liệu và theo nhóm diện tích bị sửa trên GPT-Image-2 và Gemini in-domain.</p>
 <table>

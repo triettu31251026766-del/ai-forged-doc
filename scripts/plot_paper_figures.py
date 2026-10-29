@@ -113,10 +113,11 @@ def main():
 
     plt.tight_layout()
     OUT.parent.mkdir(parents=True, exist_ok=True)
-    plt.savefig(OUT, dpi=150)
+    plt.savefig(OUT, dpi=150, bbox_inches="tight", pad_inches=0.15)
     print("Saved:", OUT)
 
 
 if __name__ == "__main__":
     main()
+
 

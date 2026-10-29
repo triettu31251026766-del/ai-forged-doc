@@ -401,9 +401,21 @@ p, li { orphans: 2; widows: 2; }
 <h3 id="66-qualitative-analysis">6.6 Qualitative analysis</h3>
 <p>Figure 2 shows score maps for the same forged GPT-Image-2 documents under three settings. Zero-shot predictions (Fig. 2a) are diffuse, often off-target, and sometimes nearly blank. After adaptation (Fig. 2b), score maps concentrate on the edited field. In-domain maps (Fig. 2c) are sharp and closely match the ground truth. The qualitative evolution mirrors the quantitative gains.</p>
 <p><strong>Figure 2.</strong> Predicted score maps for the same GPT-Image-2 forged documents. (a) Zero-shot detector: diffuse and often off-target. (b) After few-shot adaptation (k=100): concentrated on the edited field. (c) In-domain Gemini: sharp and closely matching the ground truth.</p>
-<p><img src="figures/fig_xai_zero_shot_gpt.png" alt="Figure 2a: zero-shot" style="max-height:165mm;width:auto;max-width:100%"></p>
-<p><img src="figures/fig_xai_adapted_gpt.png" alt="Figure 2b: adapted" style="max-height:165mm;width:auto;max-width:100%"></p>
-<p><img src="figures/fig_xai_in_domain.png" alt="Figure 2c: in-domain" style="max-height:165mm;width:auto;max-width:100%"></p>
+<div style="page-break-inside:avoid">
+<img src="figures/fig_xai_zero_shot_gpt.png" alt="Figure 2a: zero-shot" style="max-height:150mm;width:auto;max-width:100%">
+<p><b>(a) Zero-shot detector</b></p>
+</div>
+
+<div style="page-break-inside:avoid">
+<img src="figures/fig_xai_adapted_gpt.png" alt="Figure 2b: adapted" style="max-height:150mm;width:auto;max-width:100%">
+<p><b>(b) After few-shot adaptation (k=100)</b></p>
+</div>
+
+<div style="page-break-inside:avoid">
+<img src="figures/fig_xai_in_domain.png" alt="Figure 2c: in-domain" style="max-height:150mm;width:auto;max-width:100%">
+<p><b>(c) In-domain Gemini</b></p>
+</div>
+
 <h3 id="67-where-does-localization-fail">6.7 Where does localization fail?</h3>
 <p>We break down per-image IoU by document source and by tampered-area bucket on GPT-Image-2 and on in-domain Gemini.</p>
 <table>
