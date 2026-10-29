@@ -86,6 +86,8 @@ powershell -ExecutionPolicy Bypass -File .\scripts\setup_env.ps1
 ## Tài liệu
 
 - `paper/main.md` — bản thảo tiếng Anh (method TL-HRS)
+- `paper/main_vi.pdf` — **bản dịch toàn văn tiếng Việt** (đọc trực tiếp, 18 trang)
+- `paper/main_2.pdf` — bản PDF tiếng Anh đã sửa layout (18 trang)
 - `paper/TOM_TAT_TIENG_VIET.md` — tóm tắt tiếng Việt
 - `docs/RESULTS.md` — nhật ký toàn bộ thí nghiệm (B1–B45)
 - `RECAP.md` — tổng hợp quyết định dự án
