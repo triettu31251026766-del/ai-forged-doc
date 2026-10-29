@@ -657,6 +657,23 @@ Kết luận: cross-generator **~2.5×** baseline nhưng gap lớn; detector chu
 
 Lưu ý kỹ thuật: bản cũ cấp phát mảng full-size mỗi cửa sổ → ảnh 34MP làm chậm 7h. Đã sửa: IoU tính trên crop `inter/(pred_area+mask_area−inter)`.
 
+### B46 — Image-level metrics (AP, Recall@1%FPR) + sửa trình bày — 2026-10-29
+
+Score ảnh = trung bình top-1% probability (cùng hàm với TL-HRS), split P1 có 613 forged + 613 authentic.
+
+| k | Image AUC | Image AP | Recall@1%FPR |
+|---|---|---|---|
+| 0 (zero-shot) | 0.526 | 0.547 | 0.015 |
+| 5 | 0.529 ± 0.012 | 0.522 ± 0.010 | 0.014 ± 0.001 |
+| 25 | 0.515 ± 0.024 | 0.518 ± 0.021 | 0.019 ± 0.006 |
+| 100 | 0.565 ± 0.024 | 0.582 ± 0.016 | 0.042 ± 0.012 |
+
+Zero-shot in-domain/Ideogram: Gemini AUC 0.913/AP 0.925/R@1% 0.553; Ideogram 0.559/0.559/0.038.
+→ Image-level vẫn yếu dưới generator shift; TL-HRS là stage định vị, cần triage ảnh (ngưỡng 1% FPR) trước.
+Script: `scripts/eval_image_metrics.py`; JSON: `results/image_metrics/`.
+
+Sửa trình bày paper: hình chuyển dọc (Fig 1: 2 hàng, Fig 3: 3 hàng), công thức → HTML, mũi tên → `->`, điền ô trống Bảng 3.1/6.2, thêm mục **4.5 TL-HRS** (Method), đoạn xử lý ảnh authentic, xuất `paper/main_2.html/pdf` (A4, 18 trang).
+
 ## Cảnh báo cần kiểm tra
 
 - Model có thể "ăn gian" nhờ khác biệt **độ phân giải / kiểu nén** giữa authentic và forged → cần augmentation (JPEG, resize, blur) để kiểm chứng.

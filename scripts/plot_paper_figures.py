@@ -1,4 +1,4 @@
-import json
+﻿import json
 import re
 from collections import defaultdict
 from pathlib import Path
@@ -87,7 +87,7 @@ def main():
         labels.append(name); gpt_bars.append(gm); gem_bars.append(hm)
         gpt_err.append(gs); gem_err.append(hs)
 
-    fig, axes = plt.subplots(1, 2, figsize=(12.5, 4.6))
+    fig, axes = plt.subplots(2, 1, figsize=(8.2, 8.6))
 
     ax = axes[0]
     ax.errorbar(ks, gpt_m, yerr=gpt_s, marker="o", capsize=4, label="GPT-Image-2 (target)")
@@ -119,3 +119,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

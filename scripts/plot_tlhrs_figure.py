@@ -33,7 +33,7 @@ def main():
     ceiling = float(np.mean(ceilings))
     baseline = 0.195
 
-    fig, axes = plt.subplots(1, 3, figsize=(15, 4.2))
+    fig, axes = plt.subplots(3, 1, figsize=(8.6, 13.5))
 
     ax = axes[0]
     names = ["full-image\nbaseline", "coarse\npeak", "+centroid", "+3x3\ngrid", "TL-HRS\n(dense)", "oracle\nwindow", "GT-box\nceiling"]
@@ -104,5 +104,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
