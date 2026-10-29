@@ -27,3 +27,6 @@ results/
 .DS_Store
 .idea/
 .vscode/
+
+# Office/Word lock files
+~\$*
