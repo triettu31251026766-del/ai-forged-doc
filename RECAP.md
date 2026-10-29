@@ -1,5 +1,7 @@
 # RECAP — Tổng hợp quyết định dự án
 
+> **Trạng thái 2026-10-29.** Kế hoạch dưới đây là bản ban đầu; phần đã làm thực tế: baseline U-Net (không pretrain MAE/DINO), few-shot 3 seed, rehearsal 4 seed, và **phương pháp TL-HRS** (patch adaptation + quét dày độ phân giải cao). Kết quả chốt: full-image **0.195 ± 0.037** → TL-HRS **0.545 ± 0.012** (2.8×, 82% trần 0.677); Ideogram **0.284** (vs 0.114). Sinh dữ liệu diffusion (mục 10) **không triển khai**; cross-domain chỉ ở mức chẩn đoán. Chi tiết: `paper/main.md`, `docs/RESULTS.md` (B1–B45).
+
 ## 1. Đề tài
 
 **Phát hiện giấy tờ tài chính bị AI sinh/sửa (AI-forged) dưới dịch chuyển miền và dịch chuyển bộ sinh, bằng học tự giám sát và định vị vùng giả mạo có khả năng giải thích.**
