@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="vi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TÓM TẮT TIẾNG VIỆT — BÁO CÁO NHÓM</title><style>
+body { font-family: "Segoe UI", Arial, sans-serif; max-width: 920px; margin: 32px auto;
+       padding: 0 28px; color: #1f2328; line-height: 1.6; font-size: 16px; }
+h1 { font-size: 28px; border-bottom: 2px solid #d0d7de; padding-bottom: 10px; }
+h2 { font-size: 22px; margin-top: 34px; border-bottom: 1px solid #d0d7de; padding-bottom: 6px; }
+h3 { font-size: 18px; margin-top: 26px; }
+table { border-collapse: collapse; width: 100%; margin: 14px 0; font-size: 14px; }
+th, td { border: 1px solid #c9d1d9; padding: 6px 9px; text-align: left; vertical-align: top; }
+th { background: #f2f4f7; }
+tr:nth-child(even) td { background: #fafbfc; }
+code { background: #f0f2f5; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
+pre { background: #f0f2f5; padding: 12px; border-radius: 6px; overflow-x: auto; }
+img { max-width: 100%; height: auto; margin: 14px 0; }
+blockquote { border-left: 4px solid #d0d7de; margin: 12px 0; padding: 4px 16px; color: #57606a; }
+hr { border: 0; border-top: 1px solid #d0d7de; margin: 30px 0; }
+</style></head>
+<body><h1 id="tom-tat-tieng-viet-bao-cao-nhom">TÓM TẮT TIẾNG VIỆT — BÁO CÁO NHÓM</h1>
+<h2 id="ten-e-tai">Tên đề tài</h2>
+<p><strong>Thích ứng tiết kiệm nhãn cho hệ thống phát hiện giấy tờ tài chính bị AI sửa, dưới dịch chuyển bộ sinh, bằng rehearsal và tìm kiếm dày độ phân giải cao.</strong>
+<em>(Label-Efficient Adaptation of AI-Forged Document Detectors under Generator Shift via Rehearsal and Dense High-Resolution Search)</em></p>
+<hr />
+<h2 id="1-van-e">1. Vấn đề</h2>
+<ul>
+<li>Kẻ gian dùng AI inpainting (Gemini, Ideogram, GPT-Image-2) sửa một con số trên hóa đơn/chứng từ trong vài giây.</li>
+<li>Detector huấn luyện trên forgery truyền thống (Photoshop) gần như mù với loại này.</li>
+<li>Detector huấn luyện trên <strong>một</strong> bộ sinh AI cũng <strong>sụp</strong> khi gặp bộ sinh mới (<em>generator shift</em>).</li>
+<li>Ngân hàng <strong>không thể</strong> thu thập hàng nghìn mẫu nhãn cho mỗi công cụ AI mới.</li>
+</ul>
+<h2 id="2-cau-hoi-nghien-cuu">2. Câu hỏi nghiên cứu</h2>
+<blockquote>
+<p>Cần <strong>bao nhiêu mẫu nhãn</strong> từ bộ sinh mới để khôi phục khả năng định vị, và làm sao <strong>không quên</strong> bộ sinh cũ?</p>
+</blockquote>
+<h2 id="3-du-lieu-giao-thuc">3. Dữ liệu &amp; giao thức</h2>
+<ul>
+<li>Bộ <strong>AIForge-Doc</strong>: ảnh hóa đơn/biểu mẫu bị AI sửa, có mask pixel.</li>
+<li>3 bộ sinh: Gemini, Ideogram, GPT-Image-2.</li>
+<li>Giao thức <strong>leave-one-generator-out</strong>:</li>
+<li>Train Gemini → test Gemini (in-domain), Ideogram (unseen), GPT-Image-2 (unseen).</li>
+</ul>
+<h2 id="4-phuong-phap">4. Phương pháp</h2>
+<ul>
+<li><strong>Nền:</strong> U-Net + ResNet18, train trên Gemini.</li>
+<li><strong>Few-shot adaptation:</strong> fine-tune với (k) ảnh forged + (k) ảnh authentic từ bộ sinh mới.</li>
+<li><strong>Rehearsal:</strong> thêm (r=100) mẫu từ bộ sinh cũ khi fine-tune để chống quên.</li>
+<li><strong>Calibration:</strong> thử temperature scaling, threshold toàn cục, threshold thích ứng từng ảnh (kết quả: không hiệu quả).</li>
+</ul>
+<h2 id="5-ket-qua-chinh">5. Kết quả chính</h2>
+<h3 id="51-zero-shot-sup">5.1 Zero-shot sụp</h3>
+<table>
+<thead>
+<tr>
+<th>Test</th>
+<th>IoU</th>
+<th>Image AUC</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gemini (in-domain)</td>
+<td>0.669</td>
+<td>0.946</td>
+</tr>
+<tr>
+<td>Ideogram (unseen)</td>
+<td>0.098</td>
+<td>0.546</td>
+</tr>
+<tr>
+<td>GPT-Image-2 (unseen)</td>
+<td>0.052</td>
+<td>0.520</td>
+</tr>
+</tbody>
+</table>
+<h3 id="52-few-shot-phuc-hoi-3-seed">5.2 Few-shot phục hồi (3 seed)</h3>
+<table>
+<thead>
+<tr>
+<th>k</th>
+<th>GPT IoU</th>
+<th>Gemini IoU (quên)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>0.052</td>
+<td>0.669</td>
+</tr>
+<tr>
+<td>5</td>
+<td>0.068 ± 0.015</td>
+<td>0.624 ± 0.017</td>
+</tr>
+<tr>
+<td>25</td>
+<td>0.105 ± 0.031</td>
+<td>0.577 ± 0.031</td>
+</tr>
+<tr>
+<td>100</td>
+<td><strong>0.195 ± 0.037</strong></td>
+<td><strong>0.494 ± 0.054</strong></td>
+</tr>
+</tbody>
+</table>
+<p>→ IoU tăng <strong>3,7 lần</strong> với 100 nhãn.</p>
+<h3 id="53-rehearsal-chong-quen-4-seed">5.3 Rehearsal chống quên (4 seed)</h3>
+<table>
+<thead>
+<tr>
+<th>Phương pháp</th>
+<th>GPT IoU</th>
+<th>Gemini IoU</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Standard fine-tune</td>
+<td>0.195 ± 0.030</td>
+<td>0.494 ± 0.044</td>
+</tr>
+<tr>
+<td><strong>Replay 100</strong></td>
+<td><strong>0.162 ± 0.021</strong></td>
+<td><strong>0.672 ± 0.006</strong></td>
+</tr>
+</tbody>
+</table>
+<p>→ Replay đưa Gemini về gần mức zero-shot (0.669), chỉ giảm GPT nhẹ (~17%).</p>
+<h3 id="54-fine-tune-vs-train-from-scratch-k100">5.4 Fine-tune vs train from scratch (k=100)</h3>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>GPT IoU</th>
+<th>Gemini IoU</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fine-tune từ base</td>
+<td><strong>0.160</strong></td>
+<td><strong>0.552</strong></td>
+</tr>
+<tr>
+<td>Train from scratch</td>
+<td>0.085</td>
+<td>0.075</td>
+</tr>
+</tbody>
+</table>
+<p>→ Tiền huấn luyện trên bộ sinh cũ quan trọng: fine-tune tốt hơn ~1,9 lần.</p>
+<h3 id="55-phuong-phap-tl-hrs-text-localized-high-resolution-search">5.5 Phương pháp TL-HRS (Text-Localized High-Resolution Search)</h3>
+<p><strong>Adapt patch</strong> segmenter trên đúng k=100 nhãn GPT (+ replay 100 Gemini) → trần nâng 0.459 → 0.677. <strong>Định vị</strong>: thay vì lấy đỉnh coarse (lệch <strong>152 px</strong> median, crop chỉ phủ <strong>53%</strong> mask), quét dày cửa sổ <strong>384 native, stride 96</strong> (~197 cửa sổ/ảnh) và chọn cửa sổ có <strong>mean top-1% probability</strong> cao nhất. Không OCR, không gating, không selector học.</p>
+<table>
+<thead>
+<tr>
+<th>Thiết lập (full GPT 613 ảnh)</th>
+<th>IoU</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Few-shot toàn ảnh (k=100)</td>
+<td>0.195 ± 0.037</td>
+</tr>
+<tr>
+<td>Patch zero-shot (GT box)</td>
+<td>0.459</td>
+</tr>
+<tr>
+<td><strong>Patch adapted (GT box) — trần</strong></td>
+<td><strong>0.677 ± 0.009</strong></td>
+</tr>
+<tr>
+<td>Đỉnh coarse + patch adapted</td>
+<td>0.321</td>
+</tr>
+<tr>
+<td>+ centroid / grid 3×3</td>
+<td>0.358 / 0.400</td>
+</tr>
+<tr>
+<td><strong>TL-HRS (quét dày, 3 seed)</strong></td>
+<td><strong>0.545 ± 0.012</strong></td>
+</tr>
+<tr>
+<td>— oracle window</td>
+<td>0.653</td>
+</tr>
+<tr>
+<td>Ideogram (bộ sinh chưa thấy)</td>
+<td>0.284 (oracle 0.510)</td>
+</tr>
+<tr>
+<td>Ideogram full-image</td>
+<td>0.114</td>
+</tr>
+</tbody>
+</table>
+<p>→ <strong>0.545 = 82% trần, 2.8× baseline</strong>, cùng 100 nhãn; quét dày hơn hẳn đỉnh coarse.
+Ba phát hiện: <strong>(1) adapt patch chuyển được, trần thật</strong> (0.459 → 0.677); <strong>(2) nút thắt là <em>nhìn vào đâu</em></strong>, không phải phân đoạn (đỉnh coarse 0.321 → quét dày 0.545; oracle window 0.653); <strong>(3) "thông minh" trong tìm kiếm không đáng</strong> — zoom, tile, centroid, pruning bằng coarse đều kém hơn quét dày; coarse map không đủ tin cậy làm prior.</p>
+<h2 id="6-phat-hien-quan-trong">6. Phát hiện quan trọng</h2>
+<ul>
+<li><strong>Pixel AUC vẫn cao (0.83–0.91)</strong> dù IoU thấp → model vẫn <strong>xếp hạng pixel tốt</strong>, nhưng <strong>mask định vị chưa chính xác</strong>.</li>
+<li><strong>Calibration không phải nút thắt</strong>: temperature không đổi IoU; threshold toàn cục/thích ứng không cải thiện ổn định; threshold thích ứng còn <strong>hại in-domain</strong>.</li>
+<li>→ Nút thắt thật là <strong>độ chính xác định vị (localization precision)</strong>, không phải ngưỡng quyết định.</li>
+<li><strong>TL-HRS</strong>: adapt patch với cùng 100 nhãn nâng trần <strong>0.459 → 0.677</strong>; quét dày native (stride 96) đạt <strong>0.545 ± 0.012</strong> (~2.8× baseline, 82% trần). Đỉnh coarse chỉ 0.321 và lệch 152 px; zoom/tile/centroid/pruning đều kém hơn quét dày; trên Ideogram đạt 0.284 (oracle 0.510) → confidence chưa hiệu chỉnh qua bộ sinh.</li>
+</ul>
+<h2 id="7-ong-gop">7. Đóng góp</h2>
+<ol>
+<li>Nghiên cứu có kiểm soát về <strong>thích ứng tiết kiệm nhãn</strong> dưới generator shift.</li>
+<li>Đường cong few-shot (3 seed): <strong>0.052 → 0.195</strong>.</li>
+<li><strong>Rehearsal</strong> giữ bộ sinh cũ gần như không quên (0.672).</li>
+<li>Bộ <strong>kết quả âm trung thực</strong> (calibration, adaptive threshold, sample selection, freeze encoder, PatchCore, FR-Net).</li>
+<li><strong>Phương pháp TL-HRS</strong>: adapt patch segmenter với cùng 100 nhãn (trần <strong>0.459 → 0.677</strong>) + quét dày cửa sổ native, đạt <strong>0.545 ± 0.012</strong> (~2.8× baseline, 82% trần).</li>
+<li><strong>Ablation định vị</strong>: đỉnh coarse lệch 152 px (phủ 53% mask); zoom, tile, centroid, grid, pruning bằng coarse, OCR/selector, MSF đều kém hơn quét dày; coarse map không đủ tin cậy để làm prior.</li>
+<li>Bằng chứng định tính (score maps) + tổng quát hoá Ideogram (0.284 vs 0.114 full-image).</li>
+</ol>
+<h2 id="8-han-che">8. Hạn chế</h2>
+<ul>
+<li>Dataset nhỏ, chủ yếu hóa đơn/biểu mẫu.</li>
+<li>Chỉ 3 bộ sinh.</li>
+<li>Chỉ sửa trường số (không gồm giấy tờ sinh từ đầu, chữ ký).</li>
+<li>Một kiến trúc (ResNet18 U-Net).</li>
+<li>IoU sau thích ứng vẫn thấp so với in-domain; TL-HRS đạt 0.545 ± 0.012 = 82% trần (0.677); chi phí suy luận ~197 cửa sổ/ảnh (~20 s/ảnh). Gap trên bộ sinh mới do confidence chưa hiệu chỉnh (Ideogram 0.284 vs oracle 0.510).</li>
+</ul>
+<h2 id="9-huong-phat-trien">9. Hướng phát triển</h2>
+<ul>
+<li><strong>Federated adaptation:</strong> ngân hàng A gặp bộ sinh mới, thu 100 mẫu, chia sẻ <strong>model update</strong> (không chia sẻ dữ liệu thô) cho ngân hàng B, C.</li>
+<li><strong>Context-contrast localization:</strong> chọn vùng bị sửa bằng cách so sánh mỗi trường với các trường lân cận trong cùng ảnh (thay vì phân loại cục bộ).</li>
+<li>Hiệu chỉnh confidence của patch qua các bộ sinh để đóng gap 0.284 → 0.510 trên Ideogram; scoring cửa sổ có ngữ cảnh thay vì độc lập.</li>
+<li>Thích ứng liên tục qua nhiều bộ sinh.</li>
+<li>Benchmark rộng hơn (loại giấy, ngôn ngữ).</li>
+</ul>
+<h2 id="10-ket-luan">10. Kết luận</h2>
+<blockquote>
+<p>Một ít nhãn từ bộ sinh mới + rehearsal là đủ để <strong>khôi phục định vị</strong> và <strong>không quên</strong> bộ sinh cũ. Nút thắt còn lại là <strong>độ chính xác định vị</strong>, không phải calibration. <strong>TL-HRS</strong> — adapt patch segmenter với cùng 100 nhãn (trần <strong>0.459 → 0.677</strong>) rồi quét dày cửa sổ native — đạt <strong>0.545 ± 0.012</strong> (~2.8× baseline, 82% trần). Đỉnh coarse chỉ 0.321 vì lệch 152 px, và các biến thể "thông minh" (zoom, tile, grid, pruning) đều kém hơn. Trên Ideogram: 0.284 vs 0.114 baseline — detector tìm được vùng (oracle 0.510), nhưng confidence chưa hiệu chỉnh qua bộ sinh.</p>
+</blockquote>
+<hr />
+<p><em>Bản thảo tiếng Anh đầy đủ: <code>paper/main.md</code>. Bản thảo 1 (lưu cũ): <code>paper/ban_thao_1.md</code>.</em></p></body></html>
