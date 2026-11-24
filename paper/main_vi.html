@@ -555,8 +555,41 @@ p, li { orphans: 2; widows: 2; }
 <p><img alt="Hình 3" src="figures/fig_tlhrs.png" /></p>
 <p>Hình 3 tóm tắt bức tranh theo tầng và cross-generator. Ba phát hiện như sau. <strong>(1) Thích ứng patch chuyển giao được, và trần là thật.</strong> Với oracle box, cùng kiến trúc đi từ 0.459 (zero-shot) lên 0.677 ± 0.009 khi fine-tune với cùng 100 nhãn đích; Gemini in-domain chỉ giảm từ 0.557 xuống 0.532, cái giá mà replay giảm thiểu. <strong>(2) Nút thắt là nhìn vào đâu, không phải dự đoán cái gì.</strong> Một đỉnh coarse đơn chỉ thu được 0.321, nhưng tìm kiếm dày trên cùng bộ phân đoạn đạt 0.545 — 2.8× baseline toàn ảnh và 82% trần đã thích ứng. Khoảng cách giữa TL-HRS và oracle window của nó (0.653) hoàn toàn do xếp hạng đúng cửa sổ trước tiên. <strong>(3) "Thông minh" trong tìm kiếm không đáng.</strong> Pruning dẫn hướng bởi coarse kém hơn tìm kiếm vét cạn (top-40 cửa sổ: 0.544; top-10: 0.474; top-5: 0.431), và do đó bản đồ coarse không phải prior hữu ích ở độ phân giải này. Zoom, tiling và centroid coarse đều dưới baseline đỉnh-đơn-cộng-lưới, nên cửa sổ trượt đơn giản chiếm ưu thế.</p>
 <p><strong>6.8.1 Nghiên cứu bộ chọn trước thích ứng (kết quả âm).</strong> Trước khi thích ứng bộ phân đoạn patch, chúng tôi cố thu hẹp khoảng cách bằng cách cải thiện <em>chọn lựa</em> với patch zero-shot. Trên toàn bộ tập test giả mạo, một bộ phân loại trường ResNet-18 đạt 0.193, heatmap coarse 0.157, và phản hồi patch gốc 0.158; rank fusion của cả ba đạt 0.199 — không cái nào vượt baseline 0.195 ± 0.037. Trên subset 60 ảnh (27 giả mạo; over-represent CORD và under-represent WildReceipt) chúng tôi còn thử tinh chỉnh centroid, MAD z-score theo ảnh (đơn điệu, do đó vô nghĩa), line-merge, thích ứng selector, và một bộ chọn DINOv2 field-vs-document-context đã train (0.195); tất cả thất bại. Các kết quả này thúc đẩy hướng thích ứng patch, và tìm kiếm dày sau đó bao trùm việc chọn lựa: độ tin cậy của chính patch đã thích ứng, được đánh giá dày đặc, là bộ xếp hạng mạnh hơn mọi selector học được này.</p>
+<p><strong>6.8.2 Bộ xếp hạng cửa sổ học được (kết quả âm).</strong> Chúng tôi kiểm tra liệu khoảng cách tới oracle window (0.545 so với 0.653) có phải do hàm điểm yếu. Chúng tôi train một regressor trên đúng 100 nhãn đích với 9 đặc trưng mỗi cửa sổ — mass top-1% và top-5%, xác suất max và trung bình của vùng dự đoán, diện tích, tổng mass, tỉ lệ chạm biên (dấu hiệu mask bị cắt), độ lệch tâm và độ đặc — chuẩn hoá percentile theo từng ảnh, rồi hồi quy về IoU thực của cửa sổ bằng ridge và gradient boosting. Không mô hình nào vượt điểm top-1% đơn giản:</p>
+<table>
+<thead>
+<tr>
+<th>Điểm chọn cửa sổ</th>
+<th>GPT (150 ảnh)</th>
+<th>Ideogram (120 ảnh)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>top-1% (đang dùng)</strong></td>
+<td><strong>0.584</strong></td>
+<td><strong>0.375</strong></td>
+</tr>
+<tr>
+<td>Ridge (9 đặc trưng)</td>
+<td>0.492</td>
+<td>0.230</td>
+</tr>
+<tr>
+<td>GBM (9 đặc trưng)</td>
+<td>0.583</td>
+<td>0.368</td>
+</tr>
+<tr>
+<td>oracle window</td>
+<td>0.655</td>
+<td>0.507</td>
+</tr>
+</tbody>
+</table>
+<p>Vì vậy khoảng cách không phải giới hạn của mô hình xếp hạng: khi không có ground truth, nhiều cửa sổ thực sự không phân biệt được từ đặc trưng. Muốn cải thiện pipeline phải có detector patch tốt hơn (độ phân giải hoặc ngữ cảnh), không phải selector biểu cảm hơn. (Số là IoU trung bình theo ảnh trên cùng các subset ở Mục 6.8; subset Ideogram dễ hơn full 422 ảnh.)</p>
 <p><strong>Xử lý ảnh thật.</strong> TL-HRS là một tầng <em>định vị</em>: nó luôn trả về một cửa sổ, nên chỉ được gọi sau một quyết định triage mức ảnh. Khi triển khai, chúng tôi ngưỡng hoá điểm mức ảnh (trung bình xác suất top-1%, Bảng 6.2) trên các mẫu thật đích có nhãn tại điểm vận hành mà ngân sách cảnh báo của ngân hàng yêu cầu (chúng tôi báo cáo 1% FPR), và chỉ các tài liệu bị gắn cờ mới được đưa vào TL-HRS, với <i>w</i>* được hiển thị cho chuyên viên như vùng gợi ý. Trên tài liệu thật, ngưỡng triage chính là thứ ngăn báo động giả; bản thân tìm kiếm dày không bao giờ tuyên bố "không giả mạo". Recall@1%FPR thấp của detector toàn ảnh (0.042 tại <i>k</i> = 100) cho thấy triage này là điểm yếu còn lại, vì vậy chúng tôi định vị TL-HRS là hỗ trợ quyết định có con người trong vòng lặp chứ không phải từ chối tự động.</p>
-<p><strong>6.8.2 Hiệu quả nhãn và tổng quát hoá.</strong> Thích ứng tầng patch rẻ: với 25 nhãn đích, trần GT-box đã là 0.584 (86% của 0.677 đạt với 100), trong khi baseline toàn ảnh với 25 nhãn là 0.105. Cùng bộ phân đoạn đã thích ứng, tìm kiếm dày, chuyển giao sang Ideogram — bộ sinh không có trong cả train lẫn thích ứng — đạt 0.284 IoU so với 0.114 của detector toàn ảnh, với oracle window 0.510. Khoảng cách 0.284 -&gt; 0.510 cho thấy detector <em>tìm</em> được trường dưới dịch chuyển bộ sinh nhưng độ tin cậy của nó bị lệch chuẩn giữa các bộ sinh, đây là mục tiêu rõ ràng nhất cho công việc tương lai.</p>
+<p><strong>6.8.3 Hiệu quả nhãn và tổng quát hoá.</strong> Thích ứng tầng patch rẻ: với 25 nhãn đích, trần GT-box đã là 0.584 (86% của 0.677 đạt với 100), trong khi baseline toàn ảnh với 25 nhãn là 0.105. Cùng bộ phân đoạn đã thích ứng, tìm kiếm dày, chuyển giao sang Ideogram — bộ sinh không có trong cả train lẫn thích ứng — đạt 0.284 IoU so với 0.114 của detector toàn ảnh, với oracle window 0.510. Khoảng cách 0.284 -&gt; 0.510 cho thấy detector <em>tìm</em> được trường dưới dịch chuyển bộ sinh nhưng độ tin cậy của nó bị lệch chuẩn giữa các bộ sinh, đây là mục tiêu rõ ràng nhất cho công việc tương lai.</p>
 <hr />
 <h2 id="7-thao-luan">7. Thảo luận</h2>
 <p><strong>Vì sao thích ứng giúp?</strong> Fine-tune trên vài mẫu đích dường như làm sắc nét phản hồi không gian quanh vùng bị sửa, thay vì chỉ dịch một ngưỡng toàn cục. Điều này phù hợp với pixel AUC cao trước thích ứng và với việc các phương pháp hiệu chỉnh ngưỡng thất bại.</p>

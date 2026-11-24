@@ -674,6 +674,26 @@ Script: `scripts/eval_image_metrics.py`; JSON: `results/image_metrics/`.
 
 Sửa trình bày paper: hình chuyển dọc (Fig 1: 2 hàng, Fig 3: 3 hàng), công thức → HTML, mũi tên → `->`, điền ô trống Bảng 3.1/6.2, thêm mục **4.5 TL-HRS** (Method), đoạn xử lý ảnh authentic, xuất `paper/main_2.html/pdf` (A4, 18 trang).
 
+### B47 — Learned window ranker: kết quả âm — 2026-11-25
+
+Câu hỏi: khoảng cách TL-HRS (0.545) → oracle window (0.653) có phải do hàm điểm top-1% yếu?
+Train regressor trên đúng 100 nhãn GPT, 9 đặc trưng/cửa sổ (top1%, top5%, max, mean vùng dự đoán,
+diện tích, mass, border contact, centroid offset, compactness), chuẩn hoá percentile theo ảnh,
+hồi quy về IoU thực của cửa sổ.
+
+| Score chọn cửa sổ | GPT (150 ảnh) | Ideogram (120 ảnh) |
+|---|---|---|
+| top-1% (đang dùng) | **0.5840** | **0.3750** |
+| Ridge (9 đặc trưng) | 0.4921 | 0.2303 |
+| GBM (9 đặc trưng) | 0.5830 | 0.3681 |
+| oracle window | 0.6546 | 0.5070 |
+
+Kết luận: **không mô hình nào vượt top-1%**. Khoảng cách tới oracle không phải do thiếu bộ xếp hạng:
+khi không có ground truth, nhiều cửa sổ có độ tin cậy tương đương → thiếu thông tin để phân biệt.
+Hướng cải thiện phải nằm ở detector (độ phân giải/ngữ cảnh), không phải selector.
+Lưu ý: Ideogram 0.375 là trên subset 120 ảnh (dễ hơn full 422 = 0.284) — chỉ so sánh tương đối.
+Script: `scripts/train_window_ranker.py`; JSON: `results/ranker/results.json`.
+
 ## Cảnh báo cần kiểm tra
 
 - Model có thể "ăn gian" nhờ khác biệt **độ phân giải / kiểu nén** giữa authentic và forged → cần augmentation (JPEG, resize, blur) để kiểm chứng.

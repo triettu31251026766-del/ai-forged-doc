@@ -271,9 +271,20 @@ Hình 3 tóm tắt bức tranh theo tầng và cross-generator. Ba phát hiện 
 
 **6.8.1 Nghiên cứu bộ chọn trước thích ứng (kết quả âm).** Trước khi thích ứng bộ phân đoạn patch, chúng tôi cố thu hẹp khoảng cách bằng cách cải thiện *chọn lựa* với patch zero-shot. Trên toàn bộ tập test giả mạo, một bộ phân loại trường ResNet-18 đạt 0.193, heatmap coarse 0.157, và phản hồi patch gốc 0.158; rank fusion của cả ba đạt 0.199 — không cái nào vượt baseline 0.195 ± 0.037. Trên subset 60 ảnh (27 giả mạo; over-represent CORD và under-represent WildReceipt) chúng tôi còn thử tinh chỉnh centroid, MAD z-score theo ảnh (đơn điệu, do đó vô nghĩa), line-merge, thích ứng selector, và một bộ chọn DINOv2 field-vs-document-context đã train (0.195); tất cả thất bại. Các kết quả này thúc đẩy hướng thích ứng patch, và tìm kiếm dày sau đó bao trùm việc chọn lựa: độ tin cậy của chính patch đã thích ứng, được đánh giá dày đặc, là bộ xếp hạng mạnh hơn mọi selector học được này.
 
+**6.8.2 Bộ xếp hạng cửa sổ học được (kết quả âm).** Chúng tôi kiểm tra liệu khoảng cách tới oracle window (0.545 so với 0.653) có phải do hàm điểm yếu. Chúng tôi train một regressor trên đúng 100 nhãn đích với 9 đặc trưng mỗi cửa sổ — mass top-1% và top-5%, xác suất max và trung bình của vùng dự đoán, diện tích, tổng mass, tỉ lệ chạm biên (dấu hiệu mask bị cắt), độ lệch tâm và độ đặc — chuẩn hoá percentile theo từng ảnh, rồi hồi quy về IoU thực của cửa sổ bằng ridge và gradient boosting. Không mô hình nào vượt điểm top-1% đơn giản:
+
+| Điểm chọn cửa sổ | GPT (150 ảnh) | Ideogram (120 ảnh) |
+|---|---|---|
+| **top-1% (đang dùng)** | **0.584** | **0.375** |
+| Ridge (9 đặc trưng) | 0.492 | 0.230 |
+| GBM (9 đặc trưng) | 0.583 | 0.368 |
+| oracle window | 0.655 | 0.507 |
+
+Vì vậy khoảng cách không phải giới hạn của mô hình xếp hạng: khi không có ground truth, nhiều cửa sổ thực sự không phân biệt được từ đặc trưng. Muốn cải thiện pipeline phải có detector patch tốt hơn (độ phân giải hoặc ngữ cảnh), không phải selector biểu cảm hơn. (Số là IoU trung bình theo ảnh trên cùng các subset ở Mục 6.8; subset Ideogram dễ hơn full 422 ảnh.)
+
 **Xử lý ảnh thật.** TL-HRS là một tầng *định vị*: nó luôn trả về một cửa sổ, nên chỉ được gọi sau một quyết định triage mức ảnh. Khi triển khai, chúng tôi ngưỡng hoá điểm mức ảnh (trung bình xác suất top-1%, Bảng 6.2) trên các mẫu thật đích có nhãn tại điểm vận hành mà ngân sách cảnh báo của ngân hàng yêu cầu (chúng tôi báo cáo 1% FPR), và chỉ các tài liệu bị gắn cờ mới được đưa vào TL-HRS, với <i>w</i>* được hiển thị cho chuyên viên như vùng gợi ý. Trên tài liệu thật, ngưỡng triage chính là thứ ngăn báo động giả; bản thân tìm kiếm dày không bao giờ tuyên bố "không giả mạo". Recall@1%FPR thấp của detector toàn ảnh (0.042 tại <i>k</i> = 100) cho thấy triage này là điểm yếu còn lại, vì vậy chúng tôi định vị TL-HRS là hỗ trợ quyết định có con người trong vòng lặp chứ không phải từ chối tự động.
 
-**6.8.2 Hiệu quả nhãn và tổng quát hoá.** Thích ứng tầng patch rẻ: với 25 nhãn đích, trần GT-box đã là 0.584 (86% của 0.677 đạt với 100), trong khi baseline toàn ảnh với 25 nhãn là 0.105. Cùng bộ phân đoạn đã thích ứng, tìm kiếm dày, chuyển giao sang Ideogram — bộ sinh không có trong cả train lẫn thích ứng — đạt 0.284 IoU so với 0.114 của detector toàn ảnh, với oracle window 0.510. Khoảng cách 0.284 -> 0.510 cho thấy detector *tìm* được trường dưới dịch chuyển bộ sinh nhưng độ tin cậy của nó bị lệch chuẩn giữa các bộ sinh, đây là mục tiêu rõ ràng nhất cho công việc tương lai.
+**6.8.3 Hiệu quả nhãn và tổng quát hoá.** Thích ứng tầng patch rẻ: với 25 nhãn đích, trần GT-box đã là 0.584 (86% của 0.677 đạt với 100), trong khi baseline toàn ảnh với 25 nhãn là 0.105. Cùng bộ phân đoạn đã thích ứng, tìm kiếm dày, chuyển giao sang Ideogram — bộ sinh không có trong cả train lẫn thích ứng — đạt 0.284 IoU so với 0.114 của detector toàn ảnh, với oracle window 0.510. Khoảng cách 0.284 -> 0.510 cho thấy detector *tìm* được trường dưới dịch chuyển bộ sinh nhưng độ tin cậy của nó bị lệch chuẩn giữa các bộ sinh, đây là mục tiêu rõ ràng nhất cho công việc tương lai.
 
 ---
 
