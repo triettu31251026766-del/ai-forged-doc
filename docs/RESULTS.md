@@ -694,6 +694,20 @@ Hướng cải thiện phải nằm ở detector (độ phân giải/ngữ cản
 Lưu ý: Ideogram 0.375 là trên subset 120 ảnh (dễ hơn full 422 = 0.284) — chỉ so sánh tương đối.
 Script: `scripts/train_window_ranker.py`; JSON: `results/ranker/results.json`.
 
+### B48 — Baseline công bố: TruFor trên 150 ảnh GPT — 2026-11-25
+
+TruFor (CVPR 2023) official weights, chạy CPU (WSL2), đầu vào resize max-side 1024 (RAM CPU; ảnh gốc 8–35 MP).
+
+| Phương pháp (150 ảnh) | IoU pooled | IoU mean | F1 | Dice mean |
+|---|---|---|---|---|
+| TruFor @0.5 | 0.0242 | 0.1735 | 0.0473 | 0.2310 |
+| TruFor @0.75 (best-F1) | 0.0252 | — | 0.0492 | — |
+| **TL-HRS (cùng 150)** | **0.5826** | **0.5840** | — | — |
+
+Score mức ảnh TruFor trung bình 0.60 → có phản ứng nhưng bản đồ không khớp trường chữ mảnh.
+→ **TruFor thấp hơn TL-HRS ~24×**, đúng luận điểm benchmark. DocTamper không chạy được (mmcv không có wheel Windows).
+Script: `scripts/make_trufor_inputs.py`, `scripts/eval_trufor.py`; kết quả `results/trufor150_eval.json`.
+
 ## Cảnh báo cần kiểm tra
 
 - Model có thể "ăn gian" nhờ khác biệt **độ phân giải / kiểu nén** giữa authentic và forged → cần augmentation (JPEG, resize, blur) để kiểm chứng.

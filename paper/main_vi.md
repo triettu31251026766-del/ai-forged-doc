@@ -286,6 +286,18 @@ Vì vậy khoảng cách không phải giới hạn của mô hình xếp hạng
 
 **6.8.3 Hiệu quả nhãn và tổng quát hoá.** Thích ứng tầng patch rẻ: với 25 nhãn đích, trần GT-box đã là 0.584 (86% của 0.677 đạt với 100), trong khi baseline toàn ảnh với 25 nhãn là 0.105. Cùng bộ phân đoạn đã thích ứng, tìm kiếm dày, chuyển giao sang Ideogram — bộ sinh không có trong cả train lẫn thích ứng — đạt 0.284 IoU so với 0.114 của detector toàn ảnh, với oracle window 0.510. Khoảng cách 0.284 -> 0.510 cho thấy detector *tìm* được trường dưới dịch chuyển bộ sinh nhưng độ tin cậy của nó bị lệch chuẩn giữa các bộ sinh, đây là mục tiêu rõ ràng nhất cho công việc tương lai.
 
+### 6.9 So sánh với detector forensics công bố
+
+Để đặt TL-HRS trong tương quan tài liệu, chúng tôi chạy **TruFor** (CVPR 2023) — detector định vị giả mạo dựa trên transformer + dấu vân tay nhiễu, train trên các thao tác ảnh — trên đúng 150 ảnh GPT-Image-2 giả mạo dùng ở Mục 6.8, với weights và script suy luận chính thức. Attention toàn độ phân giải của TruFor không vừa RAM CPU với tài liệu 8–35 MP, nên chúng tôi giới hạn đầu vào 1024 px; mọi con số khác trong bài ở độ phân giải gốc. Thiết lập này cũng không ưu ái phương pháp của chúng tôi: bộ phân đoạn patch làm việc trên crop 384 px của cùng các ảnh đó.
+
+| Phương pháp (150 ảnh GPT-Image-2 giả mạo) | IoU (pooled) | IoU (trung bình) | F1 | Dice (trung bình) |
+|---|---|---|---|---|
+| TruFor, ngưỡng 0.5 | 0.024 | 0.174 | 0.047 | 0.231 |
+| TruFor, ngưỡng tốt nhất theo F1 (0.75) | 0.025 | — | 0.049 | — |
+| **TL-HRS (cùng 150 ảnh)** | **0.583** | **0.584** | — | — |
+
+Điểm mức ảnh của TruFor (trung bình 0.60) cho thấy nó có phản ứng với các tài liệu này, nhưng bản đồ định vị không khớp với trường chữ mảnh và dài: IoU pooled chỉ 0.024 và ngay cả ngưỡng tốt nhất cũng chỉ đạt F1 0.05, trong khi TL-HRS đạt 0.583 trên đúng những ảnh đó. Đây chính là kiểu thất bại mà benchmark được xây để phơi bày — detector forensics ảnh giả định bất nhất về kết cấu và nhiễu ở quy mô vật thể, còn một chữ số bị inpainting chỉ cao vài chục điểm ảnh trong một dòng chữ. Chúng tôi không chạy được DocTamper trong môi trường của mình (mmcv không có wheel Windows cho Python hiện tại), nên báo cáo TruFor làm tham chiếu công bố và để việc so sánh đa detector cho công việc tương lai.
+
 ---
 
 ## 7. Thảo luận
@@ -309,6 +321,7 @@ Vì vậy khoảng cách không phải giới hạn của mô hình xếp hạng
 - **Hiệu năng toàn ảnh khiêm tốn.** Detector toàn ảnh vẫn khiêm tốn sau thích ứng (0.195 ± 0.037); tầng TL-HRS đạt 0.545 ± 0.012, và khoảng cách còn lại tới trần 0.677 chia giữa xếp hạng cửa sổ (0.653) và giới hạn crop.
 - **Chi phí suy luận.** Tìm kiếm dày chạy ≈197 lượt cửa sổ mỗi tài liệu giả mạo (≈20 s trên một GPU tiêu dùng). Chấp nhận được cho giám định offline nhưng không cho streaming thông lượng cao; pruning dẫn hướng bởi coarse hiện mất 0.011 IoU hoặc hơn.
 - **Khoảng cách xếp hạng dưới dịch chuyển bộ sinh.** Trên Ideogram, oracle window của detector là 0.510 nhưng cửa sổ được chọn chỉ đạt 0.284, nên độ tin cậy bị lệch chuẩn giữa các bộ sinh.
+- **Chỉ một baseline công bố.** Chúng tôi chỉ so sánh với TruFor, trên subset 150 ảnh ở 1024 px (giới hạn RAM CPU); DocTamper không build được trong môi trường của nhóm, nên so sánh đa detector vẫn là việc tiếp theo.
 - **Phương sai.** Kết quả thay đổi theo seed; chúng tôi báo cáo trung bình ± độ lệch chuẩn qua ba seed cho mọi con số headline.
 
 ---

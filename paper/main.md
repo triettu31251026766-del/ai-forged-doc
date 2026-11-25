@@ -285,6 +285,18 @@ The gap is therefore not a ranking-model limitation: without ground truth, sever
 
 **6.8.3 Label efficiency and generalization.** Adapting the patch stage is cheap: with 25 target labels the GT-box ceiling is already 0.584 (86% of the 0.677 reached with 100), while the full-image baseline with 25 labels is 0.105. The same adapted segmenter, searched densely, transfers to Ideogram — a generator absent from both training and adaptation — at 0.284 IoU versus 0.114 for the full-image detector, with an oracle window of 0.510. The 0.284 -> 0.510 gap shows that the detector *finds* the field under generator shift but its confidence is miscalibrated across generators, which is the clearest target for future work.
 
+### 6.9 Comparison with a published forensic detector
+
+To place TL-HRS against the literature we ran **TruFor** (CVPR 2023), a transformer + noise-fingerprint localizer trained on photographic manipulations, on the same 150 forged GPT-Image-2 images used in Section 6.8, with its official weights and inference script. TruFor's full-resolution attention does not fit in CPU memory for 8–35 MP documents, so we cap its input at 1024 px; every other number in this paper is at native resolution. The setting does not favour our method either: the patch detector works with 384-px crops of the same images.
+
+| Method (150 forged GPT-Image-2) | IoU (pooled) | IoU (mean) | F1 | Dice (mean) |
+|---|---|---|---|---|
+| TruFor, threshold 0.5 | 0.024 | 0.174 | 0.047 | 0.231 |
+| TruFor, best-F1 threshold (0.75) | 0.025 | — | 0.049 | — |
+| **TL-HRS (same 150 images)** | **0.583** | **0.584** | — | — |
+
+TruFor's image-level score (mean 0.60) shows that it does fire on these documents, but its localization map does not align with thin, wide text fields: pooled IoU is 0.024 and even the best threshold gives F1 0.05, whereas TL-HRS reaches 0.583 on exactly the same images. This is the failure mode the benchmark was built to expose — photo-forensic localizers assume texture and noise inconsistencies at object scale, while an AI-inpainted digit is a few dozen pixels high inside a text line. We could not execute DocTamper in our environment (its mmcv build has no Windows wheel for current Python); we therefore report TruFor as the published reference and leave a full multi-detector comparison for future work.
+
 ---
 
 ## 7. Discussion
@@ -308,6 +320,7 @@ The gap is therefore not a ranking-model limitation: without ground truth, sever
 - **Modest full-image performance.** The full-image detector remains modest after adaptation (0.195 ± 0.037); the TL-HRS stage reaches 0.545 ± 0.012, and the remaining gap to its 0.677 adapted ceiling is split between window ranking (0.653) and the crop limit.
 - **Inference cost.** Dense search runs ≈197 window passes per forged document (≈20 s on one consumer GPU). This is acceptable for offline forensic review but not for high-throughput streaming; coarse-guided pruning currently costs 0.011 IoU or more.
 - **Generator-shift ranking gap.** On Ideogram the detector's oracle window is 0.510 but the selected window scores 0.284, so confidence is miscalibrated across generators.
+- **Single published baseline.** We compare against TruFor only, on a 150-image subset at 1024 px (CPU memory limit); DocTamper could not be built in our environment, so a multi-detector comparison remains future work.
 - **Variance.** Results vary across seeds; we report mean ± std over three seeds for all headline numbers.
 
 ---
