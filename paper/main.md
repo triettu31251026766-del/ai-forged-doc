@@ -297,6 +297,20 @@ To place TL-HRS against the literature we ran **TruFor** (CVPR 2023), a transfor
 
 TruFor's image-level score (mean 0.60) shows that it does fire on these documents, but its localization map does not align with thin, wide text fields: pooled IoU is 0.024 and even the best threshold gives F1 0.05, whereas TL-HRS reaches 0.583 on exactly the same images. This is the failure mode the benchmark was built to expose — photo-forensic localizers assume texture and noise inconsistencies at object scale, while an AI-inpainted digit is a few dozen pixels high inside a text line. We could not execute DocTamper in our environment (its mmcv build has no Windows wheel for current Python); we therefore report TruFor as the published reference and leave a full multi-detector comparison for future work.
 
+### 6.10 Accuracy–cost trade-off
+
+Dense search (stride 96) evaluates ≈218 windows per forged document. We test a cascade: a coarse patch scan at stride 192 proposes the top-3 windows, and each is refined on a 3×3 neighbourhood at stride 96. On the same 150-image subset this uses 66–77 windows (≈3× fewer) and does not lose accuracy — it improves slightly:
+
+| Strategy | Windows / image | IoU (mean) |
+|---|---|---|
+| Dense, stride 96 | 218 | 0.584 |
+| **Cascade, top-1** | **66** | **0.600** |
+| Cascade, top-2 | 72 | 0.607 |
+| Cascade, top-3 | 77 | 0.607 |
+| Oracle among visited | 77 | 0.674 |
+
+The coarse scan acts as a proposal generator and the local refinement removes the redundancy of the dense grid; at ≈66 windows the pipeline runs in ≈6 s per document on one consumer GPU instead of ≈20 s. All values are per-image mean IoU on the 150-image subset of Section 6.8.
+
 ---
 
 ## 7. Discussion

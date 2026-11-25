@@ -708,6 +708,20 @@ Score mức ảnh TruFor trung bình 0.60 → có phản ứng nhưng bản đ�
 → **TruFor thấp hơn TL-HRS ~24×**, đúng luận điểm benchmark. DocTamper không chạy được (mmcv không có wheel Windows).
 Script: `scripts/make_trufor_inputs.py`, `scripts/eval_trufor.py`; kết quả `results/trufor150_eval.json`.
 
+### B49 — Cascade accuracy–cost (150 ảnh) — 2026-11-25
+
+stride1=192 (top-3 đề xuất) → tinh chỉnh 3×3 stride 96.
+
+| Chiến lược | windows/img | IoU mean |
+|---|---|---|
+| dense stride 96 | 218 | 0.584 |
+| cascade top-1 | 66 | 0.6001 |
+| cascade top-2 | 72 | 0.6072 |
+| cascade top-3 | 77 | 0.6072 |
+| oracle (visited) | 77 | 0.6739 |
+
+→ **3.3× ít cửa sổ, IoU cao hơn** (~6 s/tài liệu thay vì ~20 s). Script `scripts/eval_cascade.py`.
+
 ## Cảnh báo cần kiểm tra
 
 - Model có thể "ăn gian" nhờ khác biệt **độ phân giải / kiểu nén** giữa authentic và forged → cần augmentation (JPEG, resize, blur) để kiểm chứng.

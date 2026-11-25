@@ -298,6 +298,20 @@ Vì vậy khoảng cách không phải giới hạn của mô hình xếp hạng
 
 Điểm mức ảnh của TruFor (trung bình 0.60) cho thấy nó có phản ứng với các tài liệu này, nhưng bản đồ định vị không khớp với trường chữ mảnh và dài: IoU pooled chỉ 0.024 và ngay cả ngưỡng tốt nhất cũng chỉ đạt F1 0.05, trong khi TL-HRS đạt 0.583 trên đúng những ảnh đó. Đây chính là kiểu thất bại mà benchmark được xây để phơi bày — detector forensics ảnh giả định bất nhất về kết cấu và nhiễu ở quy mô vật thể, còn một chữ số bị inpainting chỉ cao vài chục điểm ảnh trong một dòng chữ. Chúng tôi không chạy được DocTamper trong môi trường của mình (mmcv không có wheel Windows cho Python hiện tại), nên báo cáo TruFor làm tham chiếu công bố và để việc so sánh đa detector cho công việc tương lai.
 
+### 6.10 Đánh đổi độ chính xác – chi phí
+
+Tìm kiếm dày (stride 96) đánh giá ≈218 cửa sổ mỗi tài liệu. Chúng tôi thử cascade: quét patch thô ở stride 192 đề xuất top-3 cửa sổ, mỗi cửa sổ được tinh chỉnh trên lân cận 3×3 ở stride 96. Trên cùng subset 150 ảnh, cách này dùng 66–77 cửa sổ (≈3× ít hơn) mà không giảm độ chính xác — thậm chí tăng nhẹ:
+
+| Chiến lược | Cửa sổ / ảnh | IoU (trung bình) |
+|---|---|---|
+| Dày, stride 96 | 218 | 0.584 |
+| **Cascade, top-1** | **66** | **0.600** |
+| Cascade, top-2 | 72 | 0.607 |
+| Cascade, top-3 | 77 | 0.607 |
+| Oracle trong số đã thăm | 77 | 0.674 |
+
+Quét thô đóng vai trò sinh đề xuất, còn tinh chỉnh cục bộ loại bỏ phần dư thừa của lưới dày; với ≈66 cửa sổ, pipeline chạy ≈6 s/tài liệu trên một GPU tiêu dùng thay vì ≈20 s. Các số là IoU trung bình theo ảnh trên subset 150 ảnh ở Mục 6.8.
+
 ---
 
 ## 7. Thảo luận

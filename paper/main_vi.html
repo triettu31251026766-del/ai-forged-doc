@@ -627,6 +627,45 @@ p, li { orphans: 2; widows: 2; }
 </tbody>
 </table>
 <p>Điểm mức ảnh của TruFor (trung bình 0.60) cho thấy nó có phản ứng với các tài liệu này, nhưng bản đồ định vị không khớp với trường chữ mảnh và dài: IoU pooled chỉ 0.024 và ngay cả ngưỡng tốt nhất cũng chỉ đạt F1 0.05, trong khi TL-HRS đạt 0.583 trên đúng những ảnh đó. Đây chính là kiểu thất bại mà benchmark được xây để phơi bày — detector forensics ảnh giả định bất nhất về kết cấu và nhiễu ở quy mô vật thể, còn một chữ số bị inpainting chỉ cao vài chục điểm ảnh trong một dòng chữ. Chúng tôi không chạy được DocTamper trong môi trường của mình (mmcv không có wheel Windows cho Python hiện tại), nên báo cáo TruFor làm tham chiếu công bố và để việc so sánh đa detector cho công việc tương lai.</p>
+<h3 id="610-anh-oi-o-chinh-xac-chi-phi">6.10 Đánh đổi độ chính xác – chi phí</h3>
+<p>Tìm kiếm dày (stride 96) đánh giá ≈218 cửa sổ mỗi tài liệu. Chúng tôi thử cascade: quét patch thô ở stride 192 đề xuất top-3 cửa sổ, mỗi cửa sổ được tinh chỉnh trên lân cận 3×3 ở stride 96. Trên cùng subset 150 ảnh, cách này dùng 66–77 cửa sổ (≈3× ít hơn) mà không giảm độ chính xác — thậm chí tăng nhẹ:</p>
+<table>
+<thead>
+<tr>
+<th>Chiến lược</th>
+<th>Cửa sổ / ảnh</th>
+<th>IoU (trung bình)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dày, stride 96</td>
+<td>218</td>
+<td>0.584</td>
+</tr>
+<tr>
+<td><strong>Cascade, top-1</strong></td>
+<td><strong>66</strong></td>
+<td><strong>0.600</strong></td>
+</tr>
+<tr>
+<td>Cascade, top-2</td>
+<td>72</td>
+<td>0.607</td>
+</tr>
+<tr>
+<td>Cascade, top-3</td>
+<td>77</td>
+<td>0.607</td>
+</tr>
+<tr>
+<td>Oracle trong số đã thăm</td>
+<td>77</td>
+<td>0.674</td>
+</tr>
+</tbody>
+</table>
+<p>Quét thô đóng vai trò sinh đề xuất, còn tinh chỉnh cục bộ loại bỏ phần dư thừa của lưới dày; với ≈66 cửa sổ, pipeline chạy ≈6 s/tài liệu trên một GPU tiêu dùng thay vì ≈20 s. Các số là IoU trung bình theo ảnh trên subset 150 ảnh ở Mục 6.8.</p>
 <hr />
 <h2 id="7-thao-luan">7. Thảo luận</h2>
 <p><strong>Vì sao thích ứng giúp?</strong> Fine-tune trên vài mẫu đích dường như làm sắc nét phản hồi không gian quanh vùng bị sửa, thay vì chỉ dịch một ngưỡng toàn cục. Điều này phù hợp với pixel AUC cao trước thích ứng và với việc các phương pháp hiệu chỉnh ngưỡng thất bại.</p>
