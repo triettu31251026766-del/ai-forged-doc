@@ -36,7 +36,7 @@ Mục tiêu: mô hình không học vẹt dấu vết của một bộ sinh/mộ
 1. **Baseline**: U-Net ResNet-18 segmentation ở 384px (letterbox), train trên Gemini.
 2. **Few-shot adaptation**: fine-tune với k = 5/25/100 nhãn từ bộ sinh mới → IoU 0.195 ± 0.037 (3 seed).
 3. **Rehearsal**: 100 mẫu bộ sinh cũ → khôi phục in-domain 0.672 ± 0.006, không quên.
-4. **TL-HRS** (đóng góp chính): adapt một **patch segmenter** native-resolution bằng đúng 100 nhãn (trần 0.459 → 0.677), rồi **quét dày cửa sổ 384px** (stride 96, chọn theo top-1% confidence) thay cho đỉnh coarse → **0.545 ± 0.012** trên bộ sinh chưa thấy (2.8× baseline, 82% trần).
+4. **TL-HRS** (đóng góp chính): adapt một **patch segmenter** native-resolution bằng đúng 100 nhãn (trần 0.459 → 0.677), rồi **quét dày cửa sổ 384px** (stride 96, chọn theo top-1% confidence) thay cho đỉnh coarse → **0.537 ± 0.016** trên bộ sinh chưa thấy (2.8× baseline, 79% trần).
 5. **Đánh giá**: cross-generator (GPT-Image-2, Ideogram), label-efficiency, ablation định vị; giải thích bằng score maps.
 
 ## Kết quả chính (full forged test, metric full-image)
@@ -46,7 +46,7 @@ Mục tiêu: mô hình không học vẹt dấu vết của một bộ sinh/mộ
 | Full-image few-shot k=100 (3 seed) | 0.195 ± 0.037 |
 | Patch adapted, GT box (trần) | 0.677 ± 0.009 |
 | Đỉnh coarse + patch | 0.321 |
-| **TL-HRS (quét dày, 3 seed)** | **0.545 ± 0.012** |
+| **TL-HRS (quét dày, 3 seed)** | **0.537 ± 0.016** |
 | Ideogram (bộ sinh chưa thấy) | 0.284 (vs 0.114 full-image; oracle 0.510) |
 | Label efficiency: trần tại k=25 | 0.584 (86% của k=100) |
 

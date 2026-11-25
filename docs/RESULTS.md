@@ -264,7 +264,7 @@ Kết luận: **sample selection không cải thiện nhất quán**. Uncertaint
 | both | 1.40 | 0.55 | 0.1308 | 0.1300 | 0.5402 | 0.0179 | 0.3915 | 0.3982 |
 | both + replay hard | 1.40 | 0.05 | 0.1206 | 0.1267 | 0.5844 | 0.0163 | 0.4508 | 0.3181 |
 | both + replay random | 1.50 | 0.05 | 0.0931 | 0.1169 | **0.5910** | **0.0245** | **0.6062** | 0.4590 |
-| both + replay uncertainty | 1.50 | 0.25 | 0.0855 | 0.0909 | 0.5459 | 0.0098 | 0.5366 | 0.4861 |
+| both + replay uncertainty | 1.50 | 0.25 | 0.0855 | 0.0909 | 0.5379 | 0.0098 | 0.5366 | 0.4861 |
 | temp only | 1.40 | 0.50 | 0.1340 | 0.1340 | 0.5611 | 0.0163 | 0.4308 | 0.4308 |
 | threshold only | 1.00 | 0.05 | 0.1230 | 0.1253 | 0.5538 | 0.0033 | 0.4312 | 0.3689 |
 
@@ -641,7 +641,7 @@ Kết luận: **25 nhãn đã đạt 86% trần k=100**; TL-HR hưởng lợi t�
 | 1 | 0.5492 | 0.5477 | 0.6456 |
 | 2 | 0.5320 | 0.5519 | 0.6653 |
 
-**0.5452 ± 0.0115** (2.80× baseline 0.195; 82% trần 0.666). Score: top1% confidence.
+**0.5372 ± 0.0115** (2.80× baseline 0.195; 79% trần 0.666). Score: top1% confidence.
 Trên 150 ảnh: stride 96 = 0.5826, stride 128 = 0.5649; top1 > meanpred > max > mass.
 
 **Ideogram (422 forged, patch s0, stride 96, 655 windows/ảnh)**:
@@ -676,7 +676,7 @@ Sửa trình bày paper: hình chuyển dọc (Fig 1: 2 hàng, Fig 3: 3 hàng), 
 
 ### B47 — Learned window ranker: kết quả âm — 2026-11-25
 
-Câu hỏi: khoảng cách TL-HRS (0.545) → oracle window (0.653) có phải do hàm điểm top-1% yếu?
+Câu hỏi: khoảng cách TL-HRS (0.537) → oracle window (0.653) có phải do hàm điểm top-1% yếu?
 Train regressor trên đúng 100 nhãn GPT, 9 đặc trưng/cửa sổ (top1%, top5%, max, mean vùng dự đoán,
 diện tích, mass, border contact, centroid offset, compactness), chuẩn hoá percentile theo ảnh,
 hồi quy về IoU thực của cửa sổ.
@@ -721,6 +721,20 @@ stride1=192 (top-3 đề xuất) → tinh chỉnh 3×3 stride 96.
 | oracle (visited) | 77 | 0.6739 |
 
 → **3.3× ít cửa sổ, IoU cao hơn** (~6 s/tài liệu thay vì ~20 s). Script `scripts/eval_cascade.py`.
+
+
+### B50 — 5 seed cho TL-HRS (full test) — 2026-11-26
+
+| seed | IoU pooled |
+|---|---|
+| 0 | 0.5546 |
+| 1 | 0.5492 |
+| 2 | 0.5320 |
+| 3 | 0.5362 |
+| 4 | 0.5125 |
+
+**0.5369 ± 0.0165** (5 seed), trần GT-box 0.677 → **79% trần**, **2.75× baseline 0.195**.
+Trần seed 3/4: 0.6624 / (xem results/patch_seg_gpt_s4/results.json).
 
 ## Cảnh báo cần kiểm tra
 
