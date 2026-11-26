@@ -176,7 +176,7 @@ Fine-tune tốt hơn train from scratch ≈1.9× trên bộ sinh đích, và gi�
 
 | Phương pháp (k=100) | GPT IoU | Gemini IoU | Ideogram IoU |
 |---|---|---|---|
-| Fine-tune chuẩn (3 seed) | 0.195 ± 0.030 | 0.494 ± 0.044 | 0.096 ± 0.014 |
+| Fine-tune chuẩn (3 seed) | 0.195 ± 0.037 | 0.494 ± 0.044 | 0.096 ± 0.014 |
 | **Replay 100 (4 seed)** | **0.162 ± 0.021** | **0.672 ± 0.006** | 0.108 ± 0.015 |
 
 Replay khôi phục Gemini về **0.672 ± 0.006**, gần mức zero-shot (0.669), với chi phí nhỏ trên bộ sinh đích (0.195 -> 0.162). Đây là phát hiện thực tiễn trung tâm: một buffer rehearsal nhỏ đủ để ngăn quên thảm khốc dưới dịch chuyển bộ sinh.
@@ -258,7 +258,7 @@ Detector toàn ảnh dự đoán ở 384px letterbox, làm mờ trường bị s
 | Đỉnh coarse + patch đã thích ứng | 0.321 | sai số đỉnh trung vị 152 px |
 | + tái định tâm centroid | 0.358 | truncation làm lệch centroid |
 | + lưới cục bộ 3×3 quanh đỉnh | 0.400 | có giúp, nhưng đỉnh quá xa |
-| **TL-HRS, tìm kiếm dày (stride 96)** | **0.537 ± 0.016** | 5 seed (0.555 / 0.549 / 0.532 / 0.536 / 0.513) |
+| **TL-HRS, tìm kiếm dày (stride 96)** | **0.537 ± 0.016** | 5 seed (5 seeds; per-seed values in Sec. 6.8) |
 | — oracle window (cận trên của tìm kiếm) | 0.653 | chọn cửa sổ mất 0.11 |
 | Ideogram (bộ sinh chưa thấy), TL-HRS | 0.284 | oracle window 0.510 |
 | Ideogram, detector toàn ảnh | 0.114 | cùng split (422 giả mạo) |
@@ -267,7 +267,7 @@ Detector toàn ảnh dự đoán ở 384px letterbox, làm mờ trường bị s
 
 ![Hình 3](figures/fig_tlhrs.png)
 
-Bootstrap 5.000 lần trên IoU từng ảnh cho khoảng tin cậy 95% là 0.545-0.597 cho trung bình TL-HRS trên toàn tập test. Hình 3 tóm tắt bức tranh theo tầng và cross-generator. Ba phát hiện như sau. **(1) Thích ứng patch chuyển giao được, và trần là thật.** Với oracle box, cùng kiến trúc đi từ 0.459 (zero-shot) lên 0.677 ± 0.009 khi fine-tune với cùng 100 nhãn đích; Gemini in-domain chỉ giảm từ 0.557 xuống 0.532, cái giá mà replay giảm thiểu. **(2) Nút thắt là nhìn vào đâu, không phải dự đoán cái gì.** Một đỉnh coarse đơn chỉ thu được 0.321, nhưng tìm kiếm dày trên cùng bộ phân đoạn đạt 0.537 — 2.8× baseline toàn ảnh và 79% trần đã thích ứng. Khoảng cách giữa TL-HRS và oracle window của nó (0.653) hoàn toàn do xếp hạng đúng cửa sổ trước tiên. **(3) "Thông minh" trong tìm kiếm không đáng.** Pruning dẫn hướng bởi coarse kém hơn tìm kiếm vét cạn (top-40 cửa sổ: 0.544; top-10: 0.474; top-5: 0.431), và do đó bản đồ coarse không phải prior hữu ích ở độ phân giải này. Zoom, tiling và centroid coarse đều dưới baseline đỉnh-đơn-cộng-lưới, nên cửa sổ trượt đơn giản chiếm ưu thế.
+Con số 0.537 là pooled IoU; trung bình theo ảnh là 0.571, với khoảng tin cậy bootstrap 95% là 0.545-0.597 (5.000 lần). Hình 3 tóm tắt bức tranh theo tầng và cross-generator. Ba phát hiện như sau. **(1) Thích ứng patch chuyển giao được, và trần là thật.** Với oracle box, cùng kiến trúc đi từ 0.459 (zero-shot) lên 0.677 ± 0.009 khi fine-tune với cùng 100 nhãn đích; Gemini in-domain chỉ giảm từ 0.557 xuống 0.532, cái giá mà replay giảm thiểu. **(2) Nút thắt là nhìn vào đâu, không phải dự đoán cái gì.** Một đỉnh coarse đơn chỉ thu được 0.321, nhưng tìm kiếm dày trên cùng bộ phân đoạn đạt 0.537 — 2.8× baseline toàn ảnh và 79% trần đã thích ứng. Khoảng cách giữa TL-HRS và oracle window của nó (0.653) hoàn toàn do xếp hạng đúng cửa sổ trước tiên. **(3) "Thông minh" trong tìm kiếm không đáng.** Pruning dẫn hướng bởi coarse kém hơn tìm kiếm vét cạn (top-40 cửa sổ: 0.544; top-10: 0.474; top-5: 0.431), và do đó bản đồ coarse không phải prior hữu ích ở độ phân giải này. Zoom, tiling và centroid coarse đều dưới baseline đỉnh-đơn-cộng-lưới, nên cửa sổ trượt đơn giản chiếm ưu thế.
 
 **6.8.1 Nghiên cứu bộ chọn trước thích ứng (kết quả âm).** Trước khi thích ứng bộ phân đoạn patch, chúng tôi cố thu hẹp khoảng cách bằng cách cải thiện *chọn lựa* với patch zero-shot. Trên toàn bộ tập test giả mạo, một bộ phân loại trường ResNet-18 đạt 0.193, heatmap coarse 0.157, và phản hồi patch gốc 0.158; rank fusion của cả ba đạt 0.199 — không cái nào vượt baseline 0.195 ± 0.037. Trên subset 60 ảnh (27 giả mạo; over-represent CORD và under-represent WildReceipt) chúng tôi còn thử tinh chỉnh centroid, MAD z-score theo ảnh (đơn điệu, do đó vô nghĩa), line-merge, thích ứng selector, và một bộ chọn DINOv2 field-vs-document-context đã train (0.195); tất cả thất bại. Các kết quả này thúc đẩy hướng thích ứng patch, và tìm kiếm dày sau đó bao trùm việc chọn lựa: độ tin cậy của chính patch đã thích ứng, được đánh giá dày đặc, là bộ xếp hạng mạnh hơn mọi selector học được này.
 

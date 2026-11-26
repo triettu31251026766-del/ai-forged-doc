@@ -176,7 +176,7 @@ Fine-tuning is ≈1.9× better than training from scratch on the target generato
 
 | Method (k=100) | GPT IoU | Gemini IoU | Ideogram IoU |
 |---|---|---|---|
-| Standard fine-tune (3 seeds) | 0.195 ± 0.030 | 0.494 ± 0.044 | 0.096 ± 0.014 |
+| Standard fine-tune (3 seeds) | 0.195 ± 0.037 | 0.494 ± 0.044 | 0.096 ± 0.014 |
 | **Replay 100 (4 seeds)** | **0.162 ± 0.021** | **0.672 ± 0.006** | 0.108 ± 0.015 |
 
 Replay restores Gemini to **0.672 ± 0.006**, essentially the zero-shot level (0.669), at a modest target-generator cost (0.195 -> 0.162). This is the central practical finding: a small rehearsal buffer is sufficient to prevent catastrophic forgetting under generator shift.
@@ -258,7 +258,7 @@ The full-image detector predicts at a letterboxed 384px resolution, which blurs 
 | Coarse peak + adapted patch | 0.321 | median peak error 152 px |
 | + centroid re-centring | 0.358 | truncation biases the centroid |
 | + 3×3 local grid around the peak | 0.400 | helps, but the peak is too far |
-| **TL-HRS, dense search (stride 96)** | **0.537 ± 0.016** | 5 seeds (0.555 / 0.549 / 0.532 / 0.536 / 0.513) |
+| **TL-HRS, dense search (stride 96)** | **0.537 ± 0.016** | 5 seeds (5 seeds; per-seed values in Sec. 6.8) |
 | — oracle window (upper bound of search) | 0.653 | selection loses 0.11 |
 | Ideogram (unseen generator), TL-HRS | 0.284 | oracle window 0.510 |
 | Ideogram, full-image detector | 0.114 | same split (422 forged) |
@@ -267,7 +267,7 @@ The full-image detector predicts at a letterboxed 384px resolution, which blurs 
 
 ![Figure 3](figures/fig_tlhrs.png)
 
-A bootstrap over 5,000 resamples of the per-image IoU gives a 95\% confidence interval of 0.545-0.597 for the TL-HRS mean on the full test set. Figure 3 summarizes the stage-wise and cross-generator picture. Three findings follow. **(1) Patch adaptation transfers, and the ceiling is real.** With the oracle box, the same architecture moves from 0.459 (zero-shot) to 0.677 ± 0.009 when fine-tuned with the same 100 target labels; in-domain Gemini drops only from 0.557 to 0.532, a cost that replay mitigates. **(2) The bottleneck is where to look, not what to predict.** A single coarse peak recovers only 0.321, but dense search over the same segmenter reaches 0.537 — 2.8× the full-image baseline and 79% of the adapted ceiling. The gap between TL-HRS and its oracle window (0.653) is entirely due to ranking the right window first. **(3) Intelligence in the search does not pay.** Coarse-guided pruning is worse than exhaustive search (top-40 windows: 0.544; top-10: 0.474; top-5: 0.431), and the coarse map is therefore not a useful prior at this resolution. Zoom, tiling and coarse centroiding are all below the single-peak-plus-grid baseline, so the simple sliding window dominates.
+The headline 0.537 is the pooled IoU; the per-image mean is 0.571, with a 95\% bootstrap interval of 0.545-0.597 over 5,000 resamples. Figure 3 summarizes the stage-wise and cross-generator picture. Three findings follow. **(1) Patch adaptation transfers, and the ceiling is real.** With the oracle box, the same architecture moves from 0.459 (zero-shot) to 0.677 ± 0.009 when fine-tuned with the same 100 target labels; in-domain Gemini drops only from 0.557 to 0.532, a cost that replay mitigates. **(2) The bottleneck is where to look, not what to predict.** A single coarse peak recovers only 0.321, but dense search over the same segmenter reaches 0.537 — 2.8× the full-image baseline and 79% of the adapted ceiling. The gap between TL-HRS and its oracle window (0.653) is entirely due to ranking the right window first. **(3) Intelligence in the search does not pay.** Coarse-guided pruning is worse than exhaustive search (top-40 windows: 0.544; top-10: 0.474; top-5: 0.431), and the coarse map is therefore not a useful prior at this resolution. Zoom, tiling and coarse centroiding are all below the single-peak-plus-grid baseline, so the simple sliding window dominates.
 
 **6.8.1 Pre-adaptation selector study (negative results).** Before adapting the patch segmenter we tried to close the gap by improving *selection* with the zero-shot patch. On the full forged test, a ResNet-18 field classifier reaches 0.193, the coarse heatmap 0.157, and the native patch response 0.158; rank fusion of all three reaches 0.199 — none exceeds the 0.195 ± 0.037 baseline. On a 60-image subset (27 forged; it over-represents CORD and under-represents WildReceipt) we additionally tried centroid refinement, per-image MAD z-scores (monotonic, hence vacuous), line-merge, selector adaptation, and a trained DINOv2 field-vs-document-context selector (0.195); all failed. These results motivated the patch-adaptation route, and the dense search then subsumes selection: the adapted patch's own confidence, evaluated densely, is a stronger ranker than any of these learned selectors.
 
