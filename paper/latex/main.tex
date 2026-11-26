@@ -206,19 +206,19 @@ A detector trained on Gemini achieves strong in-domain localization but collapse
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}llll@{}}
 \toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
+
 k
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+ & 
 IoU
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+ & 
 F1
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+ & 
 Dice
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+ & 
 Pixel AUC
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+ & 
 Gemini IoU (forgetting)
-\end{minipage} \\
+ \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
@@ -266,17 +266,17 @@ Adaptation improves localization monotonically, reaching a \textbf{3.7×} IoU ga
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}llll@{}}
 \toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
+
 Setting (k=100)
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+ & 
 GPT IoU
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+ & 
 GPT F1
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+ & 
 Pixel AUC
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+ & 
 Gemini IoU
-\end{minipage} \\
+ \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
@@ -293,15 +293,15 @@ Fine-tuning is ≈1.9× better than training from scratch on the target generato
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}llll@{}}
 \toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
+
 Method (k=100)
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+ & 
 GPT IoU
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+ & 
 Gemini IoU
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+ & 
 Ideogram IoU
-\end{minipage} \\
+ \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
@@ -320,15 +320,15 @@ Random replay performed best among the selectors; hard and uncertainty-based rep
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}llll@{}}
 \toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
+
 Strategy
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+ & 
 Target (GPT) IoU
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+ & 
 Old (Gemini) IoU
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+ & 
 Conclusion
-\end{minipage} \\
+ \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
@@ -414,13 +414,13 @@ The full-image detector predicts at a letterboxed 384px resolution, which blurs 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}llll@{}}
 \toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
+
 Setup (GPT-Image-2, full forged test, 613 images)
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+ & 
 IoU
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+ & 
 Notes
-\end{minipage} \\
+ \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
@@ -482,17 +482,17 @@ To place TL-HRS against the literature we ran \textbf{TruFor} (CVPR 2023), a tra
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}llll@{}}
 \toprule\noalign{}
-\begin{minipage}[b]{\linewidth}\raggedright
+
 Method (150 forged GPT-Image-2)
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+ & 
 IoU (pooled)
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+ & 
 IoU (mean)
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+ & 
 F1
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+ & 
 Dice (mean)
-\end{minipage} \\
+ \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
