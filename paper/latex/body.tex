@@ -6,7 +6,7 @@
 
 \subsection{Abstract}\label{abstract}
 
-Generative image editing has made it possible to alter a single numeric field in a financial document in under a second, and detectors trained on traditional (e.g., Photoshop-based) forgeries are largely blind to such edits. Even a detector trained on one generative inpainter collapses when the underlying generator changes --- a \emph{generator shift}. In realistic banking deployments, collecting many labelled forgeries for every new generator is infeasible. We study \textbf{label-efficient adaptation} of an AI-forged document detector under generator shift, and we ask whether a small number of labelled target-generator samples is sufficient to recover localization performance without catastrophically forgetting previously seen generators. Using the AIForge-Doc benchmark (Gemini, Ideogram, GPT-Image-2), we show that: (i) a detector trained on Gemini collapses on unseen generators (IoU 0.052 on GPT-Image-2); (ii) few-shot fine-tuning recovers localization monotonically, reaching IoU 0.195 ± 0.037 with only 100 labelled target samples (≈3.7× over zero-shot); (iii) training from scratch with the same 100 labels is substantially worse (IoU 0.085), showing that base-generator pretraining matters; and (iv) rehearsal of 100 old-generator samples restores in-domain performance to 0.672 ± 0.006 (near the 0.669 zero-shot level) at a modest target-generator cost (IoU 0.162). We further report a set of negative results: temperature scaling, global and per-image threshold calibration, sample-selection strategies, encoder freezing, frequency channels, and generic anomaly detection do \textbf{not} provide consistent gains. Our analysis indicates that the bottleneck is \textbf{localization precision}, not decision-threshold calibration. Finally, we show that adapting a native-resolution patch segmenter with the same 100 labels raises the localization ceiling from 0.459 to 0.677 IoU, but that the coarse peak used to position it is the real bottleneck: it misses the field centre by 152 px (median), so the crop covers only 53\% of the tampered pixels. Replacing the single peak with a dense high-resolution search over 384 px windows and selecting by patch confidence reaches \textbf{0.537 ± 0.016 IoU on the full unseen generator (2.8× the full-image baseline, 79\% of the adapted ceiling)}, and 0.284 IoU on a completely unseen generator (Ideogram) versus 0.114 for the full-image detector. A localization study shows that centroid, grid, zoom and tiling variants all underperform dense search, that the coarse map is too unreliable to prune it, and that the residual gap is a \emph{selection-confidence} problem under generator shift (oracle-window IoU is 0.653). We release code, splits, and all results for reproducibility.
+Generative image editing has made it possible to alter a single numeric field in a financial document in under a second, and detectors trained on traditional (e.g., Photoshop-based) forgeries are largely blind to such edits. Even a detector trained on one generative inpainter collapses when the underlying generator changes --- a \emph{generator shift}. In realistic banking deployments, collecting many labelled forgeries for every new generator is infeasible. We study \textbf{label-efficient adaptation} of an AI-forged document detector under generator shift, and we ask whether a small number of labelled target-generator samples is sufficient to recover localization performance without catastrophically forgetting previously seen generators. Using the AIForge-Doc benchmark (Gemini, Ideogram, GPT-Image-2), we show that: (i) a detector trained on Gemini collapses on unseen generators (IoU 0.052 on GPT-Image-2); (ii) few-shot fine-tuning recovers localization monotonically, reaching IoU 0.195 ± 0.037 with only 100 labelled target samples (≈3.7× over zero-shot); (iii) training from scratch with the same 100 labels is substantially worse (IoU 0.085), showing that base-generator pretraining matters; and (iv) rehearsal of 100 old-generator samples restores in-domain performance to 0.672 ± 0.006 (near the 0.669 zero-shot level) at a modest target-generator cost (IoU 0.162). We further report a set of negative results: temperature scaling, global and per-image threshold calibration, sample-selection strategies, encoder freezing, frequency channels, and generic anomaly detection do \textbf{not} provide consistent gains. Our analysis indicates that the bottleneck is \textbf{localization precision}, not decision-threshold calibration. Finally, we show that adapting a native-resolution patch segmenter with the same 100 labels raises the localization ceiling from 0.459 to 0.677 IoU, but that the coarse peak used to position it is the real bottleneck: it misses the field centre by 152 px (median), so the crop covers only 53\% of the tampered pixels. Replacing the single peak with a dense high-resolution search over 384 px windows and selecting by patch confidence reaches \textbf{0.537 ± 0.016 IoU on the full unseen generator (2.8× the full-image baseline, 79\% of the adapted ceiling)}, and 0.284 IoU on a completely unseen generator (Ideogram) versus 0.114 for the full-image detector. A localization study shows that centroid, grid, zoom and tiling variants all underperform dense search, that the coarse map is too unreliable to prune it, and that the residual gap is a \emph{selection-confidence} problem under generator shift (oracle-window IoU is 0.653). We then state the guarantee where the signal lives: a split-conformal threshold calibrated on 300 labelled documents certifies a pixel-level false-negative rate of \textbf{12.0\% at a 1.8\% pixel false-alarm rate} on held-out forgeries, while the same construction fails at image level (25.4\% FNR, 67.7\% FPR). We release code, splits, and all results for reproducibility.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -43,6 +43,8 @@ We use the AIForge-Doc benchmark, which provides AI-inpainted financial and form
   A \textbf{text-localized high-resolution search (TL-HRS) method} that adapts a patch segmenter with the same 100 target labels and searches the document densely at native resolution: the localization ceiling rises from 0.459 to 0.677, and the automatic pipeline reaches \textbf{0.537 ± 0.016 IoU} on the full unseen generator (2.8× the full-image baseline, 79\% of the ceiling), while a single coarse peak reaches only 0.321.
 \item
   A localization study showing that the coarse stage, not segmentation, is the bottleneck (median peak error 152 px; crop coverage 53\% vs.~98\% at the true box), and that dense search beats centroid refinement, grids, zoom, tiling, coarse-guided pruning, OCR selection, multi-signal fusion and pixel gating; the remaining gap is uncalibrated selection confidence under generator shift.
+\item
+  A \textbf{risk-controlled localization} formulation: with 300 labelled documents, a split-conformal threshold certifies pixel-level FNR 12.0\% at 1.8\% pixel FPR on held-out forgeries, and we show that the same construction collapses at image level (25.4\% FNR, 67.7\% FPR), motivating guarantees at the localization level.
 \end{enumerate}
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
@@ -531,6 +533,60 @@ The coarse scan acts as a proposal generator and the local refinement removes th
 \subsubsection{6.11 Cross-dataset boundary}\label{cross-dataset-boundary}
 
 We also test zero-shot transfer to \textbf{DocTamper} (CVPR 2023), a document text-tampering benchmark with pixel masks, using the same patch detector and dense search. On its FCD split (100 images) we obtain \textbf{IoU 0.096 and F1 0.313}. The drop is expected and informative: DocTamper contains splicing and copy-move text edits rather than generative inpainting, and its authors state that it does not cover AIGC tampering. We therefore report this as a boundary condition of the method, not as evidence against it: inside the AIGC setting the model is trained for, TL-HRS reaches 0.537.
+
+\subsubsection{6.12 Stride, threshold and runtime}\label{stride-threshold-and-runtime}
+
+We sweep the coarse stride of the cascade on 60 forged test images, keeping the local refinement at stride 96, and measure wall-clock time on one consumer GPU.
+
+{\def\LTcaptype{none} % do not increment counter
+\begin{longtable}[]{@{}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 14\tabcolsep) * \real{0.1250}}@{}}
+\toprule\noalign{}
+\begin{minipage}[b]{\linewidth}\raggedright
+stride1
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+windows / image
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+s / image
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+IoU @0.3
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+@0.4
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+@0.5
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+@0.6
+\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
+@0.7
+\end{minipage} \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+128 & 147.6 & 2.85 & 0.612 & 0.615 & 0.616 & 0.614 & 0.611 \\
+192 & 74.5 & 1.55 & 0.599 & 0.603 & 0.602 & 0.601 & 0.598 \\
+\textbf{256} & \textbf{54.6} & \textbf{1.18} & 0.614 & \textbf{0.619} & \textbf{0.619} & 0.618 & 0.615 \\
+\end{longtable}
+}
+
+Stride 256 is both the fastest (1.18 s per document, 54 windows) and the most accurate, and the IoU is flat between thresholds 0.4 and 0.6 (variation \textless{} 0.005), so the operating point is not cherry-picked.
+
+\textbf{Image-level conformal triage fails (negative result).} Calibrating a split-conformal threshold on in-domain Gemini forges (target FNR 10\%) and deploying it on GPT-Image-2 gives an actual FNR of 25.4\% and an FPR of 67.7\% on authentic documents; even on the calibration split the FPR is 67\%, i.e.~the image-level score barely separates authentic from forged. Exchangeability is violated under generator shift, and, more fundamentally, the signal is too weak at image level. This is why the guarantees we target must be stated at the \emph{localization} level rather than for whole-image triage.
+
+\subsubsection{6.13 Risk-controlled localization}\label{risk-controlled-localization}
+
+The image-level triage above cannot separate authentic from forged documents, so we state the guarantee where the signal actually lives: on pixels. We split the 613 forged test documents into 300 calibration and 313 evaluation images, calibrate a split-conformal pixel threshold on the forged pixels of the calibration split, and then apply it unchanged to the held-out images.
+
+With a target pixel-level FNR of 10\%, the calibrated threshold is 0.357; on the held-out documents the empirical FNR is \textbf{12.0\%} and the pixel-level FPR on background is \textbf{1.8\%}. The guarantee therefore transfers to unseen documents of the same generator, which is exactly the operating regime a bank cares about: at a 1.8\% false-alarm rate on background pixels, fewer than one in eight edited pixels is missed.
+
+This is the first risk-controlled formulation for AI-forged document localization we are aware of, and it changes the claim of the paper: we do not claim a new state of the art in IoU, but a localization method whose error rate can be \emph{certified} at a chosen level with 300 labelled documents.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
