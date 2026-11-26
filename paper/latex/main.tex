@@ -6,6 +6,7 @@
 \usepackage{booktabs}
 \usepackage{longtable}
 \usepackage{array}
+\usepackage{calc}
 \usepackage{url}
 \usepackage[hidelinks]{hyperref}
 \journal{Applied Soft Computing}
@@ -203,13 +204,7 @@ A detector trained on Gemini achieves strong in-domain localization but collapse
 \section{6.2 Few-shot adaptation recovers localization}\label{few-shot-adaptation-recovers-localization}
 
 {\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 10\tabcolsep) * \real{0.1667}}@{}}
+\begin{longtable}[]{@{}llll@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 k
@@ -269,12 +264,7 @@ Adaptation improves localization monotonically, reaching a \textbf{3.7×} IoU ga
 \section{6.3 Pretraining matters: fine-tuning vs.~training from scratch}\label{pretraining-matters-fine-tuning-vs.-training-from-scratch}
 
 {\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}@{}}
+\begin{longtable}[]{@{}llll@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Setting (k=100)
@@ -301,11 +291,7 @@ Fine-tuning is ≈1.9× better than training from scratch on the target generato
 \section{6.4 Rehearsal eliminates forgetting}\label{rehearsal-eliminates-forgetting}
 
 {\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\begin{longtable}[]{@{}llll@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Method (k=100)
@@ -332,11 +318,7 @@ Random replay performed best among the selectors; hard and uncertainty-based rep
 \section{6.5 Negative results and ablations}\label{negative-results-and-ablations}
 
 {\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
+\begin{longtable}[]{@{}llll@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Strategy
@@ -430,10 +412,7 @@ The full-image detector predicts at a letterboxed 384px resolution, which blurs 
 \textbf{Inference.} We run the adapted patch segmenter densely (stride 96, ≈197 windows per forged document) and select the window maximising S(w) (Section 4.5). The rest of this section quantifies why the single coarse peak fails and how dense search compares with alternative positioning strategies.
 
 {\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 4\tabcolsep) * \real{0.3333}}@{}}
+\begin{longtable}[]{@{}llll@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Setup (GPT-Image-2, full forged test, 613 images)
@@ -501,12 +480,7 @@ The gap is therefore not a ranking-model limitation: without ground truth, sever
 To place TL-HRS against the literature we ran \textbf{TruFor} (CVPR 2023), a transformer + noise-fingerprint localizer trained on photographic manipulations, on the same 150 forged GPT-Image-2 images used in Section 6.8, with its official weights and inference script. TruFor's full-resolution attention does not fit in CPU memory for 8--35 MP documents, so we cap its input at 1024 px; every other number in this paper is at native resolution. The setting does not favour our method either: the patch detector works with 384-px crops of the same images.
 
 {\def\LTcaptype{none} % do not increment counter
-\begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}@{}}
+\begin{longtable}[]{@{}llll@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
 Method (150 forged GPT-Image-2)
