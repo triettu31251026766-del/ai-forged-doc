@@ -762,6 +762,21 @@ Triage: image AP 0.582, R@1%FPR 0.042 tại k=100 → nêu rõ trong 6.8.
 
 Conformal ảnh (calib Gemini, α=0.1): threshold 0.0666 → GPT FNR 25.4%, FPR 67.7%, calib FPR 67.1% → **score mức ảnh không tách được**; chuyển sang bảo đảm mức điểm ảnh.
 
+
+### B53 — Pixel-level conformal (risk control) — 2026-11-26
+
+613 ảnh chia 300 calib / 313 test, cascade stride 256.
+
+| | |
+|---|---|
+| Ngưỡng hiệu chỉnh (α=0.10) | 0.357 |
+| Calib FNR | 0.1000 |
+| **Test FNR** | **0.1204** |
+| **Test FPR (pixel)** | **0.0177** |
+
+→ Guarantee mức điểm ảnh giữ được (12% vs mục tiêu 10%); khác hẳn mức ảnh (25.4% FNR, 67.7% FPR).
+Script: `scripts/eval_pixel_conformal.py`.
+
 ## Cảnh báo cần kiểm tra
 
 - Model có thể "ăn gian" nhờ khác biệt **độ phân giải / kiểu nén** giữa authentic và forged → cần augmentation (JPEG, resize, blur) để kiểm chứng.

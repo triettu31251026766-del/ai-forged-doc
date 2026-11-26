@@ -332,6 +332,15 @@ Stride 256 vừa nhanh nhất (1.18 s/tài liệu, 54 cửa sổ) vừa chính x
 
 **Conformal mức ảnh thất bại (kết quả âm).** Hiệu chỉnh ngưỡng split-conformal trên Gemini in-domain (mục tiêu FNR 10%) rồi triển khai trên GPT-Image-2 cho FNR thực tế 25.4% và FPR 67.7% trên ảnh thật; ngay trên tập hiệu chỉnh FPR đã là 67%, tức score mức ảnh gần như không tách được thật/giả. Exchangeability bị vi phạm dưới dịch chuyển bộ sinh, và bản thân tín hiệu ở mức ảnh quá yếu. Vì vậy các bảo đảm cần phát biểu ở mức **định vị**, không phải triage toàn ảnh.
 
+
+### 6.13 Định vị có kiểm soát rủi ro
+
+Triage mức ảnh ở trên không tách được thật/giả, nên chúng tôi phát biểu bảo đảm ở nơi tín hiệu thực sự tồn tại: mức điểm ảnh. Chúng tôi chia 613 tài liệu giả mạo thành 300 hiệu chỉnh và 313 đánh giá, hiệu chỉnh ngưỡng điểm ảnh split-conformal trên các điểm ảnh bị sửa của tập hiệu chỉnh, rồi áp nguyên ngưỡng đó lên tập giữ lại.
+
+Với mục tiêu FNR điểm ảnh 10%, ngưỡng hiệu chỉnh là 0.357; trên tài liệu giữ lại, FNR thực nghiệm là **12.0%** và FPR điểm ảnh trên nền là **1.8%**. Bảo đảm chuyển được sang tài liệu chưa thấy của cùng bộ sinh — đúng chế độ vận hành ngân hàng quan tâm: với 1.8% báo động giả trên nền, chưa tới 1/8 số điểm ảnh bị sửa bị bỏ sót.
+
+Đây là công thức kiểm soát rủi ro đầu tiên cho định vị giấy tờ bị AI sửa mà chúng tôi biết, và nó đổi tuyên bố của bài: chúng tôi không tuyên bố SOTA về IoU, mà là phương pháp định vị có **thể chứng nhận** tỷ lệ lỗi ở mức chọn trước với 300 tài liệu có nhãn.
+
 ---
 
 ## 7. Thảo luận

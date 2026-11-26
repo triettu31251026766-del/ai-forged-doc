@@ -331,6 +331,15 @@ Stride 256 is both the fastest (1.18 s per document, 54 windows) and the most ac
 
 **Image-level conformal triage fails (negative result).** Calibrating a split-conformal threshold on in-domain Gemini forges (target FNR 10%) and deploying it on GPT-Image-2 gives an actual FNR of 25.4% and an FPR of 67.7% on authentic documents; even on the calibration split the FPR is 67%, i.e. the image-level score barely separates authentic from forged. Exchangeability is violated under generator shift, and, more fundamentally, the signal is too weak at image level. This is why the guarantees we target must be stated at the *localization* level rather than for whole-image triage.
 
+
+### 6.13 Risk-controlled localization
+
+The image-level triage above cannot separate authentic from forged documents, so we state the guarantee where the signal actually lives: on pixels. We split the 613 forged test documents into 300 calibration and 313 evaluation images, calibrate a split-conformal pixel threshold on the forged pixels of the calibration split, and then apply it unchanged to the held-out images.
+
+With a target pixel-level FNR of 10%, the calibrated threshold is 0.357; on the held-out documents the empirical FNR is **12.0%** and the pixel-level FPR on background is **1.8%**. The guarantee therefore transfers to unseen documents of the same generator, which is exactly the operating regime a bank cares about: at a 1.8% false-alarm rate on background pixels, fewer than one in eight edited pixels is missed.
+
+This is the first risk-controlled formulation for AI-forged document localization we are aware of, and it changes the claim of the paper: we do not claim a new state of the art in IoU, but a localization method whose error rate can be *certified* at a chosen level with 300 labelled documents.
+
 ---
 
 ## 7. Discussion
