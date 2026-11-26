@@ -7,14 +7,11 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def crc_threshold(losses, alpha):
-    n = len(losses)
-    cands = np.unique(np.concatenate([losses, [0.0, 1.0]]))
-    for lam in cands:
-        risk = (n / (n + 1)) * np.mean(losses <= lam) + 1 / (n + 1)
-        if risk <= alpha:
-            return float(lam), float(risk)
-    return float(cands[-1]), 1.0
+def crc_pick(risk_mean, n, alpha):
+    """CRC: largest lambda whose corrected risk is <= alpha (risk increases with lambda)."""
+    adj = (n / (n + 1)) * risk_mean + 1 / (n + 1)
+    ok = np.where(adj <= alpha)[0]
+    return int(ok[-1]) if len(ok) else int(np.argmin(adj))
 
 
 def main():
@@ -34,36 +31,29 @@ def main():
     MS, NP = z["mask_total"].astype(float), z["n_pixels"].astype(float)
 
     forged = np.where(labels == 1)[0]
+    cum_m = np.cumsum(HM[:, ::-1], axis=1)[:, ::-1]   # TP(lambda)
+    cum_b = np.cumsum(HB[:, ::-1], axis=1)[:, ::-1]   # FP(lambda)
+    L = (MS[:, None] - cum_m) / np.maximum(MS[:, None], 1)  # per-doc FNR over lambdas
+
     rng = np.random.default_rng(0)
     img_fnr, pix_fnr, pix_fpr = [], [], []
+
     for _ in range(args.n_splits):
         perm = rng.permutation(len(forged))
         cal, tst = forged[perm[: args.n_cal]], forged[perm[args.n_cal:]]
 
-        # ---- image level: loss = 1 if score < lambda (missed) ----
-        losses = scores[cal]
-        lam_img, _ = crc_threshold(losses, args.alpha)
-        img_fnr.append(float((scores[tst] < lam_img).mean()))
+        # image level: loss_i(lambda) = 1[score_i < lambda]
+        sc = scores[cal]
+        risk_img = (sc[None, :] < lambdas[:, None]).mean(axis=1)
+        j_img = crc_pick(risk_img, len(cal), args.alpha)
+        img_fnr.append(float((scores[tst] < lambdas[j_img]).mean()))
 
-        # ---- pixel (document) level: loss_i(lambda) = FN_i(lambda)/mask_i ----
-        cum_m = np.cumsum(HM[:, ::-1], axis=1)[:, ::-1]
-        tp_cal = cum_m[cal]
-        fn_cal = MS[cal][:, None] - tp_cal
-        L = fn_cal / MS[cal][:, None]
-        mean_risk = L.mean(axis=0)
-        n = len(cal)
-        adj = (n / (n + 1)) * mean_risk + 1 / (n + 1)
-        idx = np.where(adj <= args.alpha)[0]
-        j = int(idx[0]) if len(idx) else int(np.argmin(adj))
-        lam_pix = float(lambdas[j])
-
-        tp_t = cum_m[tst, j]
-        fn_t = MS[tst] - tp_t
-        pix_fnr.append(float(fn_t.sum() / MS[tst].sum()))
-        cum_b = np.cumsum(HB[:, ::-1], axis=1)[:, ::-1]
-        fp_t = cum_b[tst, j]
+        # document level: loss_i(lambda) = FN_i(lambda) / mask_i
+        j_pix = crc_pick(L[cal].mean(axis=0), len(cal), args.alpha)
+        fn_t = MS[tst] - cum_m[tst, j_pix]
+        pix_fnr.append(float(fn_t.sum() / np.maximum(MS[tst].sum(), 1)))
         bg = NP[tst] - MS[tst]
-        pix_fpr.append(float(fp_t.sum() / max(bg.sum(), 1)))
+        pix_fpr.append(float(cum_b[tst, j_pix].sum() / max(bg.sum(), 1)))
 
     res = {
         "alpha": args.alpha, "n_cal": args.n_cal, "n_splits": args.n_splits,
