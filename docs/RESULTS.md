@@ -736,6 +736,19 @@ stride1=192 (top-3 đề xuất) → tinh chỉnh 3×3 stride 96.
 **0.5369 ± 0.0165** (5 seed), trần GT-box 0.677 → **79% trần**, **2.75× baseline 0.195**.
 Trần seed 3/4: 0.6624 / (xem results/patch_seg_gpt_s4/results.json).
 
+
+### B51 — TruFor full 613 + DocTamper + triage — 2026-11-26
+
+| Phương pháp (613 ảnh) | IoU pooled | IoU mean | F1 |
+|---|---|---|---|
+| TruFor @0.5 | 0.0178 | 0.1779 | 0.0350 |
+| TruFor @0.95 (best) | 0.0216 | — | 0.0423 |
+| **TL-HRS (5 seed)** | **0.537** | 0.571 | — |
+
+DocTamper FCD (100 ảnh, zero-shot): IoU 0.096, F1 0.313 → mục 6.11 "boundary condition".
+Triage: image AP 0.582, R@1%FPR 0.042 tại k=100 → nêu rõ trong 6.8.
+`eval_slide.py` giờ lưu per-image + bootstrap CI.
+
 ## Cảnh báo cần kiểm tra
 
 - Model có thể "ăn gian" nhờ khác biệt **độ phân giải / kiểu nén** giữa authentic và forged → cần augmentation (JPEG, resize, blur) để kiểm chứng.

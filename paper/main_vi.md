@@ -312,6 +312,11 @@ Tìm kiếm dày (stride 96) đánh giá ≈218 cửa sổ mỗi tài liệu. Ch
 
 Quét thô đóng vai trò sinh đề xuất, còn tinh chỉnh cục bộ loại bỏ phần dư thừa của lưới dày; với ≈66 cửa sổ, pipeline chạy ≈6 s/tài liệu trên một GPU tiêu dùng thay vì ≈20 s. Các số là IoU trung bình theo ảnh trên subset 150 ảnh ở Mục 6.8.
 
+
+### 6.11 Ranh giới cross-dataset
+
+Chúng tôi cũng thử zero-shot trên **DocTamper** (CVPR 2023), benchmark giả mạo chữ trong tài liệu có mask điểm ảnh, dùng đúng bộ phân đoạn patch và tìm kiếm dày. Trên split FCD (100 ảnh) thu được **IoU 0.096 và F1 0.313**. Sụt giảm là dự kiến và có thông tin: DocTamper chứa các sửa chữ kiểu splicing/copy-move chứ không phải inpainting sinh ảnh, và chính tác giả ghi rõ bộ dữ liệu không bao phủ AIGC. Vì vậy chúng tôi báo cáo đây là **ranh giới** của phương pháp, không phải bằng chứng chống lại nó: trong thiết lập AIGC mà mô hình được train, TL-HRS đạt 0.537.
+
 ---
 
 ## 7. Thảo luận

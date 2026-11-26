@@ -27,6 +27,16 @@ def win_iou(pred, mask, mask_area, cx, cy, P, H, W):
     return inter, union, inter / max(union, 1)
 
 
+
+def bootstrap_ci(vals, n_boot=5000, seed=0):
+    a = np.asarray(vals, dtype=float)
+    if a.size == 0:
+        return {}
+    rng = np.random.default_rng(seed)
+    means = [a[rng.integers(0, a.size, a.size)].mean() for _ in range(n_boot)]
+    lo, hi = np.percentile(means, [2.5, 97.5])
+    return {"mean": float(a.mean()), "ci95": [float(lo), float(hi)]}
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--patch-ckpt", default="results/patch_seg_gpt/patch_seg.pth")
@@ -104,7 +114,9 @@ def main():
     with open(out / "results.json", "w", encoding="utf-8") as f:
         json.dump({"args": vars(args), "avg_windows": float(np.mean(nwin)),
                    "methods": {k: {"iou_pooled": agg[k]["inter"] / max(agg[k]["union"], 1),
-                                   "iou_mean": float(np.mean(agg[k]["per"]))} for k in keys},
+                                   "iou_mean": float(np.mean(agg[k]["per"])),
+                                   "per_image": [float(x) for x in agg[k]["per"]],
+                                   "bootstrap": bootstrap_ci(agg[k]["per"])} for k in keys},
                    "oracle_window_iou_mean": float(np.mean(agg["oracle"]["per"]))}, f, indent=2)
     print("Saved:", out / "results.json")
 

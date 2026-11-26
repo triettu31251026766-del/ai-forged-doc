@@ -281,7 +281,7 @@ Figure 3 summarizes the stage-wise and cross-generator picture. Three findings f
 
 The gap is therefore not a ranking-model limitation: without ground truth, several windows are genuinely indistinguishable from their features. Improving the pipeline requires a better patch detector (resolution or context), not a more expressive selector. (Numbers are per-image mean IoU on the same subsets used in Section 6.8; the Ideogram subset is easier than the full 422-image split.)
 
- **Authentic documents.** TL-HRS is a *localization* stage: it always returns a window, so it is invoked only after an image-level triage decision. In deployment we threshold the image-level score (top-1% mean probability, Table 6.2) on the labelled authentic target samples at the operating point required by the bank's alert budget (we report 1% FPR), and only flagged documents are passed to TL-HRS, whose <i>w</i>* is shown to the analyst as the suggested region. On authentic documents the triage threshold is what prevents a false alarm; the dense search itself never declares "no forgery". The low Recall@1%FPR of the full-image detector (0.042 at <i>k</i> = 100) shows that this triage is the remaining weakness, which is why we position TL-HRS as human-in-the-loop decision support rather than autonomous rejection.
+ **Authentic documents.** TL-HRS is a *localization* stage: it always returns a window, so it is invoked only after an image-level triage decision. In deployment we threshold the image-level score (top-1% mean probability, Table 6.2) on the labelled authentic target samples at the operating point required by the bank's alert budget (we report 1% FPR), and only flagged documents are passed to TL-HRS, whose <i>w</i>* is shown to the analyst as the suggested region. On authentic documents the triage threshold is what prevents a false alarm; the dense search itself never declares "no forgery". At <i>k</i> = 100 the image-level AP is 0.582 and Recall@1%FPR 0.042 (Table 6.2): a bank operating at a 1% alert budget catches only 4% of unseen-generator forgeries, so the triage stage, not the localizer, is the limiting factor in deployment. The low Recall@1%FPR of the full-image detector (0.042 at <i>k</i> = 100) shows that this triage is the remaining weakness, which is why we position TL-HRS as human-in-the-loop decision support rather than autonomous rejection.
 
 **6.8.3 Label efficiency and generalization.** Adapting the patch stage is cheap: with 25 target labels the GT-box ceiling is already 0.584 (86% of the 0.677 reached with 100), while the full-image baseline with 25 labels is 0.105. The same adapted segmenter, searched densely, transfers to Ideogram — a generator absent from both training and adaptation — at 0.284 IoU versus 0.114 for the full-image detector, with an oracle window of 0.510. The 0.284 -> 0.510 gap shows that the detector *finds* the field under generator shift but its confidence is miscalibrated across generators, which is the clearest target for future work.
 
@@ -310,6 +310,11 @@ Dense search (stride 96) evaluates ≈218 windows per forged document. We test a
 | Oracle among visited | 77 | 0.674 |
 
 The coarse scan acts as a proposal generator and the local refinement removes the redundancy of the dense grid; at ≈66 windows the pipeline runs in ≈6 s per document on one consumer GPU instead of ≈20 s. All values are per-image mean IoU on the 150-image subset of Section 6.8.
+
+
+### 6.11 Cross-dataset boundary
+
+We also test zero-shot transfer to **DocTamper** (CVPR 2023), a document text-tampering benchmark with pixel masks, using the same patch detector and dense search. On its FCD split (100 images) we obtain **IoU 0.096 and F1 0.313**. The drop is expected and informative: DocTamper contains splicing and copy-move text edits rather than generative inpainting, and its authors state that it does not cover AIGC tampering. We therefore report this as a boundary condition of the method, not as evidence against it: inside the AIGC setting the model is trained for, TL-HRS reaches 0.537.
 
 ---
 
