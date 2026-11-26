@@ -749,6 +749,19 @@ DocTamper FCD (100 ảnh, zero-shot): IoU 0.096, F1 0.313 → mục 6.11 "bounda
 Triage: image AP 0.582, R@1%FPR 0.042 tại k=100 → nêu rõ trong 6.8.
 `eval_slide.py` giờ lưu per-image + bootstrap CI.
 
+
+### B52 — Stride/threshold/runtime + conformal mức ảnh — 2026-11-26
+
+60 ảnh, cascade refine stride 96:
+
+| stride1 | windows | s/ảnh | IoU@0.5 |
+|---|---|---|---|
+| 128 | 147.6 | 2.85 | 0.616 |
+| 192 | 74.5 | 1.55 | 0.602 |
+| 256 | 54.6 | 1.18 | 0.619 |
+
+Conformal ảnh (calib Gemini, α=0.1): threshold 0.0666 → GPT FNR 25.4%, FPR 67.7%, calib FPR 67.1% → **score mức ảnh không tách được**; chuyển sang bảo đảm mức điểm ảnh.
+
 ## Cảnh báo cần kiểm tra
 
 - Model có thể "ăn gian" nhờ khác biệt **độ phân giải / kiểu nén** giữa authentic và forged → cần augmentation (JPEG, resize, blur) để kiểm chứng.

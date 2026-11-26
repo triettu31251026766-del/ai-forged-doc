@@ -316,6 +316,21 @@ The coarse scan acts as a proposal generator and the local refinement removes th
 
 We also test zero-shot transfer to **DocTamper** (CVPR 2023), a document text-tampering benchmark with pixel masks, using the same patch detector and dense search. On its FCD split (100 images) we obtain **IoU 0.096 and F1 0.313**. The drop is expected and informative: DocTamper contains splicing and copy-move text edits rather than generative inpainting, and its authors state that it does not cover AIGC tampering. We therefore report this as a boundary condition of the method, not as evidence against it: inside the AIGC setting the model is trained for, TL-HRS reaches 0.537.
 
+
+### 6.12 Stride, threshold and runtime
+
+We sweep the coarse stride of the cascade on 60 forged test images, keeping the local refinement at stride 96, and measure wall-clock time on one consumer GPU.
+
+| stride1 | windows / image | s / image | IoU @0.3 | @0.4 | @0.5 | @0.6 | @0.7 |
+|---|---|---|---|---|---|---|---|
+| 128 | 147.6 | 2.85 | 0.612 | 0.615 | 0.616 | 0.614 | 0.611 |
+| 192 | 74.5 | 1.55 | 0.599 | 0.603 | 0.602 | 0.601 | 0.598 |
+| **256** | **54.6** | **1.18** | 0.614 | **0.619** | **0.619** | 0.618 | 0.615 |
+
+Stride 256 is both the fastest (1.18 s per document, 54 windows) and the most accurate, and the IoU is flat between thresholds 0.4 and 0.6 (variation < 0.005), so the operating point is not cherry-picked.
+
+**Image-level conformal triage fails (negative result).** Calibrating a split-conformal threshold on in-domain Gemini forges (target FNR 10%) and deploying it on GPT-Image-2 gives an actual FNR of 25.4% and an FPR of 67.7% on authentic documents; even on the calibration split the FPR is 67%, i.e. the image-level score barely separates authentic from forged. Exchangeability is violated under generator shift, and, more fundamentally, the signal is too weak at image level. This is why the guarantees we target must be stated at the *localization* level rather than for whole-image triage.
+
 ---
 
 ## 7. Discussion

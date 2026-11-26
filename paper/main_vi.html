@@ -664,6 +664,56 @@ p, li { orphans: 2; widows: 2; }
 <p>Quét thô đóng vai trò sinh đề xuất, còn tinh chỉnh cục bộ loại bỏ phần dư thừa của lưới dày; với ≈66 cửa sổ, pipeline chạy ≈6 s/tài liệu trên một GPU tiêu dùng thay vì ≈20 s. Các số là IoU trung bình theo ảnh trên subset 150 ảnh ở Mục 6.8.</p>
 <h3 id="611-ranh-gioi-cross-dataset">6.11 Ranh giới cross-dataset</h3>
 <p>Chúng tôi cũng thử zero-shot trên <strong>DocTamper</strong> (CVPR 2023), benchmark giả mạo chữ trong tài liệu có mask điểm ảnh, dùng đúng bộ phân đoạn patch và tìm kiếm dày. Trên split FCD (100 ảnh) thu được <strong>IoU 0.096 và F1 0.313</strong>. Sụt giảm là dự kiến và có thông tin: DocTamper chứa các sửa chữ kiểu splicing/copy-move chứ không phải inpainting sinh ảnh, và chính tác giả ghi rõ bộ dữ liệu không bao phủ AIGC. Vì vậy chúng tôi báo cáo đây là <strong>ranh giới</strong> của phương pháp, không phải bằng chứng chống lại nó: trong thiết lập AIGC mà mô hình được train, TL-HRS đạt 0.537.</p>
+<h3 id="612-stride-nguong-va-toc-o">6.12 Stride, ngưỡng và tốc độ</h3>
+<p>Chúng tôi quét stride thô của cascade trên 60 ảnh test giả mạo, giữ tinh chỉnh cục bộ ở stride 96, và đo thời gian thực trên một GPU tiêu dùng.</p>
+<table>
+<thead>
+<tr>
+<th>stride1</th>
+<th>cửa sổ / ảnh</th>
+<th>s / ảnh</th>
+<th>IoU @0.3</th>
+<th>@0.4</th>
+<th>@0.5</th>
+<th>@0.6</th>
+<th>@0.7</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>128</td>
+<td>147.6</td>
+<td>2.85</td>
+<td>0.612</td>
+<td>0.615</td>
+<td>0.616</td>
+<td>0.614</td>
+<td>0.611</td>
+</tr>
+<tr>
+<td>192</td>
+<td>74.5</td>
+<td>1.55</td>
+<td>0.599</td>
+<td>0.603</td>
+<td>0.602</td>
+<td>0.601</td>
+<td>0.598</td>
+</tr>
+<tr>
+<td><strong>256</strong></td>
+<td><strong>54.6</strong></td>
+<td><strong>1.18</strong></td>
+<td>0.614</td>
+<td><strong>0.619</strong></td>
+<td><strong>0.619</strong></td>
+<td>0.618</td>
+<td>0.615</td>
+</tr>
+</tbody>
+</table>
+<p>Stride 256 vừa nhanh nhất (1.18 s/tài liệu, 54 cửa sổ) vừa chính xác nhất, và IoU phẳng giữa ngưỡng 0.4–0.6 (biến thiên &lt;0.005), nên điểm vận hành không phải chọn có lợi.</p>
+<p><strong>Conformal mức ảnh thất bại (kết quả âm).</strong> Hiệu chỉnh ngưỡng split-conformal trên Gemini in-domain (mục tiêu FNR 10%) rồi triển khai trên GPT-Image-2 cho FNR thực tế 25.4% và FPR 67.7% trên ảnh thật; ngay trên tập hiệu chỉnh FPR đã là 67%, tức score mức ảnh gần như không tách được thật/giả. Exchangeability bị vi phạm dưới dịch chuyển bộ sinh, và bản thân tín hiệu ở mức ảnh quá yếu. Vì vậy các bảo đảm cần phát biểu ở mức <strong>định vị</strong>, không phải triage toàn ảnh.</p>
 <hr />
 <h2 id="7-thao-luan">7. Thảo luận</h2>
 <p><strong>Vì sao thích ứng giúp?</strong> Fine-tune trên vài mẫu đích dường như làm sắc nét phản hồi không gian quanh vùng bị sửa, thay vì chỉ dịch một ngưỡng toàn cục. Điều này phù hợp với pixel AUC cao trước thích ứng và với việc các phương pháp hiệu chỉnh ngưỡng thất bại.</p>

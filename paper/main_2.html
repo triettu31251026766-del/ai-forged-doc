@@ -665,6 +665,56 @@ p, li { orphans: 2; widows: 2; }
 <p>The coarse scan acts as a proposal generator and the local refinement removes the redundancy of the dense grid; at ≈66 windows the pipeline runs in ≈6 s per document on one consumer GPU instead of ≈20 s. All values are per-image mean IoU on the 150-image subset of Section 6.8.</p>
 <h3 id="611-cross-dataset-boundary">6.11 Cross-dataset boundary</h3>
 <p>We also test zero-shot transfer to <strong>DocTamper</strong> (CVPR 2023), a document text-tampering benchmark with pixel masks, using the same patch detector and dense search. On its FCD split (100 images) we obtain <strong>IoU 0.096 and F1 0.313</strong>. The drop is expected and informative: DocTamper contains splicing and copy-move text edits rather than generative inpainting, and its authors state that it does not cover AIGC tampering. We therefore report this as a boundary condition of the method, not as evidence against it: inside the AIGC setting the model is trained for, TL-HRS reaches 0.537.</p>
+<h3 id="612-stride-threshold-and-runtime">6.12 Stride, threshold and runtime</h3>
+<p>We sweep the coarse stride of the cascade on 60 forged test images, keeping the local refinement at stride 96, and measure wall-clock time on one consumer GPU.</p>
+<table>
+<thead>
+<tr>
+<th>stride1</th>
+<th>windows / image</th>
+<th>s / image</th>
+<th>IoU @0.3</th>
+<th>@0.4</th>
+<th>@0.5</th>
+<th>@0.6</th>
+<th>@0.7</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>128</td>
+<td>147.6</td>
+<td>2.85</td>
+<td>0.612</td>
+<td>0.615</td>
+<td>0.616</td>
+<td>0.614</td>
+<td>0.611</td>
+</tr>
+<tr>
+<td>192</td>
+<td>74.5</td>
+<td>1.55</td>
+<td>0.599</td>
+<td>0.603</td>
+<td>0.602</td>
+<td>0.601</td>
+<td>0.598</td>
+</tr>
+<tr>
+<td><strong>256</strong></td>
+<td><strong>54.6</strong></td>
+<td><strong>1.18</strong></td>
+<td>0.614</td>
+<td><strong>0.619</strong></td>
+<td><strong>0.619</strong></td>
+<td>0.618</td>
+<td>0.615</td>
+</tr>
+</tbody>
+</table>
+<p>Stride 256 is both the fastest (1.18 s per document, 54 windows) and the most accurate, and the IoU is flat between thresholds 0.4 and 0.6 (variation &lt; 0.005), so the operating point is not cherry-picked.</p>
+<p><strong>Image-level conformal triage fails (negative result).</strong> Calibrating a split-conformal threshold on in-domain Gemini forges (target FNR 10%) and deploying it on GPT-Image-2 gives an actual FNR of 25.4% and an FPR of 67.7% on authentic documents; even on the calibration split the FPR is 67%, i.e. the image-level score barely separates authentic from forged. Exchangeability is violated under generator shift, and, more fundamentally, the signal is too weak at image level. This is why the guarantees we target must be stated at the <em>localization</em> level rather than for whole-image triage.</p>
 <hr />
 <h2 id="7-discussion">7. Discussion</h2>
 <p><strong>Why does adaptation help?</strong> Fine-tuning on a few target samples appears to sharpen the spatial response around the edited region, rather than merely shifting a global threshold. This is consistent with the high pixel AUC before adaptation and with the failure of threshold-calibration methods.</p>

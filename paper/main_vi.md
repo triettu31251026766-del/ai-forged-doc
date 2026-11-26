@@ -317,6 +317,21 @@ Quét thô đóng vai trò sinh đề xuất, còn tinh chỉnh cục bộ loạ
 
 Chúng tôi cũng thử zero-shot trên **DocTamper** (CVPR 2023), benchmark giả mạo chữ trong tài liệu có mask điểm ảnh, dùng đúng bộ phân đoạn patch và tìm kiếm dày. Trên split FCD (100 ảnh) thu được **IoU 0.096 và F1 0.313**. Sụt giảm là dự kiến và có thông tin: DocTamper chứa các sửa chữ kiểu splicing/copy-move chứ không phải inpainting sinh ảnh, và chính tác giả ghi rõ bộ dữ liệu không bao phủ AIGC. Vì vậy chúng tôi báo cáo đây là **ranh giới** của phương pháp, không phải bằng chứng chống lại nó: trong thiết lập AIGC mà mô hình được train, TL-HRS đạt 0.537.
 
+
+### 6.12 Stride, ngưỡng và tốc độ
+
+Chúng tôi quét stride thô của cascade trên 60 ảnh test giả mạo, giữ tinh chỉnh cục bộ ở stride 96, và đo thời gian thực trên một GPU tiêu dùng.
+
+| stride1 | cửa sổ / ảnh | s / ảnh | IoU @0.3 | @0.4 | @0.5 | @0.6 | @0.7 |
+|---|---|---|---|---|---|---|---|
+| 128 | 147.6 | 2.85 | 0.612 | 0.615 | 0.616 | 0.614 | 0.611 |
+| 192 | 74.5 | 1.55 | 0.599 | 0.603 | 0.602 | 0.601 | 0.598 |
+| **256** | **54.6** | **1.18** | 0.614 | **0.619** | **0.619** | 0.618 | 0.615 |
+
+Stride 256 vừa nhanh nhất (1.18 s/tài liệu, 54 cửa sổ) vừa chính xác nhất, và IoU phẳng giữa ngưỡng 0.4–0.6 (biến thiên <0.005), nên điểm vận hành không phải chọn có lợi.
+
+**Conformal mức ảnh thất bại (kết quả âm).** Hiệu chỉnh ngưỡng split-conformal trên Gemini in-domain (mục tiêu FNR 10%) rồi triển khai trên GPT-Image-2 cho FNR thực tế 25.4% và FPR 67.7% trên ảnh thật; ngay trên tập hiệu chỉnh FPR đã là 67%, tức score mức ảnh gần như không tách được thật/giả. Exchangeability bị vi phạm dưới dịch chuyển bộ sinh, và bản thân tín hiệu ở mức ảnh quá yếu. Vì vậy các bảo đảm cần phát biểu ở mức **định vị**, không phải triage toàn ảnh.
+
 ---
 
 ## 7. Thảo luận
