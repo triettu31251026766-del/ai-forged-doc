@@ -36,7 +36,7 @@ def main():
     L = (MS[:, None] - cum_m) / np.maximum(MS[:, None], 1)  # per-doc FNR over lambdas
 
     rng = np.random.default_rng(0)
-    img_fnr, pix_fnr, pix_fpr = [], [], []
+    img_fnr, pix_fnr, pix_fpr, pix_doc = [], [], [], []
 
     for _ in range(args.n_splits):
         perm = rng.permutation(len(forged))
@@ -51,6 +51,7 @@ def main():
         # document level: loss_i(lambda) = FN_i(lambda) / mask_i
         j_pix = crc_pick(L[cal].mean(axis=0), len(cal), args.alpha)
         fn_t = MS[tst] - cum_m[tst, j_pix]
+        pix_doc.append(float(np.mean(fn_t / np.maximum(MS[tst], 1))))
         pix_fnr.append(float(fn_t.sum() / np.maximum(MS[tst].sum(), 1)))
         bg = NP[tst] - MS[tst]
         pix_fpr.append(float(cum_b[tst, j_pix].sum() / max(bg.sum(), 1)))
@@ -58,7 +59,8 @@ def main():
     res = {
         "alpha": args.alpha, "n_cal": args.n_cal, "n_splits": args.n_splits,
         "image_FNR_mean": float(np.mean(img_fnr)), "image_FNR_std": float(np.std(img_fnr)),
-        "pixel_FNR_mean": float(np.mean(pix_fnr)), "pixel_FNR_std": float(np.std(pix_fnr)),
+        "pixel_FNR_pooled_mean": float(np.mean(pix_fnr)), "pixel_FNR_pooled_std": float(np.std(pix_fnr)),
+        "pixel_FNR_perdoc_mean": float(np.mean(pix_doc)), "pixel_FNR_perdoc_std": float(np.std(pix_doc)),
         "pixel_FPR_mean": float(np.mean(pix_fpr)), "pixel_FPR_std": float(np.std(pix_fpr)),
     }
     print(json.dumps(res, indent=2))
