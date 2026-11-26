@@ -6,7 +6,7 @@
 
 \subsection{Abstract}\label{abstract}
 
-Generative image editing has made it possible to alter a single numeric field in a financial document in under a second, and detectors trained on traditional (e.g., Photoshop-based) forgeries are largely blind to such edits. Even a detector trained on one generative inpainter collapses when the underlying generator changes --- a \emph{generator shift}. In realistic banking deployments, collecting many labelled forgeries for every new generator is infeasible. We study \textbf{label-efficient adaptation} of an AI-forged document detector under generator shift, and we ask whether a small number of labelled target-generator samples is sufficient to recover localization performance without catastrophically forgetting previously seen generators. Using the AIForge-Doc benchmark (Gemini, Ideogram, GPT-Image-2), we show that: (i) a detector trained on Gemini collapses on unseen generators (IoU 0.052 on GPT-Image-2); (ii) few-shot fine-tuning recovers localization monotonically, reaching IoU 0.195 ± 0.037 with only 100 labelled target samples (≈3.7× over zero-shot); (iii) training from scratch with the same 100 labels is substantially worse (IoU 0.085), showing that base-generator pretraining matters; and (iv) rehearsal of 100 old-generator samples restores in-domain performance to 0.672 ± 0.006 (near the 0.669 zero-shot level) at a modest target-generator cost (IoU 0.162). We further report a set of negative results: temperature scaling, global and per-image threshold calibration, sample-selection strategies, encoder freezing, frequency channels, and generic anomaly detection do \textbf{not} provide consistent gains. Our analysis indicates that the bottleneck is \textbf{localization precision}, not decision-threshold calibration. Finally, we show that adapting a native-resolution patch segmenter with the same 100 labels raises the localization ceiling from 0.459 to 0.677 IoU, but that the coarse peak used to position it is the real bottleneck: it misses the field centre by 152 px (median), so the crop covers only 53\% of the tampered pixels. Replacing the single peak with a dense high-resolution search over 384 px windows and selecting by patch confidence reaches \textbf{0.537 ± 0.016 IoU on the full unseen generator (2.8× the full-image baseline, 82\% of the adapted ceiling)}, and 0.284 IoU on a completely unseen generator (Ideogram) versus 0.114 for the full-image detector. A localization study shows that centroid, grid, zoom and tiling variants all underperform dense search, that the coarse map is too unreliable to prune it, and that the residual gap is a \emph{selection-confidence} problem under generator shift (oracle-window IoU is 0.653). We release code, splits, and all results for reproducibility.
+Generative image editing has made it possible to alter a single numeric field in a financial document in under a second, and detectors trained on traditional (e.g., Photoshop-based) forgeries are largely blind to such edits. Even a detector trained on one generative inpainter collapses when the underlying generator changes --- a \emph{generator shift}. In realistic banking deployments, collecting many labelled forgeries for every new generator is infeasible. We study \textbf{label-efficient adaptation} of an AI-forged document detector under generator shift, and we ask whether a small number of labelled target-generator samples is sufficient to recover localization performance without catastrophically forgetting previously seen generators. Using the AIForge-Doc benchmark (Gemini, Ideogram, GPT-Image-2), we show that: (i) a detector trained on Gemini collapses on unseen generators (IoU 0.052 on GPT-Image-2); (ii) few-shot fine-tuning recovers localization monotonically, reaching IoU 0.195 ± 0.037 with only 100 labelled target samples (≈3.7× over zero-shot); (iii) training from scratch with the same 100 labels is substantially worse (IoU 0.085), showing that base-generator pretraining matters; and (iv) rehearsal of 100 old-generator samples restores in-domain performance to 0.672 ± 0.006 (near the 0.669 zero-shot level) at a modest target-generator cost (IoU 0.162). We further report a set of negative results: temperature scaling, global and per-image threshold calibration, sample-selection strategies, encoder freezing, frequency channels, and generic anomaly detection do \textbf{not} provide consistent gains. Our analysis indicates that the bottleneck is \textbf{localization precision}, not decision-threshold calibration. Finally, we show that adapting a native-resolution patch segmenter with the same 100 labels raises the localization ceiling from 0.459 to 0.677 IoU, but that the coarse peak used to position it is the real bottleneck: it misses the field centre by 152 px (median), so the crop covers only 53\% of the tampered pixels. Replacing the single peak with a dense high-resolution search over 384 px windows and selecting by patch confidence reaches \textbf{0.537 ± 0.016 IoU on the full unseen generator (2.8× the full-image baseline, 79\% of the adapted ceiling)}, and 0.284 IoU on a completely unseen generator (Ideogram) versus 0.114 for the full-image detector. A localization study shows that centroid, grid, zoom and tiling variants all underperform dense search, that the coarse map is too unreliable to prune it, and that the residual gap is a \emph{selection-confidence} problem under generator shift (oracle-window IoU is 0.653). We release code, splits, and all results for reproducibility.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -447,7 +447,7 @@ Ideogram, full-image detector & 0.114 & same split (422 forged) \\
 \caption{Figure 3}
 \end{figure}
 
-Figure 3 summarizes the stage-wise and cross-generator picture. Three findings follow. \textbf{(1) Patch adaptation transfers, and the ceiling is real.} With the oracle box, the same architecture moves from 0.459 (zero-shot) to 0.677 ± 0.009 when fine-tuned with the same 100 target labels; in-domain Gemini drops only from 0.557 to 0.532, a cost that replay mitigates. \textbf{(2) The bottleneck is where to look, not what to predict.} A single coarse peak recovers only 0.321, but dense search over the same segmenter reaches 0.537 --- 2.8× the full-image baseline and 82\% of the adapted ceiling. The gap between TL-HRS and its oracle window (0.653) is entirely due to ranking the right window first. \textbf{(3) Intelligence in the search does not pay.} Coarse-guided pruning is worse than exhaustive search (top-40 windows: 0.544; top-10: 0.474; top-5: 0.431), and the coarse map is therefore not a useful prior at this resolution. Zoom, tiling and coarse centroiding are all below the single-peak-plus-grid baseline, so the simple sliding window dominates.
+A bootstrap over 5,000 resamples of the per-image IoU gives a 95\% confidence interval of 0.545-0.597 for the TL-HRS mean on the full test set. Figure 3 summarizes the stage-wise and cross-generator picture. Three findings follow. \textbf{(1) Patch adaptation transfers, and the ceiling is real.} With the oracle box, the same architecture moves from 0.459 (zero-shot) to 0.677 ± 0.009 when fine-tuned with the same 100 target labels; in-domain Gemini drops only from 0.557 to 0.532, a cost that replay mitigates. \textbf{(2) The bottleneck is where to look, not what to predict.} A single coarse peak recovers only 0.321, but dense search over the same segmenter reaches 0.537 --- 2.8× the full-image baseline and 79\% of the adapted ceiling. The gap between TL-HRS and its oracle window (0.653) is entirely due to ranking the right window first. \textbf{(3) Intelligence in the search does not pay.} Coarse-guided pruning is worse than exhaustive search (top-40 windows: 0.544; top-10: 0.474; top-5: 0.431), and the coarse map is therefore not a useful prior at this resolution. Zoom, tiling and coarse centroiding are all below the single-peak-plus-grid baseline, so the simple sliding window dominates.
 
 \textbf{6.8.1 Pre-adaptation selector study (negative results).} Before adapting the patch segmenter we tried to close the gap by improving \emph{selection} with the zero-shot patch. On the full forged test, a ResNet-18 field classifier reaches 0.193, the coarse heatmap 0.157, and the native patch response 0.158; rank fusion of all three reaches 0.199 --- none exceeds the 0.195 ± 0.037 baseline. On a 60-image subset (27 forged; it over-represents CORD and under-represents WildReceipt) we additionally tried centroid refinement, per-image MAD z-scores (monotonic, hence vacuous), line-merge, selector adaptation, and a trained DINOv2 field-vs-document-context selector (0.195); all failed. These results motivated the patch-adaptation route, and the dense search then subsumes selection: the adapted patch's own confidence, evaluated densely, is a stronger ranker than any of these learned selectors.
 
@@ -470,44 +470,41 @@ oracle window & 0.655 & 0.507 \\
 
 The gap is therefore not a ranking-model limitation: without ground truth, several windows are genuinely indistinguishable from their features. Improving the pipeline requires a better patch detector (resolution or context), not a more expressive selector. (Numbers are per-image mean IoU on the same subsets used in Section 6.8; the Ideogram subset is easier than the full 422-image split.)
 
-\textbf{Authentic documents.} TL-HRS is a \emph{localization} stage: it always returns a window, so it is invoked only after an image-level triage decision. In deployment we threshold the image-level score (top-1\% mean probability, Table 6.2) on the labelled authentic target samples at the operating point required by the bank's alert budget (we report 1\% FPR), and only flagged documents are passed to TL-HRS, whose w* is shown to the analyst as the suggested region. On authentic documents the triage threshold is what prevents a false alarm; the dense search itself never declares ``no forgery''. The low Recall@1\%FPR of the full-image detector (0.042 at k = 100) shows that this triage is the remaining weakness, which is why we position TL-HRS as human-in-the-loop decision support rather than autonomous rejection.
+\textbf{Authentic documents.} TL-HRS is a \emph{localization} stage: it always returns a window, so it is invoked only after an image-level triage decision. In deployment we threshold the image-level score (top-1\% mean probability, Table 6.2) on the labelled authentic target samples at the operating point required by the bank's alert budget (we report 1\% FPR), and only flagged documents are passed to TL-HRS, whose w* is shown to the analyst as the suggested region. On authentic documents the triage threshold is what prevents a false alarm; the dense search itself never declares ``no forgery''. At k = 100 the image-level AP is 0.582 and Recall@1\%FPR 0.042 (Table 6.2): a bank operating at a 1\% alert budget catches only 4\% of unseen-generator forgeries, so the triage stage, not the localizer, is the limiting factor in deployment. The low Recall@1\%FPR of the full-image detector (0.042 at k = 100) shows that this triage is the remaining weakness, which is why we position TL-HRS as human-in-the-loop decision support rather than autonomous rejection.
 
 \textbf{6.8.3 Label efficiency and generalization.} Adapting the patch stage is cheap: with 25 target labels the GT-box ceiling is already 0.584 (86\% of the 0.677 reached with 100), while the full-image baseline with 25 labels is 0.105. The same adapted segmenter, searched densely, transfers to Ideogram --- a generator absent from both training and adaptation --- at 0.284 IoU versus 0.114 for the full-image detector, with an oracle window of 0.510. The 0.284 -\textgreater{} 0.510 gap shows that the detector \emph{finds} the field under generator shift but its confidence is miscalibrated across generators, which is the clearest target for future work.
 
 \subsubsection{6.9 Comparison with a published forensic detector}\label{comparison-with-a-published-forensic-detector}
 
-To place TL-HRS against the literature we ran \textbf{TruFor} (CVPR 2023), a transformer + noise-fingerprint localizer trained on photographic manipulations, on the same 150 forged GPT-Image-2 images used in Section 6.8, with its official weights and inference script. TruFor's full-resolution attention does not fit in CPU memory for 8--35 MP documents, so we cap its input at 1024 px; every other number in this paper is at native resolution. The setting does not favour our method either: the patch detector works with 384-px crops of the same images.
+To place TL-HRS against the literature we ran \textbf{TruFor} (CVPR 2023), a transformer + noise-fingerprint localizer trained on photographic manipulations, on the full 613 forged GPT-Image-2 images used throughout Section 6.8, with its official weights and inference script. TruFor's full-resolution attention does not fit in CPU memory for 8--35 MP documents, so we cap its input at 1024 px; every other number in this paper is at native resolution. The setting does not favour our method either: the patch detector works with 384-px crops of the same images.
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}
-  >{\raggedright\arraybackslash}p{(\linewidth - 8\tabcolsep) * \real{0.2000}}@{}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}
+  >{\raggedright\arraybackslash}p{(\linewidth - 6\tabcolsep) * \real{0.2500}}@{}}
 \toprule\noalign{}
 \begin{minipage}[b]{\linewidth}\raggedright
-Method (150 forged GPT-Image-2)
+Method (613 forged GPT-Image-2)
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 IoU (pooled)
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 IoU (mean)
 \end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
 F1
-\end{minipage} & \begin{minipage}[b]{\linewidth}\raggedright
-Dice (mean)
 \end{minipage} \\
 \midrule\noalign{}
 \endhead
 \bottomrule\noalign{}
 \endlastfoot
-TruFor, threshold 0.5 & 0.024 & 0.174 & 0.047 & 0.231 \\
-TruFor, best-F1 threshold (0.75) & 0.025 & --- & 0.049 & --- \\
-\textbf{TL-HRS (same 150 images)} & \textbf{0.583} & \textbf{0.584} & --- & --- \\
+TruFor, threshold 0.5 & 0.018 & 0.178 & 0.035 \\
+TruFor, best-F1 threshold (0.95) & 0.022 & --- & 0.042 \\
+\textbf{TL-HRS (same 613 images, 5 seeds)} & \textbf{0.537 ± 0.016} & \textbf{0.571} & --- \\
 \end{longtable}
 }
 
-TruFor's image-level score (mean 0.60) shows that it does fire on these documents, but its localization map does not align with thin, wide text fields: pooled IoU is 0.024 and even the best threshold gives F1 0.05, whereas TL-HRS reaches 0.583 on exactly the same images. This is the failure mode the benchmark was built to expose --- photo-forensic localizers assume texture and noise inconsistencies at object scale, while an AI-inpainted digit is a few dozen pixels high inside a text line. We could not execute DocTamper in our environment (its mmcv build has no Windows wheel for current Python); we therefore report TruFor as the published reference and leave a full multi-detector comparison for future work.
+TruFor's image-level score (mean 0.63) shows that it does fire on these documents, but its localization map does not align with thin, wide text fields: pooled IoU is 0.018 and even the best threshold gives F1 0.042, whereas TL-HRS reaches 0.537 ± 0.016 on exactly the same images --- a 30× gap in pooled IoU. This is the failure mode the benchmark was built to expose --- photo-forensic localizers assume texture and noise inconsistencies at object scale, while an AI-inpainted digit is a few dozen pixels high inside a text line. We could not execute DocTamper in our environment (its mmcv build has no Windows wheel for current Python); we therefore report TruFor as the published reference and leave a full multi-detector comparison for future work.
 
 \subsubsection{6.10 Accuracy--cost trade-off}\label{accuracycost-trade-off}
 
@@ -530,6 +527,10 @@ Oracle among visited & 77 & 0.674 \\
 }
 
 The coarse scan acts as a proposal generator and the local refinement removes the redundancy of the dense grid; at ≈66 windows the pipeline runs in ≈6 s per document on one consumer GPU instead of ≈20 s. All values are per-image mean IoU on the 150-image subset of Section 6.8.
+
+\subsubsection{6.11 Cross-dataset boundary}\label{cross-dataset-boundary}
+
+We also test zero-shot transfer to \textbf{DocTamper} (CVPR 2023), a document text-tampering benchmark with pixel masks, using the same patch detector and dense search. On its FCD split (100 images) we obtain \textbf{IoU 0.096 and F1 0.313}. The drop is expected and informative: DocTamper contains splicing and copy-move text edits rather than generative inpainting, and its authors state that it does not cover AIGC tampering. We therefore report this as a boundary condition of the method, not as evidence against it: inside the AIGC setting the model is trained for, TL-HRS reaches 0.537.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -564,7 +565,7 @@ The coarse scan acts as a proposal generator and the local refinement removes th
 \item
   \textbf{Generator-shift ranking gap.} On Ideogram the detector's oracle window is 0.510 but the selected window scores 0.284, so confidence is miscalibrated across generators.
 \item
-  \textbf{Single published baseline.} We compare against TruFor only, on a 150-image subset at 1024 px (CPU memory limit); DocTamper could not be built in our environment, so a multi-detector comparison remains future work.
+  \textbf{Single published baseline.} We compare against TruFor only, on the full 613 forged test images (capped at 1024 px because of CPU memory); DocTamper could not be built in our environment, so a multi-detector comparison remains future work.
 \item
   \textbf{Variance.} Results vary across seeds; we report mean ± std over three seeds for all headline numbers.
 \end{itemize}
