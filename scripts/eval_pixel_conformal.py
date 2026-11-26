@@ -30,6 +30,13 @@ def best_window(model, img, P, s1, dev):
                 prob = torch.sigmoid(model(x))[0, 0].cpu().numpy()
                 coarse.append((score(prob), cx, cy, prob))
     coarse.sort(key=lambda z: -z[0])
+    if not coarse:
+        cx, cy = W // 2, H // 2
+        crop = crop_window(img, cx, cy, P)
+        x = torch.from_numpy(np.transpose((crop - MEAN) / STD, (2, 0, 1))).unsqueeze(0).to(dev)
+        with torch.no_grad():
+            prob = torch.sigmoid(model(x))[0, 0].cpu().numpy()
+        return (score(prob), prob, cx, cy)
     best = (-1, None, 0, 0)
     seen = set()
     for _, cx, cy, _ in coarse[:3]:
@@ -78,6 +85,8 @@ def main():
             mask = load_mask(mp) > 0
             H, W = img.shape[:2]
             s, prob, cx, cy = best_window(model, img, args.P, args.stride1, dev)
+            if prob is None:
+                continue
             x0, y0 = cx - args.P // 2, cy - args.P // 2
             gx0, gy0 = max(0, x0), max(0, y0)
             gx1, gy1 = min(W, x0 + args.P), min(H, y0 + args.P)
@@ -96,6 +105,8 @@ def main():
         mask = load_mask(mp) > 0
         H, W = img.shape[:2]
         s, prob, cx, cy = best_window(model, img, args.P, args.stride1, dev)
+        if prob is None:
+            continue
         x0, y0 = cx - args.P // 2, cy - args.P // 2
         gx0, gy0 = max(0, x0), max(0, y0)
         gx1, gy1 = min(W, x0 + args.P), min(H, y0 + args.P)
