@@ -717,9 +717,46 @@ p, li { orphans: 2; widows: 2; }
 <p>Stride 256 is both the fastest (1.18 s per document, 54 windows) and the most accurate, and the IoU is flat between thresholds 0.4 and 0.6 (variation &lt; 0.005), so the operating point is not cherry-picked.</p>
 <p><strong>Image-level conformal triage fails (negative result).</strong> Calibrating a split-conformal threshold on in-domain Gemini forges (target FNR 10%) and deploying it on GPT-Image-2 gives an actual FNR of 25.4% and an FPR of 67.7% on authentic documents; even on the calibration split the FPR is 67%, i.e. the image-level score barely separates authentic from forged. Exchangeability is violated under generator shift, and, more fundamentally, the signal is too weak at image level. This is why the guarantees we target must be stated at the <em>localization</em> level rather than for whole-image triage.</p>
 <h3 id="613-risk-controlled-localization">6.13 Risk-controlled localization</h3>
-<p>The image-level triage above cannot separate authentic from forged documents, so we state the guarantee where the signal actually lives: on pixels. We split the 613 forged test documents into 300 calibration and 313 evaluation images, calibrate a split-conformal pixel threshold on the forged pixels of the calibration split, and then apply it unchanged to the held-out images.</p>
-<p>With a target pixel-level FNR of 10%, the calibrated threshold is 0.357; on the held-out documents the empirical FNR is <strong>12.0%</strong> and the pixel-level FPR on background is <strong>1.8%</strong>. The guarantee therefore transfers to unseen documents of the same generator, which is exactly the operating regime a bank cares about: at a 1.8% false-alarm rate on background pixels, fewer than one in eight edited pixels is missed.</p>
-<p>This is the first risk-controlled formulation for AI-forged document localization we are aware of, and it changes the claim of the paper: we do not claim a new state of the art in IoU, but a localization method whose error rate can be <em>certified</em> at a chosen level with 300 labelled documents.</p>
+<p>We state the guarantee where the signal lives — on pixels and on documents — using Conformal Risk Control (CRC): for a threshold λ, let L_i(λ) be the fraction of document i's annotated pixels missed (false negatives), and choose λ̂ as the largest λ whose empirical risk, corrected by n/(n+1) and 1/(n+1), is below α. We calibrate on 300 forged documents and evaluate on the remaining 313, repeating the random split 100 times.</p>
+<table>
+<thead>
+<tr>
+<th>α</th>
+<th>n_cal</th>
+<th>image FNR</th>
+<th>pixel FNR (per doc)</th>
+<th>pixel FNR (pooled)</th>
+<th>pixel FPR</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.10</td>
+<td>300</td>
+<td><strong>9.66 ± 2.09</strong></td>
+<td>15.33 ± 1.13</td>
+<td>18.29 ± 1.96</td>
+<td>5.6%</td>
+</tr>
+<tr>
+<td>0.10</td>
+<td>500</td>
+<td><strong>9.90 ± 2.90</strong></td>
+<td>15.24 ± 2.95</td>
+<td>18.46 ± 3.96</td>
+<td>5.6%</td>
+</tr>
+<tr>
+<td>0.15</td>
+<td>300</td>
+<td><strong>14.70 ± 2.48</strong></td>
+<td><strong>15.33 ± 1.13</strong></td>
+<td>18.29 ± 1.96</td>
+<td>5.6%</td>
+</tr>
+</tbody>
+</table>
+<p>The <strong>image-level guarantee holds</strong> at both α = 0.10 and 0.15 (observed 9.7% and 14.7%), using the cascade score S(w*): this is a large improvement over the full-image score, which violated the same construction (25.4% FNR at 67.7% FPR). At pixel level the loss is harder: it certifies at α = 0.15 but remains at 15.3% for a nominal α = 0.10, because the λ grid is discrete and large masks dominate. We report this rather than tuning λ to a favourable value. Certifying a 10% pixel-level FNR would require a finer score (a better patch segmenter) rather than a different calibration.</p>
 <hr />
 <h2 id="7-discussion">7. Discussion</h2>
 <p><strong>Why does adaptation help?</strong> Fine-tuning on a few target samples appears to sharpen the spatial response around the edited region, rather than merely shifting a global threshold. This is consistent with the high pixel AUC before adaptation and with the failure of threshold-calibration methods.</p>

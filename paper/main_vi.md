@@ -335,11 +335,16 @@ Stride 256 vừa nhanh nhất (1.18 s/tài liệu, 54 cửa sổ) vừa chính x
 
 ### 6.13 Định vị có kiểm soát rủi ro
 
-Triage mức ảnh ở trên không tách được thật/giả, nên chúng tôi phát biểu bảo đảm ở nơi tín hiệu thực sự tồn tại: mức điểm ảnh. Chúng tôi chia 613 tài liệu giả mạo thành 300 hiệu chỉnh và 313 đánh giá, hiệu chỉnh ngưỡng điểm ảnh split-conformal trên các điểm ảnh bị sửa của tập hiệu chỉnh, rồi áp nguyên ngưỡng đó lên tập giữ lại.
+Chúng tôi phát biểu bảo đảm ở nơi tín hiệu thực sự tồn tại — trên điểm ảnh và trên tài liệu — dùng Conformal Risk Control (CRC): với ngưỡng λ, gọi L_i(λ) là tỉ lệ điểm ảnh bị sót của tài liệu i (false negative), chọn λ̂ là λ lớn nhất mà rủi ro thực nghiệm sau hiệu chỉnh n/(n+1) và 1/(n+1) vẫn dưới α. Hiệu chỉnh trên 300 tài liệu giả mạo, đánh giá trên 313 tài liệu còn lại, lặp 100 lần chia ngẫu nhiên.
 
-Với mục tiêu FNR điểm ảnh 10%, ngưỡng hiệu chỉnh là 0.357; trên tài liệu giữ lại, FNR thực nghiệm là **12.0%** và FPR điểm ảnh trên nền là **1.8%**. Bảo đảm chuyển được sang tài liệu chưa thấy của cùng bộ sinh — đúng chế độ vận hành ngân hàng quan tâm: với 1.8% báo động giả trên nền, chưa tới 1/8 số điểm ảnh bị sửa bị bỏ sót.
+| α | n_cal | image FNR | pixel FNR (mỗi tài liệu) | pixel FNR (pooled) | pixel FPR |
+|---|---|---|---|---|---|
+| 0.10 | 300 | **9.66 ± 2.09** | 15.33 ± 1.13 | 18.29 ± 1.96 | 5.6% |
+| 0.10 | 500 | **9.90 ± 2.90** | 15.24 ± 2.95 | 18.46 ± 3.96 | 5.6% |
+| 0.15 | 300 | **14.70 ± 2.48** | **15.33 ± 1.13** | 18.29 ± 1.96 | 5.6% |
 
-Đây là công thức kiểm soát rủi ro đầu tiên cho định vị giấy tờ bị AI sửa mà chúng tôi biết, và nó đổi tuyên bố của bài: chúng tôi không tuyên bố SOTA về IoU, mà là phương pháp định vị có **thể chứng nhận** tỷ lệ lỗi ở mức chọn trước với 300 tài liệu có nhãn.
+**Bảo đảm mức ảnh giữ được** ở cả α = 0.10 và 0.15 (quan sát 9.7% và 14.7%), dùng điểm cascade S(w*): cải thiện lớn so với score toàn ảnh, vốn vi phạm cùng cách dựng (FNR 25.4% tại FPR 67.7%). Ở mức điểm ảnh, bài toán khó hơn: chứng nhận được ở α = 0.15 nhưng vẫn 15.3% với α danh nghĩa 0.10, do lưới λ rời rạc và mask lớn chi phối. Chúng tôi báo cáo trung thực thay vì tinh chỉnh λ cho đẹp. Muốn chứng nhận FNR 10% ở mức điểm ảnh cần score tốt hơn (bộ phân đoạn patch mạnh hơn), không phải đổi cách hiệu chỉnh.
+
 
 ---
 

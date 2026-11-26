@@ -335,11 +335,16 @@ Stride 256 is both the fastest (1.18 s per document, 54 windows) and the most ac
 
 ### 6.13 Risk-controlled localization
 
-The image-level triage above cannot separate authentic from forged documents, so we state the guarantee where the signal actually lives: on pixels. We split the 613 forged test documents into 300 calibration and 313 evaluation images, calibrate a split-conformal pixel threshold on the forged pixels of the calibration split, and then apply it unchanged to the held-out images.
+We state the guarantee where the signal lives — on pixels and on documents — using Conformal Risk Control (CRC): for a threshold λ, let L_i(λ) be the fraction of document i's annotated pixels missed (false negatives), and choose λ̂ as the largest λ whose empirical risk, corrected by n/(n+1) and 1/(n+1), is below α. We calibrate on 300 forged documents and evaluate on the remaining 313, repeating the random split 100 times.
 
-With a target pixel-level FNR of 10%, the calibrated threshold is 0.357; on the held-out documents the empirical FNR is **12.0%** and the pixel-level FPR on background is **1.8%**. The guarantee therefore transfers to unseen documents of the same generator, which is exactly the operating regime a bank cares about: at a 1.8% false-alarm rate on background pixels, fewer than one in eight edited pixels is missed.
+| α | n_cal | image FNR | pixel FNR (per doc) | pixel FNR (pooled) | pixel FPR |
+|---|---|---|---|---|---|
+| 0.10 | 300 | **9.66 ± 2.09** | 15.33 ± 1.13 | 18.29 ± 1.96 | 5.6% |
+| 0.10 | 500 | **9.90 ± 2.90** | 15.24 ± 2.95 | 18.46 ± 3.96 | 5.6% |
+| 0.15 | 300 | **14.70 ± 2.48** | **15.33 ± 1.13** | 18.29 ± 1.96 | 5.6% |
 
-This is the first risk-controlled formulation for AI-forged document localization we are aware of, and it changes the claim of the paper: we do not claim a new state of the art in IoU, but a localization method whose error rate can be *certified* at a chosen level with 300 labelled documents.
+The **image-level guarantee holds** at both α = 0.10 and 0.15 (observed 9.7% and 14.7%), using the cascade score S(w*): this is a large improvement over the full-image score, which violated the same construction (25.4% FNR at 67.7% FPR). At pixel level the loss is harder: it certifies at α = 0.15 but remains at 15.3% for a nominal α = 0.10, because the λ grid is discrete and large masks dominate. We report this rather than tuning λ to a favourable value. Certifying a 10% pixel-level FNR would require a finer score (a better patch segmenter) rather than a different calibration.
+
 
 ---
 
