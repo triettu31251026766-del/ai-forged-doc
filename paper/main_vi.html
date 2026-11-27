@@ -813,10 +813,11 @@ p, li { orphans: 2; widows: 2; }
 <p>Ở mức điểm ảnh, bức tranh khác. FNR là 15.3–16.7% trong mọi cấu hình tại 4.5–5.6% pixel FPR, và tăng alpha từ 0.10 lên 0.15 gần như không thay đổi vì một sàn cấu trúc chi phối: ở khoảng 15% tài liệu giả mạo, cửa sổ được chọn w* không phủ toàn bộ vùng gán nhãn, và các điểm ảnh đó là false negative ở mọi ngưỡng. Không bộ hiệu chỉnh nào xuống dưới sàn bỏ sót cửa sổ này, nên bảo đảm 10% danh nghĩa ở mức điểm ảnh không đạt, và alpha = 0.15 chỉ đạt sát ngưỡng tại n_cal = 300 (15.5 ± 1.3%). Pixel FPR thấp là hệ quả của độ thưa (mask phủ khoảng 1% số điểm ảnh): ngay cả ngưỡng dễ dãi cũng thêm ít dương tính giả so với nền. Muốn chứng nhận FNR 10% ở mức điểm ảnh cần chọn cửa sổ tốt hơn hoặc bộ phân đoạn mịn hơn, không phải đổi cách hiệu chỉnh. Chúng tôi báo cáo đúng số đo thay vì tinh chỉnh lambda cho đẹp.</p>
 <p><strong>Cascade trên toàn tập và triage mức ảnh.</strong> Chạy cascade (stride 256) trên toàn bộ 1.226 ảnh test GPT-Image-2 (613 giả + 613 thật) mất 1.04 s/ảnh, cho IoU 0.564 pooled / 0.590 mean, F1 0.721 pooled. Dùng chính điểm S(w*) cho triage toàn ảnh tốt hơn hẳn detector toàn ảnh: image AUC 0.825 so với 0.565, image AP 0.845 so với 0.582, và <strong>Recall@1%FPR 0.286 so với 0.042</strong> (tăng 6.8 lần). Đây là tín hiệu xếp hạng tốt hơn, không phải triage đã được giải quyết: tại ngân sách cảnh báo 1%, 71% giấy tờ giả vẫn bị bỏ sót, và điểm vận hành conformal chặn tỉ lệ bỏ sót ở 10% gắn cờ 56% tài liệu thật. Tầng định vị vì thế cải thiện triage nhưng không khắc phục được nó.</p>
 <h3 id="614-o-ben-voi-hau-xu-ly">6.14 Độ bền với hậu xử lý</h3>
-<p>Tài liệu giả hiếm khi đến ngân hàng dưới dạng PNG nguyên bản: nó bị chụp màn hình, nén lại hoặc thay đổi kích thước trên đường đi. Vì thế chúng tôi chạy lại cascade trên một tập con cố định 200 tài liệu giả + 100 tài liệu thật GPT-Image-2 dưới bốn phép biến đổi: JPEG quality 90 và 75, giảm mẫu 0.75x rồi phóng bilinear, và Gaussian blur (5x5, sigma = 1). Tập con là 200/100 tài liệu đầu tiên của danh sách test cố định và dễ hơn split đầy đủ (IoU pooled 0.705 khi không biến đổi so với 0.564 ở Mục 6.8); do đó giá trị tuyệt đối không so sánh được giữa các bảng, và bảng dưới đây chỉ đọc theo mức giữ tương đối. Với 100 tài liệu thật, điểm vận hành FPR 1% mang tính thực nghiệm và thô (khoảng một dương tính giả), nên Recall@1%FPR bị lượng tử hóa theo bước 0.005.</p>
+<p>Tài liệu giả hiếm khi đến ngân hàng dưới dạng PNG nguyên bản: nó bị chụp màn hình, nén lại hoặc thay đổi kích thước trên đường đi. Vì thế chúng tôi chạy lại cascade trên một tập con cố định 200 tài liệu giả + 100 tài liệu thật GPT-Image-2 dưới bốn phép biến đổi: JPEG quality 90 và 75, giảm mẫu 0.75x rồi phóng bilinear, và Gaussian blur (5x5, sigma = 1). Chúng tôi so sánh bộ thích ứng patch gốc ở Mục 6.8 với một biến thể fine-tune bằng đúng 100 nhãn đó cộng augmentation JPEG ngẫu nhiên (quality 50–95 áp cho 50% crop patch); đây là khác biệt duy nhất giữa hai lần chạy. Tập con là 200/100 tài liệu đầu tiên của danh sách test cố định và dễ hơn split đầy đủ (IoU pooled 0.705 khi không biến đổi với bản gốc so với 0.564 ở Mục 6.8); do đó giá trị tuyệt đối không so sánh được giữa các bảng, và bảng dưới đây chỉ đọc theo mức giữ tương đối. Với 100 tài liệu thật, điểm vận hành FPR 1% mang tính thực nghiệm và thô (khoảng một dương tính giả), nên Recall@1%FPR bị lượng tử hóa theo bước 0.005.</p>
 <table>
 <thead>
 <tr>
+<th>Bộ thích ứng</th>
 <th>Biến đổi</th>
 <th>IoU (pooled)</th>
 <th>IoU (mean)</th>
@@ -828,6 +829,7 @@ p, li { orphans: 2; widows: 2; }
 </thead>
 <tbody>
 <tr>
+<td>Gốc</td>
 <td>Không</td>
 <td>0.705</td>
 <td>0.725</td>
@@ -837,6 +839,7 @@ p, li { orphans: 2; widows: 2; }
 <td>0.520</td>
 </tr>
 <tr>
+<td>Gốc</td>
 <td>JPEG q90</td>
 <td>0.214</td>
 <td>0.278</td>
@@ -846,6 +849,7 @@ p, li { orphans: 2; widows: 2; }
 <td>0.070</td>
 </tr>
 <tr>
+<td>Gốc</td>
 <td>JPEG q75</td>
 <td>0.081</td>
 <td>0.117</td>
@@ -855,6 +859,7 @@ p, li { orphans: 2; widows: 2; }
 <td>0.005</td>
 </tr>
 <tr>
+<td>Gốc</td>
 <td>Resize 0.75x</td>
 <td>0.629</td>
 <td>0.655</td>
@@ -864,6 +869,7 @@ p, li { orphans: 2; widows: 2; }
 <td>0.305</td>
 </tr>
 <tr>
+<td>Gốc</td>
 <td>Blur sigma = 1</td>
 <td>0.579</td>
 <td>0.617</td>
@@ -872,9 +878,59 @@ p, li { orphans: 2; widows: 2; }
 <td>0.882</td>
 <td>0.240</td>
 </tr>
+<tr>
+<td>+ JPEG aug</td>
+<td>Không</td>
+<td>0.621</td>
+<td>0.641</td>
+<td>0.766</td>
+<td>0.807</td>
+<td>0.904</td>
+<td>0.345</td>
+</tr>
+<tr>
+<td>+ JPEG aug</td>
+<td>JPEG q90</td>
+<td>0.512</td>
+<td>0.531</td>
+<td>0.678</td>
+<td>0.669</td>
+<td>0.822</td>
+<td>0.165</td>
+</tr>
+<tr>
+<td>+ JPEG aug</td>
+<td>JPEG q75</td>
+<td>0.449</td>
+<td>0.482</td>
+<td>0.620</td>
+<td>0.623</td>
+<td>0.786</td>
+<td>0.130</td>
+</tr>
+<tr>
+<td>+ JPEG aug</td>
+<td>Resize 0.75x</td>
+<td>0.505</td>
+<td>0.553</td>
+<td>0.671</td>
+<td>0.733</td>
+<td>0.854</td>
+<td>0.225</td>
+</tr>
+<tr>
+<td>+ JPEG aug</td>
+<td>Blur sigma = 1</td>
+<td>0.476</td>
+<td>0.544</td>
+<td>0.645</td>
+<td>0.724</td>
+<td>0.850</td>
+<td>0.205</td>
+</tr>
 </tbody>
 </table>
-<p>Ba nhận xét. <strong>(1) JPEG tàn phá.</strong> Quality 90 giảm IoU pooled từ 0.705 xuống 0.214 (giữ 30%) và Recall@1%FPR từ 0.520 xuống 0.070; quality 75 chỉ còn 0.081 IoU, 0.149 F1 và 0.005 Recall@1%FPR, image AUC xuống 0.397, dưới mức ngẫu nhiên trên tập con này. Điều này phù hợp với việc detector dựa vào dấu vết tần số cao của bộ sinh mà lượng tử hóa xóa đi, và quan trọng về vận hành vì nén lại là phổ biến. Chúng tôi báo cáo AUC dưới ngẫu nhiên đúng như đo được; với 200 tài liệu giả, đây cũng là ô nhiễu nhất trong bảng. <strong>(2) Resize và blur nhẹ hơn.</strong> Chúng giữ 89% và 82% IoU pooled (0.629 và 0.579), Recall@1%FPR còn 0.305 và 0.240, nên tín hiệu không thuần túy tần số cao. <strong>(3) Xếp hạng và định vị suy giảm cùng nhau.</strong> Hậu xử lý không chỉ dịch điểm vận hành, nên hiệu chỉnh lại không lấy lại được IoU đã mất. Triển khai thực tế nên thêm augmentation JPEG/resize khi thích ứng và ghi lại pipeline nén của đường vào; nghiên cứu augmentation đầy đủ để cho công việc sau.</p>
+<p>Ba nhận xét. <strong>(1) Không có augmentation nén, JPEG tàn phá.</strong> Quality 90 giảm IoU pooled từ 0.705 xuống 0.214 (giữ 30%) và Recall@1%FPR từ 0.520 xuống 0.070; quality 75 chỉ còn 0.081 IoU, 0.149 F1 và 0.005 Recall@1%FPR, image AUC xuống 0.397, dưới mức ngẫu nhiên trên tập con này. Điều này phù hợp với việc detector dựa vào dấu vết tần số cao của bộ sinh mà lượng tử hóa xóa đi, và quan trọng về vận hành vì nén lại là phổ biến. Chúng tôi báo cáo AUC dưới ngẫu nhiên đúng như đo được; với 200 tài liệu giả, đây cũng là ô nhiễu nhất trong bảng. <strong>(2) Augmentation JPEG lấy lại phần lớn mất mát.</strong> Với đúng 100 nhãn và ngân sách replay, quality 90 tăng từ 0.214 lên 0.512 IoU pooled và quality 75 từ 0.081 lên 0.449 (72% mức sạch 0.621 của chính mô hình có augmentation); image AUC tăng từ 0.541/0.397 lên 0.669/0.623, và Recall@1%FPR ở quality 75 tăng từ 0.005 lên 0.130. <strong>(3) Lợi ích có mục tiêu và không miễn phí.</strong> Mô hình có augmentation trả giá trên tài liệu sạch (0.705 -&gt; 0.621 IoU pooled; Recall@1%FPR 0.520 -&gt; 0.345) và trên hai phép nó không được huấn luyện (resize 0.629 -&gt; 0.505; blur 0.579 -&gt; 0.476). Vì thế khớp augmentation với pipeline đầu vào quan trọng hơn là thêm mù quáng. Ngay cả khi có augmentation, quality 75 vẫn mất 28% IoU sạch và triage tại FPR 1% chỉ bắt 13% giấy tờ giả so với 34.5% khi sạch, nên khoảng cách được thu hẹp nhưng chưa đóng. Xếp hạng và định vị suy giảm cùng nhau, nên hiệu chỉnh lại không lấy lại được IoU đã mất.</p>
 <hr />
 <h2 id="7-thao-luan">7. Thảo luận</h2>
 <p><strong>Vì sao thích ứng giúp?</strong> Fine-tune trên vài mẫu đích dường như làm sắc nét phản hồi không gian quanh vùng bị sửa, thay vì chỉ dịch một ngưỡng toàn cục. Điều này phù hợp với pixel AUC cao trước thích ứng và với việc các phương pháp hiệu chỉnh ngưỡng thất bại.</p>
@@ -892,7 +948,7 @@ p, li { orphans: 2; widows: 2; }
 <li><strong>Chi phí suy luận.</strong> Tìm kiếm dày chạy ≈197 lượt cửa sổ mỗi tài liệu giả mạo (≈20 s trên một GPU tiêu dùng). Chấp nhận được cho giám định offline nhưng không cho streaming thông lượng cao; pruning dẫn hướng bởi coarse hiện mất 0.011 IoU hoặc hơn.</li>
 <li><strong>Khoảng cách xếp hạng dưới dịch chuyển bộ sinh.</strong> Trên Ideogram, oracle window của detector là 0.510 nhưng cửa sổ được chọn chỉ đạt 0.284, nên độ tin cậy bị lệch chuẩn giữa các bộ sinh.</li>
 <li><strong>Chỉ một baseline công bố.</strong> Chúng tôi chỉ so sánh với TruFor, trên toàn bộ 613 ảnh test ở 1024 px (giới hạn RAM CPU); DocTamper không build được trong môi trường của nhóm, nên so sánh đa detector vẫn là việc tiếp theo.</li>
-<li><strong>Hậu xử lý.</strong> Nén JPEG quality 75 xóa phần lớn tín hiệu (Mục 6.14); các mô hình hiện tại chưa được huấn luyện với augmentation nén ảnh.</li>
+<li><strong>Hậu xử lý.</strong> Nén JPEG quality 75 xóa phần lớn tín hiệu nếu không có augmentation nén (Mục 6.14); augmentation cho bộ thích ứng patch lấy lại 72% IoU sạch dưới q75 nhưng tốn độ chính xác trên ảnh sạch và không giúp resize/blur.</li>
 <li><strong>Phương sai.</strong> Kết quả thay đổi theo seed; chúng tôi báo cáo trung bình ± độ lệch chuẩn qua ba seed cho mọi con số headline.</li>
 </ul>
 <hr />

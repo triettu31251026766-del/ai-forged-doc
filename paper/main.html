@@ -1,27 +1,36 @@
 <!DOCTYPE html>
 <html lang="vi"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Label-Efficient Adaptation of AI-Forged Document Detectors under Generator Shift via Rehearsal and Dense High-Resolution Search</title><style>
+<title>Label-Efficient and Risk-Controlled Adaptation of AI-Forged Document Detectors under Generator Shift</title><style>
+@page { size: A4; margin: 16mm 14mm; }
 body { font-family: "Segoe UI", Arial, sans-serif; max-width: 920px; margin: 32px auto;
        padding: 0 28px; color: #1f2328; line-height: 1.6; font-size: 16px; }
 h1 { font-size: 28px; border-bottom: 2px solid #d0d7de; padding-bottom: 10px; }
-h2 { font-size: 22px; margin-top: 34px; border-bottom: 1px solid #d0d7de; padding-bottom: 6px; }
-h3 { font-size: 18px; margin-top: 26px; }
-table { border-collapse: collapse; width: 100%; margin: 14px 0; font-size: 14px; }
+h2 { font-size: 22px; margin-top: 34px; border-bottom: 1px solid #d0d7de; padding-bottom: 6px; page-break-after: avoid; }
+h3 { font-size: 18px; margin-top: 26px; page-break-after: avoid; }
+table { border-collapse: collapse; width: 100%; margin: 14px 0; font-size: 14px; page-break-inside: avoid; }
 th, td { border: 1px solid #c9d1d9; padding: 6px 9px; text-align: left; vertical-align: top; }
 th { background: #f2f4f7; }
 tr:nth-child(even) td { background: #fafbfc; }
 code { background: #f0f2f5; padding: 1px 5px; border-radius: 4px; font-size: 13px; }
 pre { background: #f0f2f5; padding: 12px; border-radius: 6px; overflow-x: auto; }
-img { max-width: 100%; height: auto; margin: 14px 0; }
+img { max-width: 100% !important; height: auto; margin: 14px 0; page-break-inside: avoid; display: block; margin-left: auto; margin-right: auto; }
 blockquote { border-left: 4px solid #d0d7de; margin: 12px 0; padding: 4px 16px; color: #57606a; }
 hr { border: 0; border-top: 1px solid #d0d7de; margin: 30px 0; }
+p, li { orphans: 2; widows: 2; }
+@media print {
+  body { max-width: none; margin: 0; padding: 0; font-size: 10.5pt; }
+  h1 { font-size: 20pt; } h2 { font-size: 15pt; } h3 { font-size: 12.5pt; }
+  table { font-size: 8.5pt; }
+  img { max-width: 100% !important; max-height: 235mm; }
+  a { color: inherit; text-decoration: none; }
+}
 </style></head>
-<body><h1 id="label-efficient-adaptation-of-ai-forged-document-detectors-under-generator-shift-via-rehearsal-and-dense-high-resolution-search">Label-Efficient Adaptation of AI-Forged Document Detectors under Generator Shift via Rehearsal and Dense High-Resolution Search</h1>
-<p><strong>Authors:</strong> </p>
+<body><h1 id="label-efficient-and-risk-controlled-adaptation-of-ai-forged-document-detectors-under-generator-shift">Label-Efficient and Risk-Controlled Adaptation of AI-Forged Document Detectors under Generator Shift</h1>
+<p><strong>Authors:</strong> Anonymous submission (author names withheld for review).</p>
 <hr />
 <h2 id="abstract">Abstract</h2>
-<p>Generative image editing has made it possible to alter a single numeric field in a financial document in under a second, and detectors trained on traditional (e.g., Photoshop-based) forgeries are largely blind to such edits. Even a detector trained on one generative inpainter collapses when the underlying generator changes — a <em>generator shift</em>. In realistic banking deployments, collecting many labelled forgeries for every new generator is infeasible. We study <strong>label-efficient adaptation</strong> of an AI-forged document detector under generator shift, and we ask whether a small number of labelled target-generator samples is sufficient to recover localization performance without catastrophically forgetting previously seen generators. Using the AIForge-Doc benchmark (Gemini, Ideogram, GPT-Image-2), we show that: (i) a detector trained on Gemini collapses on unseen generators (IoU 0.052 on GPT-Image-2); (ii) few-shot fine-tuning recovers localization monotonically, reaching IoU 0.195 ± 0.037 with only 100 labelled target samples (≈3.7× over zero-shot); (iii) training from scratch with the same 100 labels is substantially worse (IoU 0.085), showing that base-generator pretraining matters; and (iv) rehearsal of 100 old-generator samples restores in-domain performance to 0.672 ± 0.006 (near the 0.669 zero-shot level) at a modest target-generator cost (IoU 0.162). We further report a set of negative results: temperature scaling, global and per-image threshold calibration, sample-selection strategies, encoder freezing, frequency channels, and generic anomaly detection do <strong>not</strong> provide consistent gains. Our analysis indicates that the bottleneck is <strong>localization precision</strong>, not decision-threshold calibration. Finally, we show that adapting a native-resolution patch segmenter with the same 100 labels raises the localization ceiling from 0.459 to 0.677 IoU, but that the coarse peak used to position it is the real bottleneck: it misses the field centre by 152 px (median), so the crop covers only 53% of the tampered pixels. Replacing the single peak with a dense high-resolution search over 384 px windows and selecting by patch confidence reaches <strong>0.545 ± 0.012 IoU on the full unseen generator (2.8× the full-image baseline, 82% of the adapted ceiling)</strong>, and 0.284 IoU on a completely unseen generator (Ideogram) versus 0.114 for the full-image detector. A localization study shows that centroid, grid, zoom and tiling variants all underperform dense search, that the coarse map is too unreliable to prune it, and that the residual gap is a <em>selection-confidence</em> problem under generator shift (oracle-window IoU is 0.653). We release code, splits, and all results for reproducibility.</p>
+<p>Generative image editing has made it possible to alter a single numeric field in a financial document in under a second, and detectors trained on traditional (e.g., Photoshop-based) forgeries are largely blind to such edits. Even a detector trained on one generative inpainter collapses when the underlying generator changes — a <em>generator shift</em>. In realistic banking deployments, collecting many labelled forgeries for every new generator is infeasible. We study <strong>label-efficient adaptation</strong> of an AI-forged document detector under generator shift, and we ask whether a small number of labelled target-generator samples is sufficient to recover localization performance without catastrophically forgetting previously seen generators. Using the AIForge-Doc benchmark (Gemini, Ideogram, GPT-Image-2), we show that: (i) a detector trained on Gemini collapses on unseen generators (IoU 0.052 on GPT-Image-2); (ii) few-shot fine-tuning recovers localization monotonically, reaching IoU 0.195 ± 0.037 with only 100 labelled target samples (≈3.7× over zero-shot); (iii) training from scratch with the same 100 labels is substantially worse (IoU 0.085), showing that base-generator pretraining matters; and (iv) rehearsal of 100 old-generator samples restores in-domain performance to 0.672 ± 0.006 (near the 0.669 zero-shot level) at a modest target-generator cost (IoU 0.162). We further report a set of negative results: temperature scaling, global and per-image threshold calibration, sample-selection strategies, encoder freezing, frequency channels, and generic anomaly detection do <strong>not</strong> provide consistent gains. Our analysis indicates that the bottleneck is <strong>localization precision</strong>, not decision-threshold calibration. Finally, we show that adapting a native-resolution patch segmenter with the same 100 labels raises the localization ceiling from 0.459 to 0.677 IoU, but that the coarse peak used to position it is the real bottleneck: it misses the field centre by 152 px (median), so the crop covers only 53% of the tampered pixels. Replacing the single peak with a dense high-resolution search over 384 px windows and selecting by patch confidence reaches <strong>0.537 ± 0.016 IoU on the full unseen generator (2.8× the full-image baseline, 79% of the adapted ceiling)</strong>, and 0.284 IoU on a completely unseen generator (Ideogram) versus 0.114 for the full-image detector. A localization study shows that centroid, grid, zoom and tiling variants all underperform dense search, that the coarse map is too unreliable to prune it, and that the residual gap is a <em>selection-confidence</em> problem under generator shift (oracle-window IoU is 0.653). We then state the guarantee where the signal lives: with 300 labelled documents, a split-conformal threshold controls the image-level miss rate at the nominal level (9.8% at alpha = 0.10) but flags <strong>55.8% of authentic documents</strong>, and the pixel-level miss rate saturates at <strong>15.5% at 5.5% pixel false alarms</strong> because the selected window misses part of the annotation in about 15% of documents. Conformal risk control therefore gives a one-sided guarantee on misses, not a usable operating point: image triage remains the deployment bottleneck. We release code, splits, and all results for reproducibility.</p>
 <hr />
 <h2 id="1-introduction">1. Introduction</h2>
 <p>Digital document fraud is increasing rapidly. Recent generative inpainting APIs can replace a number or a date in a photographed receipt while preserving font, colour, and texture, leaving no obvious compression or copy-move traces. Detectors designed for traditional document tampering therefore degrade substantially on such forgeries.</p>
@@ -31,21 +40,24 @@ hr { border: 0; border-top: 1px solid #d0d7de; margin: 30px 0; }
 <p><em>Given a detector trained on an old generator, how many labelled samples from a new generator are needed to recover localization, and how can we adapt without forgetting the old generator?</em></p>
 </blockquote>
 <p>We use the AIForge-Doc benchmark, which provides AI-inpainted financial and form documents with pixel-precise masks for three generator families: Gemini 2.5 Flash Image, Ideogram v2 Edit, and GPT-Image-2. We adopt a leave-one-generator-out protocol and evaluate both localization (IoU/F1/Dice) and detection-oriented metrics (image AUC/AP, Recall@1%FPR).</p>
-<p><strong>Contributions.</strong>
-1. A controlled study of label-efficient adaptation for AI-forged document detection under generator shift.
-2. A few-shot adaptation curve (k = 0, 5, 25, 100; 3 seeds) showing monotonic recovery (IoU 0.052 → 0.195 ± 0.037).
-3. A rehearsal strategy that restores old-generator performance to near zero-shot level (Gemini IoU 0.672 ± 0.006) while retaining most of the adaptation gain.
-4. An honest set of negative results: calibration, adaptive thresholding, sample selection, encoder freezing, frequency channels, and generic anomaly detection do not provide consistent gains; we analyze why.
-5. Qualitative evidence (score maps) showing that adaptation sharpens localization rather than merely shifting thresholds.
-6. A <strong>text-localized high-resolution search (TL-HRS) method</strong> that adapts a patch segmenter with the same 100 target labels and searches the document densely at native resolution: the localization ceiling rises from 0.459 to 0.677, and the automatic pipeline reaches <strong>0.545 ± 0.012 IoU</strong> on the full unseen generator (2.8× the full-image baseline, 82% of the ceiling), while a single coarse peak reaches only 0.321.
-7. A localization study showing that the coarse stage, not segmentation, is the bottleneck (median peak error 152 px; crop coverage 53% vs. 98% at the true box), and that dense search beats centroid refinement, grids, zoom, tiling, coarse-guided pruning, OCR selection, multi-signal fusion and pixel gating; the remaining gap is uncalibrated selection confidence under generator shift.</p>
+<p><strong>Contributions.</strong></p>
+<ol>
+<li>A controlled study of label-efficient adaptation for AI-forged document detection under generator shift.</li>
+<li>A few-shot adaptation curve (k = 0, 5, 25, 100; 3 seeds) showing monotonic recovery (IoU 0.052 -&gt; 0.195 ± 0.037).</li>
+<li>A rehearsal strategy that restores old-generator performance to near zero-shot level (Gemini IoU 0.672 ± 0.006) while retaining most of the adaptation gain.</li>
+<li>An honest set of negative results: calibration, adaptive thresholding, sample selection, encoder freezing, frequency channels, and generic anomaly detection do not provide consistent gains; we analyze why.</li>
+<li>Qualitative evidence (score maps) showing that adaptation sharpens localization rather than merely shifting thresholds.</li>
+<li>A <strong>text-localized high-resolution search (TL-HRS) method</strong> that adapts a patch segmenter with the same 100 target labels and searches the document densely at native resolution: the localization ceiling rises from 0.459 to 0.677, and the automatic pipeline reaches <strong>0.537 ± 0.016 IoU</strong> on the full unseen generator (2.8× the full-image baseline, 79% of the ceiling), while a single coarse peak reaches only 0.321.</li>
+<li>A localization study showing that the coarse stage, not segmentation, is the bottleneck (median peak error 152 px; crop coverage 53% vs. 98% at the true box), and that dense search beats centroid refinement, grids, zoom, tiling, coarse-guided pruning, OCR selection, multi-signal fusion and pixel gating; the remaining gap is uncalibrated selection confidence under generator shift.</li>
+<li>A <strong>risk-controlled localization</strong> analysis: with 300 labelled documents, split-conformal risk control holds for image-level misses (9.8% at alpha = 0.10) but only at 55.8% image false alarms, and pixel-level FNR saturates at 15.5% (5.5% pixel FPR) because of the window-miss floor. We report the guarantee as one-sided and identify image triage, not localization, as the remaining bottleneck.</li>
+</ol>
 <hr />
 <h2 id="2-related-work">2. Related Work</h2>
-<p><strong>AI-forged document detection.</strong> DocTamper introduced a large document-tampering benchmark and a document-specific detector based on frequency-domain losses. TruFor combines a transformer backbone with a noise fingerprint for general image forgery localization. AIForge-Doc and DOCFORGE-BENCH recently showed that these detectors degrade severely on diffusion-inpainted documents, and that the problem remains unsolved. Our work builds directly on AIForge-Doc and studies adaptation rather than zero-shot detection.</p>
-<p><strong>Few-shot and domain adaptation.</strong> Few-shot learning and unsupervised domain adaptation are mature fields. We do not propose a new adaptation algorithm; instead, we characterize how standard fine-tuning behaves in the specific regime of extreme label scarcity and generator shift, and identify which components (pretraining, rehearsal, calibration) actually matter.</p>
-<p><strong>Continual learning and rehearsal.</strong> Rehearsal (experience replay) is a classical remedy for catastrophic forgetting. We show that a small replay buffer of old-generator samples is sufficient to preserve in-domain performance while adapting to a new generator.</p>
-<p><strong>Calibration.</strong> Temperature scaling is a standard post-hoc calibration method. We find that although it changes confidence, it does not change ranking and therefore does not improve IoU; global and per-image threshold calibration are generator-specific and do not transfer reliably.</p>
-<hr />
+<p><strong>AI-forged document detection.</strong> DocTamper (CVPR 2023) introduced a large document-tampering benchmark and a document-specific detector built on compression-artifact tracing, later extended by CAT-Net and PSCC-Net; MVSS-Net and HiFi-Net approached the same problem with multi-view supervision and reconstruction-classification learning. On the general-image side, TruFor combines a transformer backbone with a learned noise fingerprint, Noiseprint models camera fingerprints, and ManTra-Net and RGB-N exploit anomalous features and rich boundary cues. AIForge-Doc, DOCFORGE-BENCH and the GPT-Image-2 study recently showed that all of these degrade severely on diffusion-inpainted documents, and that the problem remains open. Our work builds directly on AIForge-Doc and studies adaptation rather than zero-shot detection.</p>
+<p><strong>Detection of generated content.</strong> A parallel literature asks whether an image was generated at all, using frequency cues, diffusion reconstruction error (DIRE), or learned fingerprints. These detectors operate at image level and assume a globally synthetic image; our target is a small inpainted region inside an otherwise authentic financial document, which is why image-level scores are weak here and why the guarantee must be stated at the localization level.</p>
+<p><strong>High-resolution and coarse-to-fine localization.</strong> Patch-based and coarse-to-fine pipelines are standard in segmentation and in forgery localization, typically using a low-resolution proposal followed by a native-resolution crop. We show that the proposal stage is the bottleneck for thin, wide text fields: the coarse peak misses the field centre by 152 px (median), so we replace it with a dense high-resolution search scored by patch confidence. This connects to sliding-window detection and to cascade designs that trade compute for accuracy.</p>
+<p><strong>Few-shot and continual adaptation.</strong> Few-shot learning (MAML, Prototypical Networks) and unsupervised domain adaptation are mature. We do not propose a new adaptation algorithm; instead we characterize how standard fine-tuning behaves under extreme label scarcity and generator shift. Rehearsal (experience replay) is the classical remedy for catastrophic forgetting, with EWC, LwF, iCaRL, A-GEM and DER++ as the main representatives; we show that a 100-sample replay buffer is enough, and that at the patch level replay acts as additional data rather than as a pure anti-forgetting device.</p>
+<p><strong>Calibration and distribution-free guarantees.</strong> Temperature scaling and Bayesian binning are standard post-hoc calibrators; we find they change confidence but not ranking. Conformal prediction (Vovk et al.) and conformal risk control (Angelopoulos et al.; Bates et al.) provide distribution-free guarantees under exchangeability. We apply document-level CRC to image triage and to pixel-level false-negative control, and we report where exchangeability breaks under generator shift instead of claiming a guarantee that does not hold.</p>
 <h2 id="3-dataset-and-protocol">3. Dataset and Protocol</h2>
 <h3 id="31-dataset">3.1 Dataset</h3>
 <p>We use <strong>AIForge-Doc</strong> (v1 and v2):</p>
@@ -74,18 +86,18 @@ hr { border: 0; border-top: 1px solid #d0d7de; margin: 30px 0; }
 <tr>
 <td>v2 train</td>
 <td>2,453</td>
-<td>—</td>
+<td>2,453</td>
 <td>GPT-Image-2</td>
 </tr>
 <tr>
 <td>v2 test</td>
 <td>613</td>
-<td>—</td>
+<td>613</td>
 <td>GPT-Image-2</td>
 </tr>
 </tbody>
 </table>
-<p>Documents are receipts and forms; forgeries replace a single numeric field. The median tampered area is ≈1% of the image. Masks are binary (0/255). We verified the integrity of all 18,315 files (0 corrupt) and visually confirmed mask alignment.</p>
+<p>v1 and v2 pair each forged document with an authentic counterpart, so the authentic counts mirror the forged counts (v2 authentic pairs are used for adaptation and image-level evaluation). Documents are receipts and forms; forgeries replace a single numeric field. The median tampered area is ≈1% of the image. Masks are binary (0/255). We verified the integrity of all 18,315 files (0 corrupt) and visually confirmed mask alignment.</p>
 <h3 id="32-leave-one-generator-out-protocol">3.2 Leave-one-generator-out protocol</h3>
 <p>We define three settings:</p>
 <ul>
@@ -100,26 +112,46 @@ hr { border: 0; border-top: 1px solid #d0d7de; margin: 30px 0; }
 <li><strong>Ranking:</strong> pixel AUC (mean per image) and image AUC.</li>
 <li><strong>Detection under alert budget:</strong> image Average Precision (AP) and Recall at FPR = 1% (Recall@1%FPR), which reflects a bank's limited review capacity.</li>
 </ul>
+<h3 id="34-threat-model">3.4 Threat model</h3>
+<p>The asset is a financial document whose numeric field has been replaced by a generative editor. The adversary wants to (i) evade image-level triage, (ii) displace or shrink the predicted mask so that a human reviewer cannot find the edit, or (iii) trigger false alarms on genuine documents. We assume a black-box adversary who can (a) use a generator not seen in training, (b) post-process the final document with operations that preserve legibility — JPEG recompression at messenger or bank settings, resizing, and mild blur — and (c) query the deployed system only through its output. White-box adversarial perturbations, physical recapture, whole-document synthesis, and collusion with the reviewer are out of scope. The model is deliberately modest: it captures the shift that occurs when a forger uses a new tool or sends the file through a messaging pipeline, which is exactly where the detectors above fail. Section 6.14 quantifies the post-processing component.</p>
 <hr />
 <h2 id="4-method">4. Method</h2>
+<p><strong>Figure 1.</strong> Overview of TL-HRS: a coarse patch scan proposes windows, a local refinement selects w<em>, and the adapted patch segmenter produces the mask. The same score S(w</em>) drives image-level triage, and the mask supports pixel-level risk control.</p>
+<p><img alt="Figure 1" src="figures/fig_pipeline.png" /></p>
 <h3 id="41-base-detector">4.1 Base detector</h3>
 <p>We use a U-Net with a ResNet-18 encoder pretrained on ImageNet. The model outputs a single-channel logit map. It is trained on Gemini with:</p>
-<p>[
-\mathcal{L} = \mathrm{BCEWithLogits}(\hat{y}, y; w=20) + \mathcal{L}_{\mathrm{Dice}},
-]</p>
-<p>where the positive weight compensates for the extreme pixel imbalance (≈1% tampered). Inputs are letterboxed to 384×384 to preserve document aspect ratio. Training uses AdamW (lr (10^{-4})) for 10 epochs.</p>
+<p align="center"><i>L</i> = BCEWithLogits(<i>ŷ</i>, <i>y</i>; <i>w</i> = 20) + <i>L</i><sub>Dice</sub></p>
+
+<p>where the positive weight compensates for the extreme pixel imbalance (≈1% tampered). Inputs are letterboxed to 384×384 to preserve document aspect ratio. Training uses AdamW (lr 10<sup>−4</sup>) for 10 epochs.</p>
 <h3 id="42-few-shot-adaptation">4.2 Few-shot adaptation</h3>
-<p>Given (k) labelled samples from the target generator (plus (k) authentic samples), we fine-tune the base detector for 10 epochs with the same loss and optimizer. All models are evaluated on a disjoint target test split.</p>
+<p>Given <i>k</i> labelled samples from the target generator (plus <i>k</i> authentic samples), we fine-tune the base detector for 10 epochs with the same loss and optimizer. All models are evaluated on a disjoint target test split.</p>
 <h3 id="43-rehearsal">4.3 Rehearsal</h3>
-<p>To mitigate forgetting, we add (r) samples from the old generator (Gemini) to the fine-tuning set. We compare random replay with two informed selectors: <strong>hard</strong> (highest per-sample BCE under the base model) and <strong>uncertainty</strong> (highest predictive entropy).</p>
+<p>To mitigate forgetting, we add <i>r</i> samples from the old generator (Gemini) to the fine-tuning set. We compare random replay with two informed selectors: <strong>hard</strong> (highest per-sample BCE under the base model) and <strong>uncertainty</strong> (highest predictive entropy).</p>
 <h3 id="44-calibration-studied-as-an-ablation">4.4 Calibration (studied as an ablation)</h3>
-<p>We study three calibration strategies: temperature scaling fitted on a held-out fraction of the labelled target samples; global threshold optimization; and per-image adaptive thresholding (keep the top-(p)% pixels). These are evaluated but, as shown in Section 6.5, do not provide consistent gains.</p>
+<p>We study three calibration strategies: temperature scaling fitted on a held-out fraction of the labelled target samples; global threshold optimization; and per-image adaptive thresholding (keep the top-<i>p</i>% pixels). These are evaluated but, as shown in Section 6.5, do not provide consistent gains.</p>
+<h3 id="45-text-localized-high-resolution-search-tl-hrs">4.5 Text-localized high-resolution search (TL-HRS)</h3>
+<p><strong>Algorithm 1</strong> TL-HRS with risk control.</p>
+<pre><code>Input: document x, patch segmenter f_theta, stride s1=256, s2=96, risk level alpha
+1  W &lt;- {windows at centres (s1*i, s1*j)}
+2  score each w in W by S(w) = mean of top-1% of f_theta(x_w)
+3  C &lt;- top-3 windows of W
+4  R &lt;- union of 3x3 neighbourhoods of C at stride s2
+5  w* &lt;- argmax_{w in R} S(w)
+6  p &lt;- f_theta(x_{w*});  m &lt;- p &gt; 0.5
+7  image score s* &lt;- S(w*); flag forged if s* &gt; lambda_CRC(alpha)   # calibrated on n_cal docs
+8  return m, s*, w*
+</code></pre>
+<p>Full-image inference runs at a letterboxed 384×384, where the median tampered field (≈148 px wide) occupies only a few pixels; the resulting mask is spatially imprecise. TL-HRS adds a native-resolution stage on top of the adapted detector.</p>
+<p><strong>Patch adaptation.</strong> A patch segmenter (the same U-Net, applied to 384×384 crops at native scale) is fine-tuned with the <em>same</em> <i>k</i> target labels: <i>k</i> crops centred on the ground-truth fields, <i>k</i> non-overlapping same-line negatives, <i>k</i> authentic crops, plus <i>r</i> replay crops from the old generator. Crop boxes are derived from the training masks by connected components, so no extra annotation is required. Formally, for a crop <i>x</i><sub><i>w</i></sub> centred at window <i>w</i> the model outputs logits <i>f</i><sub>&theta;</sub>(<i>x</i><sub><i>w</i></sub>) and probabilities <i>ŷ</i><sub><i>w</i></sub> = &sigma;(<i>f</i><sub>&theta;</sub>(<i>x</i><sub><i>w</i></sub>)).</p>
+<p><strong>Dense search.</strong> At inference we slide the crop over the document at stride <i>s</i> and score every window by the mean of its top-1% pixels,</p>
+<p align="center"><i>S</i>(<i>w</i>) = (1 / |<i>P</i><sub>1%</sub>(<i>w</i>)|) &Sigma;<sub><i>p</i> &isin; <i>P</i><sub>1%</sub>(<i>w</i>)</sub> <i>ŷ</i><sub><i>w</i></sub>(<i>p</i>), &nbsp;&nbsp; <i>w</i>* = arg max<sub><i>w</i> &isin; <i>W</i></sub> <i>S</i>(<i>w</i>)</p>
+<p>where <i>P</i><sub>1%</sub>(<i>w</i>) is the set of the highest-probability 1% pixels in window <i>w</i> and <i>W</i> is the set of valid windows (stride <i>s</i> = 96, ≈197 windows per forged document). The prediction is the thresholded patch probability map at <i>w</i>*; no OCR, selector, gating or multi-scale fusion is used. The mean of the top 1% is robust to the large background area and rewards windows that contain a sharp, high-confidence mask rather than merely a large low-confidence blob. The whole pipeline is offline-friendly (≈20 s per document on one consumer GPU) and is evaluated end-to-end in Section 6.8.</p>
 <hr />
 <h2 id="5-experimental-setup">5. Experimental Setup</h2>
 <ul>
 <li><strong>Base training:</strong> Gemini train split, 384×384, 10 epochs.</li>
-<li><strong>Adaptation:</strong> (k \in {5, 25, 100}) forged + (k) authentic target samples, 10 epochs.</li>
-<li><strong>Rehearsal:</strong> (r = 100) old-generator samples.</li>
+<li><strong>Adaptation:</strong> <i>k</i> &isin; {5, 25, 100} forged + <i>k</i> authentic target samples, 10 epochs.</li>
+<li><strong>Rehearsal:</strong> <i>r</i> = 100 old-generator samples.</li>
 <li><strong>Seeds:</strong> 3 seeds for the adaptation curve, 4 for rehearsal.</li>
 <li><strong>Hardware:</strong> a single NVIDIA RTX 5060 Laptop GPU (8 GB).</li>
 <li><strong>Reproducibility:</strong> fixed splits, seeds, and scripts are released.</li>
@@ -135,6 +167,8 @@ hr { border: 0; border-top: 1px solid #d0d7de; margin: 30px 0; }
 <th>F1</th>
 <th>Dice</th>
 <th>Image AUC</th>
+<th>Image AP</th>
+<th>Recall@1%FPR</th>
 </tr>
 </thead>
 <tbody>
@@ -143,25 +177,31 @@ hr { border: 0; border-top: 1px solid #d0d7de; margin: 30px 0; }
 <td>0.669</td>
 <td>0.802</td>
 <td>0.719</td>
-<td>0.946</td>
+<td>0.913</td>
+<td>0.925</td>
+<td>0.553</td>
 </tr>
 <tr>
 <td>Ideogram (unseen)</td>
 <td>0.098</td>
 <td>0.179</td>
 <td>0.109</td>
-<td>0.546</td>
+<td>0.559</td>
+<td>0.559</td>
+<td>0.038</td>
 </tr>
 <tr>
 <td>GPT-Image-2 (unseen)</td>
 <td>0.052</td>
 <td>0.099</td>
 <td>0.104</td>
-<td>0.520</td>
+<td>0.526</td>
+<td>0.547</td>
+<td>0.015</td>
 </tr>
 </tbody>
 </table>
-<p>A detector trained on Gemini achieves strong in-domain localization but collapses on unseen generators. Notably, on GPT-Image-2 the <em>image-level</em> AUC is near chance, yet the <strong>pixel AUC remains 0.899</strong> (Section 6.5). In other words, the model still ranks tampered pixels above background, but its predicted mask is spatially imprecise.</p>
+<p>A detector trained on Gemini achieves strong in-domain localization but collapses on unseen generators. Notably, on GPT-Image-2 the <em>image-level</em> AUC is near chance, yet the <strong>pixel AUC remains 0.899</strong> (Section 6.5). In other words, the model still ranks tampered pixels above background, but its predicted mask is spatially imprecise. The image-level scores (top-1% mean probability) confirm the same picture: Recall@1%FPR falls from 0.553 in-domain to 0.015 on GPT-Image-2, so a bank operating at a 1% alert budget would miss almost every unseen-generator forgery — a strong argument for the localization-assisted review pipeline studied in Section 6.8.</p>
 <h3 id="62-few-shot-adaptation-recovers-localization">6.2 Few-shot adaptation recovers localization</h3>
 <table>
 <thead>
@@ -186,29 +226,67 @@ hr { border: 0; border-top: 1px solid #d0d7de; margin: 30px 0; }
 <tr>
 <td>5</td>
 <td>0.068 ± 0.015</td>
-<td>—</td>
-<td>—</td>
+<td>0.126 ± 0.026</td>
+<td>0.116 ± 0.020</td>
 <td>0.877 ± 0.020</td>
 <td>0.624 ± 0.017</td>
 </tr>
 <tr>
 <td>25</td>
 <td>0.105 ± 0.031</td>
-<td>—</td>
-<td>—</td>
+<td>0.189 ± 0.052</td>
+<td>0.140 ± 0.040</td>
 <td>0.830 ± 0.023</td>
 <td>0.577 ± 0.031</td>
 </tr>
 <tr>
 <td>100</td>
 <td><strong>0.195 ± 0.037</strong></td>
-<td><strong>0.292</strong></td>
-<td><strong>0.202</strong></td>
+<td><strong>0.325 ± 0.051</strong></td>
+<td><strong>0.228 ± 0.022</strong></td>
 <td><strong>0.907 ± 0.031</strong></td>
 <td><strong>0.494 ± 0.054</strong></td>
 </tr>
 </tbody>
 </table>
+<p>Image-level detection under the same label budgets (GPT-Image-2, 613 forged + 613 authentic; score = top-1% mean probability):</p>
+<table>
+<thead>
+<tr>
+<th>k</th>
+<th>Image AUC</th>
+<th>Image AP</th>
+<th>Recall@1%FPR</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0</td>
+<td>0.526</td>
+<td>0.547</td>
+<td>0.015</td>
+</tr>
+<tr>
+<td>5</td>
+<td>0.529 ± 0.012</td>
+<td>0.522 ± 0.010</td>
+<td>0.014 ± 0.001</td>
+</tr>
+<tr>
+<td>25</td>
+<td>0.515 ± 0.024</td>
+<td>0.518 ± 0.021</td>
+<td>0.019 ± 0.006</td>
+</tr>
+<tr>
+<td>100</td>
+<td>0.565 ± 0.024</td>
+<td>0.582 ± 0.016</td>
+<td>0.042 ± 0.012</td>
+</tr>
+</tbody>
+</table>
+<p>Image-level discrimination improves with labels but remains weak at a 1% alert budget; this is expected, since the target quantity is a small localized edit rather than a global texture change, and it motivates localization-assisted review rather than a pure image-level triage.</p>
 <p>Adaptation improves localization monotonically, reaching a <strong>3.7×</strong> IoU gain with only 100 labelled target samples. The cost is forgetting: in-domain Gemini drops from 0.669 to 0.494. Figure 1(a) visualizes the curve; Figure 1(b) compares standard fine-tuning, rehearsal, and training from scratch at k=100.</p>
 <p><strong>Figure 1.</strong> (a) Few-shot adaptation curve: IoU on the unseen GPT-Image-2 generator and on the old Gemini generator as a function of the number of labelled target samples (mean ± std over seeds). (b) Forgetting at k=100: standard fine-tuning vs. rehearsal vs. training from scratch.</p>
 <p><img alt="Figure 1" src="figures/fig_main_results.png" /></p>
@@ -254,7 +332,7 @@ hr { border: 0; border-top: 1px solid #d0d7de; margin: 30px 0; }
 <tbody>
 <tr>
 <td>Standard fine-tune (3 seeds)</td>
-<td>0.195 ± 0.030</td>
+<td>0.195 ± 0.037</td>
 <td>0.494 ± 0.044</td>
 <td>0.096 ± 0.014</td>
 </tr>
@@ -266,7 +344,7 @@ hr { border: 0; border-top: 1px solid #d0d7de; margin: 30px 0; }
 </tr>
 </tbody>
 </table>
-<p>Replay restores Gemini to <strong>0.672 ± 0.006</strong>, essentially the zero-shot level (0.669), at a modest target-generator cost (0.195 → 0.162). This is the central practical finding: a small rehearsal buffer is sufficient to prevent catastrophic forgetting under generator shift.</p>
+<p>Replay restores Gemini to <strong>0.672 ± 0.006</strong>, essentially the zero-shot level (0.669), at a modest target-generator cost (0.195 -&gt; 0.162). This is the central practical finding: a small rehearsal buffer is sufficient to prevent catastrophic forgetting under generator shift.</p>
 <p>Random replay performed best among the selectors; hard and uncertainty-based replay did not improve retention at the same budget.</p>
 <h3 id="65-negative-results-and-ablations">6.5 Negative results and ablations</h3>
 <table>
@@ -281,7 +359,7 @@ hr { border: 0; border-top: 1px solid #d0d7de; margin: 30px 0; }
 <tbody>
 <tr>
 <td>Global threshold tuning</td>
-<td>0.160 → 0.194 (one model)</td>
+<td>0.160 -&gt; 0.194 (one model)</td>
 <td>—</td>
 <td>modest, generator-specific</td>
 </tr>
@@ -293,8 +371,8 @@ hr { border: 0; border-top: 1px solid #d0d7de; margin: 30px 0; }
 </tr>
 <tr>
 <td>Per-image adaptive threshold</td>
-<td>0.158 → 0.141 (p1%)</td>
-<td>0.555 → 0.365</td>
+<td>0.158 -&gt; 0.141 (p1%)</td>
+<td>0.555 -&gt; 0.365</td>
 <td>worse than fixed 0.5</td>
 </tr>
 <tr>
@@ -311,8 +389,8 @@ hr { border: 0; border-top: 1px solid #d0d7de; margin: 30px 0; }
 </tr>
 <tr>
 <td>Augmentation (JPEG/blur/noise)</td>
-<td>0.052 → 0.054</td>
-<td>0.669 → 0.589</td>
+<td>0.052 -&gt; 0.054</td>
+<td>0.669 -&gt; 0.589</td>
 <td>marginal, harms in-domain</td>
 </tr>
 <tr>
@@ -339,9 +417,21 @@ hr { border: 0; border-top: 1px solid #d0d7de; margin: 30px 0; }
 <h3 id="66-qualitative-analysis">6.6 Qualitative analysis</h3>
 <p>Figure 2 shows score maps for the same forged GPT-Image-2 documents under three settings. Zero-shot predictions (Fig. 2a) are diffuse, often off-target, and sometimes nearly blank. After adaptation (Fig. 2b), score maps concentrate on the edited field. In-domain maps (Fig. 2c) are sharp and closely match the ground truth. The qualitative evolution mirrors the quantitative gains.</p>
 <p><strong>Figure 2.</strong> Predicted score maps for the same GPT-Image-2 forged documents. (a) Zero-shot detector: diffuse and often off-target. (b) After few-shot adaptation (k=100): concentrated on the edited field. (c) In-domain Gemini: sharp and closely matching the ground truth.</p>
-<p><img alt="Figure 2a: zero-shot" src="figures/fig_xai_zero_shot_gpt.png" /></p>
-<p><img alt="Figure 2b: adapted" src="figures/fig_xai_adapted_gpt.png" /></p>
-<p><img alt="Figure 2c: in-domain" src="figures/fig_xai_in_domain.png" /></p>
+<div style="page-break-inside:avoid">
+<img src="figures/fig_xai_zero_shot_gpt.png" alt="Figure 2a: zero-shot" style="max-height:150mm;width:auto;max-width:100%">
+<p><b>(a) Zero-shot detector</b></p>
+</div>
+
+<div style="page-break-inside:avoid">
+<img src="figures/fig_xai_adapted_gpt.png" alt="Figure 2b: adapted" style="max-height:150mm;width:auto;max-width:100%">
+<p><b>(b) After few-shot adaptation (k=100)</b></p>
+</div>
+
+<div style="page-break-inside:avoid">
+<img src="figures/fig_xai_in_domain.png" alt="Figure 2c: in-domain" style="max-height:150mm;width:auto;max-width:100%">
+<p><b>(c) In-domain Gemini</b></p>
+</div>
+
 <h3 id="67-where-does-localization-fail">6.7 Where does localization fail?</h3>
 <p>We break down per-image IoU by document source and by tampered-area bucket on GPT-Image-2 and on in-domain Gemini.</p>
 <table>
@@ -414,9 +504,9 @@ hr { border: 0; border-top: 1px solid #d0d7de; margin: 30px 0; }
 <p>Two findings stand out. First, cross-generator localization is <strong>strongly source-dependent</strong>: CORD price fields are the easiest, whereas XFUND multilingual forms are almost entirely missed. Second, in-domain performance improves with tampered-area size, but under generator shift the area effect is weak and non-monotonic. This indicates that the failure is not merely due to tiny regions; <strong>document type, language, and layout</strong> are major factors. Replay slightly reduces target performance across all sources, consistent with the trade-off reported in Section 6.4.</p>
 <h3 id="68-text-localized-high-resolution-search-tl-hrs">6.8 Text-Localized High-Resolution Search (TL-HRS)</h3>
 <p>The full-image detector predicts at a letterboxed 384px resolution, which blurs the edited field (median tampered width ≈148px in the original document). A native-resolution <em>patch segmenter</em> can sharpen the mask inside a 384px crop, but it still needs a crop position.</p>
-<p><strong>Few-shot patch adaptation.</strong> The patch segmenter is first trained on Gemini crops around ground-truth fields. Used zero-shot on GPT-Image-2 it reaches only 0.459 IoU even with the oracle box. We therefore fine-tune it with the <em>same 100 target labels</em> used by the full-image baseline: 100 GPT crops around ground-truth fields, 100 non-overlapping same-line negatives, 100 authentic crops, plus 100 Gemini replay crops to limit forgetting. No new labels are used. The boxes used to sample crops are derived from the training masks by connected components, so they cost no additional annotation.</p>
+<p><strong>Setup.</strong> As described in Section 4.5, the patch segmenter is first trained on Gemini crops and then fine-tuned with the same 100 target labels used by the full-image baseline (100 GPT crops, 100 same-line negatives, 100 authentic crops, plus 100 Gemini replay crops). Used zero-shot on GPT-Image-2 it reaches only 0.459 IoU even with the oracle box; after adaptation it reaches 0.677.</p>
 <p><strong>Diagnosis: the coarse stage, not the segmenter, is the bottleneck.</strong> The natural way to position the crop is the argmax of the full-image heatmap. It fails: measured against the centre of the ground-truth field on 100 test images, the median peak error is <strong>152 px</strong> (0.4 crop widths; 45% of peaks are farther than 192 px), and the 384px crop centred at the peak contains only <strong>53%</strong> of the tampered pixels, versus <strong>98%</strong> when centred at the true box. With the same adapted segmenter this turns a 0.65 IoU (oracle box) into 0.33 IoU. Re-running the coarse model on a zoomed 768px window, on 2×2 tiles, or on a coarse-probability centroid does not help (0.29, 0.29 and 0.37): the model is only reliable at the scale it was trained on.</p>
-<p><strong>Dense high-resolution search.</strong> We therefore drop the coarse peak and run the adapted patch segmenter as a dense detector: a 384px window slides over the document with stride 96 (≈197 windows per forged test image), and each window yields a probability map and a confidence score. The score is the mean of the top 1% of its pixels, a robust proxy for "this window contains a sharp, high-confidence mask". The window with the highest score is the prediction; no OCR, selector, gating or multi-scale fusion is used. Local exhaustive search is affordable offline (≈20 s per document on one consumer GPU).</p>
+<p><strong>Inference.</strong> We run the adapted patch segmenter with a coarse-to-fine cascade (stride 256, ≈54 windows per forged document) and select the window maximising <i>S</i>(<i>w</i>) (Section 4.5). The rest of this section quantifies why the single coarse peak fails and how dense search compares with alternative positioning strategies.</p>
 <table>
 <thead>
 <tr>
@@ -458,8 +548,8 @@ hr { border: 0; border-top: 1px solid #d0d7de; margin: 30px 0; }
 </tr>
 <tr>
 <td><strong>TL-HRS, dense search (stride 96)</strong></td>
-<td><strong>0.545 ± 0.012</strong></td>
-<td>3 seeds (0.555 / 0.549 / 0.532)</td>
+<td><strong>0.537 ± 0.016</strong></td>
+<td>5 seeds; per-seed values in Sec. 6.8</td>
 </tr>
 <tr>
 <td>— oracle window (upper bound of search)</td>
@@ -480,15 +570,402 @@ hr { border: 0; border-top: 1px solid #d0d7de; margin: 30px 0; }
 </table>
 <p><strong>Figure 3.</strong> (a) Stage-wise IoU on the full forged test: the adapted patch alone (coarse peak) recovers little, while dense search recovers most of the oracle-window and GT-box ceilings. (b) Localization variants on a 150-image subset: exhaustive dense search dominates centroid refinement, grids, zoom, tiling and coarse-guided pruning. (c) The same 100 labels on the target and on a completely unseen generator.</p>
 <p><img alt="Figure 3" src="figures/fig_tlhrs.png" /></p>
-<p>Figure 3 summarizes the stage-wise and cross-generator picture. Three findings follow. <strong>(1) Patch adaptation transfers, and the ceiling is real.</strong> With the oracle box, the same architecture moves from 0.459 (zero-shot) to 0.677 ± 0.009 when fine-tuned with the same 100 target labels; in-domain Gemini drops only from 0.557 to 0.532, a cost that replay mitigates. <strong>(2) The bottleneck is where to look, not what to predict.</strong> A single coarse peak recovers only 0.321, but dense search over the same segmenter reaches 0.545 — 2.8× the full-image baseline and 82% of the adapted ceiling. The gap between TL-HRS and its oracle window (0.653) is entirely due to ranking the right window first. <strong>(3) Intelligence in the search does not pay.</strong> Coarse-guided pruning is worse than exhaustive search (top-40 windows: 0.544; top-10: 0.474; top-5: 0.431), and the coarse map is therefore not a useful prior at this resolution. Zoom, tiling and coarse centroiding are all below the single-peak-plus-grid baseline, so the simple sliding window dominates.</p>
+<p>The headline 0.537 is the pooled IoU; the per-image mean is 0.571, with a 95\% bootstrap interval of 0.545-0.597 over 5,000 resamples. Figure 3 summarizes the stage-wise and cross-generator picture. Three findings follow. <strong>(1) Patch adaptation transfers, and the ceiling is real.</strong> With the oracle box, the same architecture moves from 0.459 (zero-shot) to 0.677 ± 0.009 when fine-tuned with the same 100 target labels; in-domain Gemini drops only from 0.557 to 0.532, a cost that replay mitigates. <strong>(2) The bottleneck is where to look, not what to predict.</strong> A single coarse peak recovers only 0.321, but dense search over the same segmenter reaches 0.537 — 2.8× the full-image baseline and 79% of the adapted ceiling. The gap between TL-HRS and its oracle window (0.653) is entirely due to ranking the right window first. <strong>(3) Intelligence in the search does not pay.</strong> Coarse-guided pruning is worse than exhaustive search (top-40 windows: 0.544; top-10: 0.474; top-5: 0.431), and the coarse map is therefore not a useful prior at this resolution. Zoom, tiling and coarse centroiding are all below the single-peak-plus-grid baseline, so the simple sliding window dominates.</p>
 <p><strong>6.8.1 Pre-adaptation selector study (negative results).</strong> Before adapting the patch segmenter we tried to close the gap by improving <em>selection</em> with the zero-shot patch. On the full forged test, a ResNet-18 field classifier reaches 0.193, the coarse heatmap 0.157, and the native patch response 0.158; rank fusion of all three reaches 0.199 — none exceeds the 0.195 ± 0.037 baseline. On a 60-image subset (27 forged; it over-represents CORD and under-represents WildReceipt) we additionally tried centroid refinement, per-image MAD z-scores (monotonic, hence vacuous), line-merge, selector adaptation, and a trained DINOv2 field-vs-document-context selector (0.195); all failed. These results motivated the patch-adaptation route, and the dense search then subsumes selection: the adapted patch's own confidence, evaluated densely, is a stronger ranker than any of these learned selectors.</p>
-<p><strong>6.8.2 Label efficiency and generalization.</strong> Adapting the patch stage is cheap: with 25 target labels the GT-box ceiling is already 0.584 (86% of the 0.677 reached with 100), while the full-image baseline with 25 labels is 0.105. The same adapted segmenter, searched densely, transfers to Ideogram — a generator absent from both training and adaptation — at 0.284 IoU versus 0.114 for the full-image detector, with an oracle window of 0.510. The 0.284 → 0.510 gap shows that the detector <em>finds</em> the field under generator shift but its confidence is miscalibrated across generators, which is the clearest target for future work.</p>
+<p><strong>6.8.2 Learned window ranker (negative result).</strong> We test whether the gap to the oracle window (0.537 vs. 0.653) is due to a weak scoring function. We train a regressor on the same 100 target labels using nine window features — top-1% and top-5% mass, max and mean probability of the predicted region, area, total mass, border contact (a cue for a truncated mask), centroid offset and compactness — with per-image percentile normalisation, and fit both ridge regression and gradient boosting to the window's true IoU. Neither beats the simple top-1% score:</p>
+<table>
+<thead>
+<tr>
+<th>Window score</th>
+<th>GPT (150 images)</th>
+<th>Ideogram (120 images)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>top-1% (used)</strong></td>
+<td><strong>0.584</strong></td>
+<td><strong>0.375</strong></td>
+</tr>
+<tr>
+<td>Ridge (9 features)</td>
+<td>0.492</td>
+<td>0.230</td>
+</tr>
+<tr>
+<td>GBM (9 features)</td>
+<td>0.583</td>
+<td>0.368</td>
+</tr>
+<tr>
+<td>oracle window</td>
+<td>0.655</td>
+<td>0.507</td>
+</tr>
+</tbody>
+</table>
+<p>The gap is therefore not a ranking-model limitation: without ground truth, several windows are genuinely indistinguishable from their features. Improving the pipeline requires a better patch detector (resolution or context), not a more expressive selector. (Numbers are per-image mean IoU on the same subsets used in Section 6.8; the Ideogram subset is easier than the full 422-image split.)</p>
+<p><strong>Authentic documents.</strong> TL-HRS is a <em>localization</em> stage: it always returns a window, so it is invoked only after an image-level triage decision. In deployment we threshold the image-level score (top-1% mean probability, Table 6.2) on the labelled authentic target samples at the operating point required by the bank's alert budget (we report 1% FPR), and only flagged documents are passed to TL-HRS, whose <i>w</i>* is shown to the analyst as the suggested region. On authentic documents the triage threshold is what prevents a false alarm; the dense search itself never declares "no forgery". At <i>k</i> = 100 the image-level AP is 0.582 and Recall@1%FPR 0.042 (Table 6.2): a bank operating at a 1% alert budget catches only 4% of unseen-generator forgeries, so the triage stage, not the localizer, is the limiting factor in deployment. The low Recall@1%FPR of the full-image detector (0.042 at <i>k</i> = 100) shows that this triage is the remaining weakness, which is why we position TL-HRS as human-in-the-loop decision support rather than autonomous rejection.</p>
+<p><strong>6.8.3 Label efficiency and generalization.</strong> Adapting the patch stage is cheap: with 25 target labels the GT-box ceiling is already 0.584 (86% of the 0.677 reached with 100), while the full-image baseline with 25 labels is 0.105. The same adapted segmenter, searched densely, transfers to Ideogram — a generator absent from both training and adaptation — at 0.284 IoU versus 0.114 for the full-image detector, with an oracle window of 0.510. The 0.284 -&gt; 0.510 gap shows that the detector <em>finds</em> the field under generator shift but its confidence is miscalibrated across generators, which is the clearest target for future work.</p>
+<h3 id="69-comparison-with-a-published-forensic-detector">6.9 Comparison with a published forensic detector</h3>
+<p>To place TL-HRS against the literature we ran <strong>TruFor</strong> (CVPR 2023), a transformer + noise-fingerprint localizer trained on photographic manipulations, on the full 613 forged GPT-Image-2 images used throughout Section 6.8, with its official weights and inference script. TruFor's full-resolution attention does not fit in CPU memory for 8–35 MP documents, so we cap its input at 1024 px; every other number in this paper is at native resolution. The setting does not favour our method either: the patch detector works with 384-px crops of the same images.</p>
+<table>
+<thead>
+<tr>
+<th>Method (613 forged GPT-Image-2)</th>
+<th>IoU (pooled)</th>
+<th>IoU (mean)</th>
+<th>F1</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>TruFor, threshold 0.5</td>
+<td>0.018</td>
+<td>0.178</td>
+<td>0.035</td>
+</tr>
+<tr>
+<td>TruFor, best-F1 threshold (0.95)</td>
+<td>0.022</td>
+<td>—</td>
+<td>0.042</td>
+</tr>
+<tr>
+<td><strong>TL-HRS (same 613 images, 5 seeds)</strong></td>
+<td><strong>0.537 ± 0.016</strong></td>
+<td><strong>0.571</strong></td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p>TruFor's image-level score (mean 0.63) shows that it does fire on these documents, but its localization map does not align with thin, wide text fields: pooled IoU is 0.018 and even the best threshold gives F1 0.042, whereas TL-HRS reaches 0.537 ± 0.016 on exactly the same images — a 30× gap in pooled IoU. This is the failure mode the benchmark was built to expose — photo-forensic localizers assume texture and noise inconsistencies at object scale, while an AI-inpainted digit is a few dozen pixels high inside a text line. We could not execute DocTamper in our environment (its mmcv build has no Windows wheel for current Python); we therefore report TruFor as the published reference and leave a full multi-detector comparison for future work.</p>
+<h3 id="610-accuracycost-trade-off">6.10 Accuracy–cost trade-off</h3>
+<p>Dense search (stride 96) evaluates ≈218 windows per forged document. We test a cascade: a coarse patch scan at stride 192 proposes the top-3 windows, and each is refined on a 3×3 neighbourhood at stride 96. On the same 150-image subset this uses 66–77 windows (≈3× fewer) and does not lose accuracy — it improves slightly:</p>
+<table>
+<thead>
+<tr>
+<th>Strategy</th>
+<th>Windows / image</th>
+<th>IoU (mean)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dense, stride 96</td>
+<td>218</td>
+<td>0.584</td>
+</tr>
+<tr>
+<td><strong>Cascade, top-1</strong></td>
+<td><strong>66</strong></td>
+<td><strong>0.600</strong></td>
+</tr>
+<tr>
+<td>Cascade, top-2</td>
+<td>72</td>
+<td>0.607</td>
+</tr>
+<tr>
+<td>Cascade, top-3</td>
+<td>77</td>
+<td>0.607</td>
+</tr>
+<tr>
+<td>Oracle among visited</td>
+<td>77</td>
+<td>0.674</td>
+</tr>
+</tbody>
+</table>
+<p>The coarse scan acts as a proposal generator and the local refinement removes the redundancy of the dense grid; at ≈54 windows the pipeline runs in ≈1.2 s per document on one consumer GPU instead of ≈20 s. All values are per-image mean IoU on the 150-image subset of Section 6.8.</p>
+<h3 id="611-cross-dataset-boundary">6.11 Cross-dataset boundary</h3>
+<p>We also test zero-shot transfer to <strong>DocTamper</strong> (CVPR 2023), a document text-tampering benchmark with pixel masks, using the same patch detector and dense search. On its FCD split (100 images) we obtain <strong>IoU 0.096 and F1 0.313</strong>. The drop is expected and informative: DocTamper contains splicing and copy-move text edits rather than generative inpainting, and its authors state that it does not cover AIGC tampering. We therefore report this as a boundary condition of the method, not as evidence against it: inside the AIGC setting the model is trained for, TL-HRS reaches 0.537.</p>
+<h3 id="612-stride-threshold-and-runtime">6.12 Stride, threshold and runtime</h3>
+<p>We sweep the coarse stride of the cascade on 60 forged test images, keeping the local refinement at stride 96, and measure wall-clock time on one consumer GPU.</p>
+<table>
+<thead>
+<tr>
+<th>stride1</th>
+<th>windows / image</th>
+<th>s / image</th>
+<th>IoU @0.3</th>
+<th>@0.4</th>
+<th>@0.5</th>
+<th>@0.6</th>
+<th>@0.7</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>128</td>
+<td>147.6</td>
+<td>2.85</td>
+<td>0.612</td>
+<td>0.615</td>
+<td>0.616</td>
+<td>0.614</td>
+<td>0.611</td>
+</tr>
+<tr>
+<td>192</td>
+<td>74.5</td>
+<td>1.55</td>
+<td>0.599</td>
+<td>0.603</td>
+<td>0.602</td>
+<td>0.601</td>
+<td>0.598</td>
+</tr>
+<tr>
+<td><strong>256</strong></td>
+<td><strong>54.6</strong></td>
+<td><strong>1.18</strong></td>
+<td>0.614</td>
+<td><strong>0.619</strong></td>
+<td><strong>0.619</strong></td>
+<td>0.618</td>
+<td>0.615</td>
+</tr>
+</tbody>
+</table>
+<p>Stride 256 is both the fastest (1.18 s per document, 54 windows) and the most accurate, and the IoU is flat between thresholds 0.4 and 0.6 (variation &lt; 0.005), so the operating point is not cherry-picked.</p>
+<p><strong>Image-level conformal triage fails (negative result).</strong> Calibrating a split-conformal threshold on in-domain Gemini forges (target FNR 10%) and deploying it on GPT-Image-2 gives an actual FNR of 25.4% and an FPR of 67.7% on authentic documents; even on the calibration split the FPR is 67%, i.e. the image-level score barely separates authentic from forged. Exchangeability is violated under generator shift, and the full-image score has almost no separation. Section 6.13 shows that the cascade score S(w*) is a much better ranker (AUC 0.825, Recall@1%FPR 0.286), but that the conformal threshold which bounds the miss rate at 10% still flags 56% of authentic documents: a better signal, not a solved triage stage.</p>
+<h3 id="613-risk-controlled-localization">6.13 Risk-controlled localization</h3>
+<p>We state the guarantee where the signal lives — on pixels and on documents — using Conformal Risk Control (CRC), keeping the two losses separate. For a threshold lambda, L_i^img(lambda) = 1[s_i &lt;= lambda] is the image-level loss on forged document i (the document is missed entirely), and L_i^pix(lambda) is the fraction of its annotated pixels with score at most lambda. We choose lambda-hat as the largest lambda whose corrected empirical risk, (n/(n+1))(1/n) sum_i L_i(lambda) + 1/(n+1), is below alpha. We calibrate on n_cal in {25, 50, 100, 300} forged documents, evaluate on the remaining 613 - n_cal, repeat the random split 100 times, and use all 613 authentic documents only to measure the false-positive rate. The score is the cascade score S(w*) of Section 6.8; a document is caught when s_i &gt; lambda-hat.</p>
+<p>CRC bounds the loss it is given. It says nothing about false alarms, and under class imbalance and generator shift the two sides can diverge sharply. The table below therefore reports both.</p>
+<table>
+<thead>
+<tr>
+<th>alpha</th>
+<th>n_cal</th>
+<th>image FNR (%)</th>
+<th>image FPR (%)</th>
+<th>pixel FNR (%)</th>
+<th>pixel FPR (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>0.10</td>
+<td>25</td>
+<td>7.0 ± 5.1</td>
+<td>64.9 ± 14.2</td>
+<td>15.3 ± 0.5</td>
+<td>5.5</td>
+</tr>
+<tr>
+<td>0.10</td>
+<td>50</td>
+<td>9.2 ± 4.1</td>
+<td>57.8 ± 10.7</td>
+<td>15.5 ± 1.1</td>
+<td>5.5</td>
+</tr>
+<tr>
+<td>0.10</td>
+<td>100</td>
+<td>9.8 ± 3.5</td>
+<td>56.0 ± 8.4</td>
+<td>15.3 ± 0.6</td>
+<td>5.6</td>
+</tr>
+<tr>
+<td>0.10</td>
+<td>300</td>
+<td><strong>9.8 ± 2.4</strong></td>
+<td>55.8 ± 4.3</td>
+<td>15.5 ± 1.3</td>
+<td>5.5</td>
+</tr>
+<tr>
+<td>0.15</td>
+<td>25</td>
+<td>11.7 ± 5.3</td>
+<td>51.6 ± 12.2</td>
+<td>16.7 ± 3.2</td>
+<td>4.5</td>
+</tr>
+<tr>
+<td>0.15</td>
+<td>50</td>
+<td>14.3 ± 5.1</td>
+<td>45.5 ± 10.0</td>
+<td>16.3 ± 2.3</td>
+<td>4.6</td>
+</tr>
+<tr>
+<td>0.15</td>
+<td>100</td>
+<td>14.7 ± 3.3</td>
+<td>43.1 ± 5.9</td>
+<td>15.8 ± 1.8</td>
+<td>5.0</td>
+</tr>
+<tr>
+<td>0.15</td>
+<td>300</td>
+<td>14.9 ± 2.5</td>
+<td>42.1 ± 2.7</td>
+<td>15.5 ± 1.3</td>
+<td>5.6</td>
+</tr>
+</tbody>
+</table>
+<p>The image-level guarantee is valid but one-sided. With n_cal = 300, the miss rate is 9.8 ± 2.4% at alpha = 0.10 and 14.9 ± 2.5% at alpha = 0.15: the construction does what it promises, and the observed risk approaches alpha from below as n_cal grows (7.0% at n_cal = 25), because with few calibration documents lambda-hat is fitted to a noisy empirical risk and under-covers. The same thresholds, however, flag 55.8 ± 4.3% (alpha = 0.10) and 42.1 ± 2.7% (alpha = 0.15) of authentic documents. A bank that insists on missing at most 10% of forgeries would send more than half of all genuine documents to manual review.</p>
+<p>This does not mean that the cascade score is useless for triage. Relative to the full-image score it is a much better ranker: image AUC 0.825 versus 0.565, image AP 0.845 versus 0.582, and Recall@1%FPR 0.286 versus 0.042, a 6.8x gain. But a 6.8x improvement over a near-random ranker is not a solution: at the 1% alert budget 71% of forgeries still pass unreviewed, and the conformal threshold that bounds the miss rate at 10% operates at 56% FPR. We therefore do not claim that TL-HRS restores image-level triage. The score used for localization is a better ranking signal, but triage remains the deployment bottleneck.</p>
+<p>At pixel level the picture is different. FNR is 15.3–16.7% across all settings at 4.5–5.6% pixel FPR, and moving alpha from 0.10 to 0.15 barely changes it because a structural floor dominates: in about 15% of forged documents the selected window w* does not cover the whole annotation, and those pixels are false negatives at every threshold. No calibrator can go below this window-miss floor, so the nominal 10% pixel guarantee is not met and alpha = 0.15 is met only marginally at n_cal = 300 (15.5 ± 1.3%). The low pixel FPR is a consequence of sparsity (masks cover about 1% of the pixels): even a permissive threshold adds few false positives relative to background. Certifying a 10% pixel-level FNR requires better window selection or a finer segmenter, not a different calibration. We report these numbers as measured rather than tuning lambda to a favourable value.</p>
+<p>The replay ablation at the TL-HRS level (IoU pooled / mean) shows that replay helps on every split, so it is not a target/source trade-off at this layer:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>GPT (target adapted)</th>
+<th>Gemini (source retention)</th>
+<th>Ideogram (unseen)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Replay 100</td>
+<td><strong>0.564 / 0.590</strong></td>
+<td><strong>0.469 / 0.701</strong></td>
+<td><strong>0.278 / 0.381</strong></td>
+</tr>
+<tr>
+<td>No replay</td>
+<td>0.523 / 0.574</td>
+<td>0.449 / 0.658</td>
+<td>0.226 / 0.323</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Full-test cascade and image-level triage.</strong> Running the cascade (stride 256) over all 1,226 GPT-Image-2 test images (613 forged + 613 authentic) takes 1.04 s per image and gives IoU 0.564 pooled / 0.590 mean, F1 0.721 pooled. Using the same score S(w*) for whole-image triage is substantially better than the full-image detector: image AUC 0.825 versus 0.565, image AP 0.845 versus 0.582, and <strong>Recall@1%FPR 0.286 versus 0.042</strong> (a 6.8x gain). This is a better ranking signal, not a solved triage stage: at a 1% alert budget 71% of forgeries are still missed, and the conformal operating point that bounds the miss rate at 10% flags 56% of authentic documents. The localization stage therefore improves triage but does not fix it.</p>
+<h3 id="614-robustness-to-post-processing">6.14 Robustness to post-processing</h3>
+<p>A forged document rarely reaches the bank as a pristine PNG: it is screenshotted, recompressed, or resized on its way. We therefore re-run the cascade on a fixed subset of 200 forged and 100 authentic GPT-Image-2 documents under four corruptions: JPEG quality 90 and 75, a 0.75x downsample followed by bilinear upsampling, and Gaussian blur (5x5, sigma = 1). We compare the baseline patch adapter of Section 6.8 with a variant fine-tuned with the same 100 labels plus random JPEG augmentation (quality 50–95 applied to 50% of patch crops); this is the only difference between the two runs. The subset is the first 200/100 documents of the fixed test list and is easier than the full split (pooled IoU 0.705 without corruption for the baseline versus 0.564 in Section 6.8); absolute values are therefore not comparable across tables, and we read the table below only as relative retention. With 100 authentic documents the 1% FPR operating point is empirical and coarse (about one false positive), so Recall@1%FPR is quantized in steps of 0.005.</p>
+<table>
+<thead>
+<tr>
+<th>Adapter</th>
+<th>Corruption</th>
+<th>IoU (pooled)</th>
+<th>IoU (mean)</th>
+<th>F1</th>
+<th>Image AUC</th>
+<th>Image AP</th>
+<th>Recall@1%FPR</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Baseline</td>
+<td>None</td>
+<td>0.705</td>
+<td>0.725</td>
+<td>0.827</td>
+<td>0.908</td>
+<td>0.953</td>
+<td>0.520</td>
+</tr>
+<tr>
+<td>Baseline</td>
+<td>JPEG q90</td>
+<td>0.214</td>
+<td>0.278</td>
+<td>0.352</td>
+<td>0.541</td>
+<td>0.718</td>
+<td>0.070</td>
+</tr>
+<tr>
+<td>Baseline</td>
+<td>JPEG q75</td>
+<td>0.081</td>
+<td>0.117</td>
+<td>0.149</td>
+<td>0.397</td>
+<td>0.594</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>Baseline</td>
+<td>Resize 0.75x</td>
+<td>0.629</td>
+<td>0.655</td>
+<td>0.772</td>
+<td>0.815</td>
+<td>0.903</td>
+<td>0.305</td>
+</tr>
+<tr>
+<td>Baseline</td>
+<td>Blur sigma = 1</td>
+<td>0.579</td>
+<td>0.617</td>
+<td>0.733</td>
+<td>0.778</td>
+<td>0.882</td>
+<td>0.240</td>
+</tr>
+<tr>
+<td>+ JPEG aug</td>
+<td>None</td>
+<td>0.621</td>
+<td>0.641</td>
+<td>0.766</td>
+<td>0.807</td>
+<td>0.904</td>
+<td>0.345</td>
+</tr>
+<tr>
+<td>+ JPEG aug</td>
+<td>JPEG q90</td>
+<td>0.512</td>
+<td>0.531</td>
+<td>0.678</td>
+<td>0.669</td>
+<td>0.822</td>
+<td>0.165</td>
+</tr>
+<tr>
+<td>+ JPEG aug</td>
+<td>JPEG q75</td>
+<td>0.449</td>
+<td>0.482</td>
+<td>0.620</td>
+<td>0.623</td>
+<td>0.786</td>
+<td>0.130</td>
+</tr>
+<tr>
+<td>+ JPEG aug</td>
+<td>Resize 0.75x</td>
+<td>0.505</td>
+<td>0.553</td>
+<td>0.671</td>
+<td>0.733</td>
+<td>0.854</td>
+<td>0.225</td>
+</tr>
+<tr>
+<td>+ JPEG aug</td>
+<td>Blur sigma = 1</td>
+<td>0.476</td>
+<td>0.544</td>
+<td>0.645</td>
+<td>0.724</td>
+<td>0.850</td>
+<td>0.205</td>
+</tr>
+</tbody>
+</table>
+<p>Three observations follow. <strong>(1) Without compression augmentation, JPEG is catastrophic.</strong> Quality 90 reduces pooled IoU from 0.705 to 0.214 (30% retained) and Recall@1%FPR from 0.520 to 0.070; quality 75 leaves 0.081 IoU, 0.149 F1 and 0.005 Recall@1%FPR, and image AUC falls to 0.397, below chance on this subset. This is consistent with the detector relying on high-frequency generator traces that quantization removes, and it matters operationally because recompression is ubiquitous. We report the below-chance AUC as measured; with 200 forged documents it is also the noisiest cell in the table. <strong>(2) JPEG augmentation removes most of that loss.</strong> Under the same 100 labels and replay budget, quality 90 improves from 0.214 to 0.512 pooled IoU and quality 75 from 0.081 to 0.449 (72% of the augmented model's own clean 0.621); image AUC rises from 0.541/0.397 to 0.669/0.623, and Recall@1%FPR at quality 75 rises from 0.005 to 0.130. <strong>(3) The gain is targeted and not free.</strong> The augmented model pays on clean documents (0.705 -&gt; 0.621 pooled IoU; Recall@1%FPR 0.520 -&gt; 0.345) and on the two corruptions it was not trained for (resize 0.629 -&gt; 0.505; blur 0.579 -&gt; 0.476). Matching augmentation to the ingestion pipeline therefore matters more than adding it blindly. Even with augmentation, quality 75 still loses 28% of the clean IoU and triage at 1% FPR catches 13% of forgeries versus 34.5% clean, so the gap is narrowed but not closed. Ranking and localization degrade together, so recalibration cannot recover the lost IoU.</p>
 <hr />
 <h2 id="7-discussion">7. Discussion</h2>
 <p><strong>Why does adaptation help?</strong> Fine-tuning on a few target samples appears to sharpen the spatial response around the edited region, rather than merely shifting a global threshold. This is consistent with the high pixel AUC before adaptation and with the failure of threshold-calibration methods.</p>
 <p><strong>Why does forgetting happen?</strong> The base detector's features encode generator-specific artefacts. Fine-tuning on a new generator overwrites part of this encoding. Rehearsal of a small number of old samples anchors the old decision boundary and restores in-domain performance.</p>
 <p><strong>Why do calibration and selection fail?</strong> Calibration is generator-specific and does not change pixel ranking; sample selection does not address the underlying localization error. These negative results are useful: they rule out several intuitive but ineffective remedies. They also show that <em>learned</em> selectors trained on a handful of target images overfit the wrong cues; the adapted patch's own dense confidence is a better ranker.</p>
-<p><strong>Where is the ceiling, and what limits us?</strong> Adapting the patch segmenter with the same 100 target labels raises the oracle-box ceiling from 0.459 to 0.677, so segmentation is no longer the wall. The wall is <em>where to look</em>: the full-image peak is 152 px (median) from the field centre, and the crop it defines covers only half of the tampered pixels. Dense high-resolution search removes the dependence on that peak and reaches 0.545 ± 0.012 (82% of the ceiling). The remaining gap splits into two measured quantities: 0.545 → 0.653 is window <em>ranking</em> (oracle window), and 0.653 → 0.677 is the residual crop/segmentation limit. Under generator shift the ranking gap widens (0.284 observed vs. 0.510 oracle on Ideogram), which points to confidence calibration across generators rather than to a weaker detector.</p>
+<p><strong>Where is the ceiling, and what limits us?</strong> Adapting the patch segmenter with the same 100 target labels raises the oracle-box ceiling from 0.459 to 0.677, so segmentation is no longer the wall. The wall is <em>where to look</em>: the full-image peak is 152 px (median) from the field centre, and the crop it defines covers only half of the tampered pixels. Dense high-resolution search removes the dependence on that peak and reaches 0.537 ± 0.016 (79% of the ceiling). The remaining gap splits into two measured quantities: 0.537 -&gt; 0.653 is window <em>ranking</em> (oracle window), and 0.653 -&gt; 0.677 is the residual crop/segmentation limit. Under generator shift the ranking gap widens (0.284 observed vs. 0.510 oracle on Ideogram), which points to confidence calibration across generators rather than to a weaker detector.</p>
 <hr />
 <h2 id="8-limitations">8. Limitations</h2>
 <ul>
@@ -496,18 +973,20 @@ hr { border: 0; border-top: 1px solid #d0d7de; margin: 30px 0; }
 <li><strong>Three generators.</strong> Gemini, Ideogram, and GPT-Image-2 do not cover the full space of generative editors.</li>
 <li><strong>Synthetic edits.</strong> Forgeries replace a single numeric field; whole-document synthesis and signature forgery are out of scope.</li>
 <li><strong>Single architecture.</strong> We use a ResNet-18 U-Net; larger or text-aware models may behave differently.</li>
-<li><strong>Modest full-image performance.</strong> The full-image detector remains modest after adaptation (0.195 ± 0.037); the TL-HRS stage reaches 0.545 ± 0.012, and the remaining gap to its 0.677 adapted ceiling is split between window ranking (0.653) and the crop limit.</li>
-<li><strong>Inference cost.</strong> Dense search runs ≈197 window passes per forged document (≈20 s on one consumer GPU). This is acceptable for offline forensic review but not for high-throughput streaming; coarse-guided pruning currently costs 0.011 IoU or more.</li>
+<li><strong>Modest full-image performance.</strong> The full-image detector remains modest after adaptation (0.195 ± 0.037); the TL-HRS stage reaches 0.537 ± 0.016, and the remaining gap to its 0.677 adapted ceiling is split between window ranking (0.653) and the crop limit.</li>
+<li><strong>Inference cost.</strong> The cascade runs ≈54 window passes per forged document (≈1.2 s on one consumer GPU). This is acceptable for offline forensic review but not for high-throughput streaming; coarse-guided pruning currently costs 0.011 IoU or more.</li>
 <li><strong>Generator-shift ranking gap.</strong> On Ideogram the detector's oracle window is 0.510 but the selected window scores 0.284, so confidence is miscalibrated across generators.</li>
+<li><strong>Single published baseline.</strong> We compare against TruFor only, on the full 613 forged test images (capped at 1024 px because of CPU memory); DocTamper could not be built in our environment, so a multi-detector comparison remains future work.</li>
+<li><strong>Post-processing.</strong> JPEG recompression at quality 75 removes most of the signal without compression augmentation (Section 6.14); augmenting the patch adapter restores 72% of its clean IoU under q75 but costs clean accuracy and does not help resize or blur.</li>
 <li><strong>Variance.</strong> Results vary across seeds; we report mean ± std over three seeds for all headline numbers.</li>
 </ul>
 <hr />
 <h2 id="9-future-work">9. Future Work</h2>
 <p>A natural extension is <strong>federated adaptation</strong>: when one bank encounters a new generator and collects a small labelled set, it could share the <em>model update</em> (not raw customer data) with other institutions, allowing them to defend against the same threat without violating data-protection regulations. Combining few-shot adaptation with secure aggregation and differential privacy is an important direction.</p>
-<p>Other directions include: (i) calibrating the patch confidence across generators to close the 0.284 → 0.510 ranking gap on unseen generators, and scoring windows jointly rather than independently; (ii) continual adaptation over a stream of generators; (iii) stronger domain-generalization objectives; (iv) broader benchmarks across document types and languages; and (v) calibrated uncertainty for human-in-the-loop review.</p>
+<p>Other directions include: (i) calibrating the patch confidence across generators to close the 0.284 -&gt; 0.510 ranking gap on unseen generators, and scoring windows jointly rather than independently; (ii) continual adaptation over a stream of generators; (iii) stronger domain-generalization objectives; (iv) broader benchmarks across document types and languages; and (v) calibrated uncertainty for human-in-the-loop review.</p>
 <hr />
 <h2 id="10-conclusion">10. Conclusion</h2>
-<p>We studied label-efficient adaptation of AI-forged document detectors under generator shift. A detector trained on one generator collapses on unseen generators, but a small number of labelled target samples recovers localization substantially, and a small rehearsal buffer preserves old-generator performance with negligible forgetting. Our analysis shows that the remaining bottleneck is localization precision rather than threshold calibration, and that several intuitive remedies (calibration, adaptive thresholding, sample selection, encoder freezing) do not provide consistent gains. Adapting a native-resolution patch segmenter with the same 100 labels raises the localization ceiling from 0.459 to 0.677. The coarse peak used to position that segmenter is itself the wall — it misses the field centre by 152 px (median) and covers only 53% of the tampered pixels — and replacing it with dense high-resolution search yields <strong>0.545 ± 0.012 IoU</strong> on the full unseen generator (2.8× the full-image baseline, 82% of the ceiling). The same pipeline reaches 0.284 IoU on a completely unseen generator (Ideogram) versus 0.114 for the full-image detector, with an oracle window of 0.510: the detector finds the field, but cross-generator confidence ranking remains the open problem. We hope these results provide a realistic foundation for deploying and adapting document-fraud detectors in banking workflows.</p>
+<p>We studied label-efficient adaptation of AI-forged document detectors under generator shift. A detector trained on one generator collapses on unseen generators, but a small number of labelled target samples recovers localization substantially, and a small rehearsal buffer preserves old-generator performance with negligible forgetting. Our analysis shows that the remaining bottleneck is localization precision rather than threshold calibration, and that several intuitive remedies (calibration, adaptive thresholding, sample selection, encoder freezing) do not provide consistent gains. Adapting a native-resolution patch segmenter with the same 100 labels raises the localization ceiling from 0.459 to 0.677. The coarse peak used to position that segmenter is itself the wall — it misses the field centre by 152 px (median) and covers only 53% of the tampered pixels — and replacing it with dense high-resolution search yields <strong>0.537 ± 0.016 IoU</strong> on the full unseen generator (2.8× the full-image baseline, 79% of the ceiling). The same pipeline reaches 0.284 IoU on a completely unseen generator (Ideogram) versus 0.114 for the full-image detector, with an oracle window of 0.510: the detector finds the field, but cross-generator confidence ranking remains the open problem. We hope these results provide a realistic foundation for deploying and adapting document-fraud detectors in banking workflows.</p>
 <hr />
 <h2 id="references">References</h2>
 <ol>

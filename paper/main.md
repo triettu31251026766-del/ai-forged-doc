@@ -392,17 +392,22 @@ The replay ablation at the TL-HRS level (IoU pooled / mean) shows that replay he
 
 ### 6.14 Robustness to post-processing
 
-A forged document rarely reaches the bank as a pristine PNG: it is screenshotted, recompressed, or resized on its way. We therefore re-run the cascade on a fixed subset of 200 forged and 100 authentic GPT-Image-2 documents under four corruptions: JPEG quality 90 and 75, a 0.75x downsample followed by bilinear upsampling, and Gaussian blur (5x5, sigma = 1). The subset is the first 200/100 documents of the fixed test list and is easier than the full split (pooled IoU 0.705 without corruption versus 0.564 in Section 6.8); absolute values are therefore not comparable across tables, and we read the table below only as relative retention. With 100 authentic documents the 1% FPR operating point is empirical and coarse (about one false positive), so Recall@1%FPR is quantized in steps of 0.005.
+A forged document rarely reaches the bank as a pristine PNG: it is screenshotted, recompressed, or resized on its way. We therefore re-run the cascade on a fixed subset of 200 forged and 100 authentic GPT-Image-2 documents under four corruptions: JPEG quality 90 and 75, a 0.75x downsample followed by bilinear upsampling, and Gaussian blur (5x5, sigma = 1). We compare the baseline patch adapter of Section 6.8 with a variant fine-tuned with the same 100 labels plus random JPEG augmentation (quality 50–95 applied to 50% of patch crops); this is the only difference between the two runs. The subset is the first 200/100 documents of the fixed test list and is easier than the full split (pooled IoU 0.705 without corruption for the baseline versus 0.564 in Section 6.8); absolute values are therefore not comparable across tables, and we read the table below only as relative retention. With 100 authentic documents the 1% FPR operating point is empirical and coarse (about one false positive), so Recall@1%FPR is quantized in steps of 0.005.
 
-| Corruption | IoU (pooled) | IoU (mean) | F1 | Image AUC | Image AP | Recall@1%FPR |
-|---|---|---|---|---|---|---|
-| None | 0.705 | 0.725 | 0.827 | 0.908 | 0.953 | 0.520 |
-| JPEG q90 | 0.214 | 0.278 | 0.352 | 0.541 | 0.718 | 0.070 |
-| JPEG q75 | 0.081 | 0.117 | 0.149 | 0.397 | 0.594 | 0.005 |
-| Resize 0.75x | 0.629 | 0.655 | 0.772 | 0.815 | 0.903 | 0.305 |
-| Blur sigma = 1 | 0.579 | 0.617 | 0.733 | 0.778 | 0.882 | 0.240 |
+| Adapter | Corruption | IoU (pooled) | IoU (mean) | F1 | Image AUC | Image AP | Recall@1%FPR |
+|---|---|---|---|---|---|---|---|
+| Baseline | None | 0.705 | 0.725 | 0.827 | 0.908 | 0.953 | 0.520 |
+| Baseline | JPEG q90 | 0.214 | 0.278 | 0.352 | 0.541 | 0.718 | 0.070 |
+| Baseline | JPEG q75 | 0.081 | 0.117 | 0.149 | 0.397 | 0.594 | 0.005 |
+| Baseline | Resize 0.75x | 0.629 | 0.655 | 0.772 | 0.815 | 0.903 | 0.305 |
+| Baseline | Blur sigma = 1 | 0.579 | 0.617 | 0.733 | 0.778 | 0.882 | 0.240 |
+| + JPEG aug | None | 0.621 | 0.641 | 0.766 | 0.807 | 0.904 | 0.345 |
+| + JPEG aug | JPEG q90 | 0.512 | 0.531 | 0.678 | 0.669 | 0.822 | 0.165 |
+| + JPEG aug | JPEG q75 | 0.449 | 0.482 | 0.620 | 0.623 | 0.786 | 0.130 |
+| + JPEG aug | Resize 0.75x | 0.505 | 0.553 | 0.671 | 0.733 | 0.854 | 0.225 |
+| + JPEG aug | Blur sigma = 1 | 0.476 | 0.544 | 0.645 | 0.724 | 0.850 | 0.205 |
 
-Three observations follow. **(1) JPEG is catastrophic.** Quality 90 reduces pooled IoU from 0.705 to 0.214 (30% retained) and Recall@1%FPR from 0.520 to 0.070; quality 75 leaves 0.081 IoU, 0.149 F1 and 0.005 Recall@1%FPR, and image AUC falls to 0.397, below chance on this subset. This is consistent with the detector relying on high-frequency generator traces that quantization removes, and it matters operationally because recompression is ubiquitous. We report the below-chance AUC as measured; with 200 forged documents it is also the noisiest cell in the table. **(2) Resizing and blur are milder.** They retain 89% and 82% of the uncorrupted pooled IoU (0.629 and 0.579), and Recall@1%FPR stays at 0.305 and 0.240, so the signal is not purely high-frequency. **(3) Ranking and localization degrade together.** Post-processing does not merely move the operating threshold, so recalibration cannot recover the lost IoU. A practical deployment should include JPEG and resize augmentation during adaptation and record the compression pipeline of the ingestion path; a full augmentation study is left to future work.
+Three observations follow. **(1) Without compression augmentation, JPEG is catastrophic.** Quality 90 reduces pooled IoU from 0.705 to 0.214 (30% retained) and Recall@1%FPR from 0.520 to 0.070; quality 75 leaves 0.081 IoU, 0.149 F1 and 0.005 Recall@1%FPR, and image AUC falls to 0.397, below chance on this subset. This is consistent with the detector relying on high-frequency generator traces that quantization removes, and it matters operationally because recompression is ubiquitous. We report the below-chance AUC as measured; with 200 forged documents it is also the noisiest cell in the table. **(2) JPEG augmentation removes most of that loss.** Under the same 100 labels and replay budget, quality 90 improves from 0.214 to 0.512 pooled IoU and quality 75 from 0.081 to 0.449 (72% of the augmented model's own clean 0.621); image AUC rises from 0.541/0.397 to 0.669/0.623, and Recall@1%FPR at quality 75 rises from 0.005 to 0.130. **(3) The gain is targeted and not free.** The augmented model pays on clean documents (0.705 -> 0.621 pooled IoU; Recall@1%FPR 0.520 -> 0.345) and on the two corruptions it was not trained for (resize 0.629 -> 0.505; blur 0.579 -> 0.476). Matching augmentation to the ingestion pipeline therefore matters more than adding it blindly. Even with augmentation, quality 75 still loses 28% of the clean IoU and triage at 1% FPR catches 13% of forgeries versus 34.5% clean, so the gap is narrowed but not closed. Ranking and localization degrade together, so recalibration cannot recover the lost IoU.
 
 
 ---
@@ -429,7 +434,7 @@ Three observations follow. **(1) JPEG is catastrophic.** Quality 90 reduces pool
 - **Inference cost.** The cascade runs ≈54 window passes per forged document (≈1.2 s on one consumer GPU). This is acceptable for offline forensic review but not for high-throughput streaming; coarse-guided pruning currently costs 0.011 IoU or more.
 - **Generator-shift ranking gap.** On Ideogram the detector's oracle window is 0.510 but the selected window scores 0.284, so confidence is miscalibrated across generators.
 - **Single published baseline.** We compare against TruFor only, on the full 613 forged test images (capped at 1024 px because of CPU memory); DocTamper could not be built in our environment, so a multi-detector comparison remains future work.
-- **Post-processing.** JPEG recompression at quality 75 removes most of the signal (Section 6.14); the current models are not trained with compression augmentation.
+- **Post-processing.** JPEG recompression at quality 75 removes most of the signal without compression augmentation (Section 6.14); augmenting the patch adapter restores 72% of its clean IoU under q75 but costs clean accuracy and does not help resize or blur.
 - **Variance.** Results vary across seeds; we report mean ± std over three seeds for all headline numbers.
 
 ---

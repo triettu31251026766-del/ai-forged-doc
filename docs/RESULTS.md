@@ -819,6 +819,23 @@ Kết luận (dùng cho §6.14):
 - Resize/blur nhẹ hơn (89%/82% IoU), nên tín hiệu không thuần tần số cao.
 - Hệ quả: cần JPEG/resize augmentation khi adaptation; ghi rõ pipeline nén của đường vào.
 
+### B56 — Robustness with JPEG augmentation (patch adapter) — 2026-11-27
+
+Checkpoint `results/patch_seg_gpt_jpeg/patch_seg.pth` (k=100, replay=100, `--jpeg-aug`, q∈[50,95] cho 50% crop; init `results/patch_seg/patch_seg.pth`). Cùng script/subset B55; output `results/robustness_jpeg.json`.
+
+| Biến đổi | IoU pooled | IoU mean | F1 | Image AUC | Image AP | R@1%FPR |
+|---|---|---|---|---|---|---|
+| None | 0.621 | 0.641 | 0.766 | 0.807 | 0.904 | 0.345 |
+| JPEG q90 | 0.512 | 0.531 | 0.678 | 0.669 | 0.822 | 0.165 |
+| JPEG q75 | 0.449 | 0.482 | 0.620 | 0.623 | 0.786 | 0.130 |
+| Resize 0.75× | 0.505 | 0.553 | 0.671 | 0.733 | 0.854 | 0.225 |
+| Blur σ=1 | 0.476 | 0.544 | 0.645 | 0.724 | 0.850 | 0.205 |
+
+So với B55 (không augmentation):
+- JPEG q90 0.214 → **0.512**, q75 0.081 → **0.449**; AUC q90 0.541 → 0.669, q75 0.397 → 0.623; R@1% q75 0.005 → 0.130.
+- **Trả giá**: none 0.705 → 0.621 (R@1% 0.520 → 0.345); resize 0.629 → 0.505; blur 0.579 → 0.476.
+- Kết luận cho §6.14: augmentation có mục tiêu, không miễn phí; phải khớp pipeline nén đầu vào. q75 vẫn mất 28% IoU sạch; triage vẫn là điểm yếu.
+
 ## Cảnh báo cần kiểm tra
 
 - Model có thể "ăn gian" nhờ khác biệt **độ phân giải / kiểu nén** giữa authentic và forged → cần augmentation (JPEG, resize, blur) để kiểm chứng.
