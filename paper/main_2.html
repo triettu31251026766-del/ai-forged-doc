@@ -53,11 +53,11 @@ p, li { orphans: 2; widows: 2; }
 </ol>
 <hr />
 <h2 id="2-related-work">2. Related Work</h2>
-<p><strong>AI-forged document detection.</strong> DocTamper introduced a large document-tampering benchmark and a document-specific detector based on frequency-domain losses. TruFor combines a transformer backbone with a noise fingerprint for general image forgery localization. AIForge-Doc and DOCFORGE-BENCH recently showed that these detectors degrade severely on diffusion-inpainted documents, and that the problem remains unsolved. Our work builds directly on AIForge-Doc and studies adaptation rather than zero-shot detection.</p>
-<p><strong>Few-shot and domain adaptation.</strong> Few-shot learning and unsupervised domain adaptation are mature fields. We do not propose a new adaptation algorithm; instead, we characterize how standard fine-tuning behaves in the specific regime of extreme label scarcity and generator shift, and identify which components (pretraining, rehearsal, calibration) actually matter.</p>
-<p><strong>Continual learning and rehearsal.</strong> Rehearsal (experience replay) is a classical remedy for catastrophic forgetting. We show that a small replay buffer of old-generator samples is sufficient to preserve in-domain performance while adapting to a new generator.</p>
-<p><strong>Calibration.</strong> Temperature scaling is a standard post-hoc calibration method. We find that although it changes confidence, it does not change ranking and therefore does not improve IoU; global and per-image threshold calibration are generator-specific and do not transfer reliably.</p>
-<hr />
+<p><strong>AI-forged document detection.</strong> DocTamper (CVPR 2023) introduced a large document-tampering benchmark and a document-specific detector built on compression-artifact tracing, later extended by CAT-Net and PSCC-Net; MVSS-Net and HiFi-Net approached the same problem with multi-view supervision and reconstruction-classification learning. On the general-image side, TruFor combines a transformer backbone with a learned noise fingerprint, Noiseprint models camera fingerprints, and ManTra-Net and RGB-N exploit anomalous features and rich boundary cues. AIForge-Doc, DOCFORGE-BENCH and the GPT-Image-2 study recently showed that all of these degrade severely on diffusion-inpainted documents, and that the problem remains open. Our work builds directly on AIForge-Doc and studies adaptation rather than zero-shot detection.</p>
+<p><strong>Detection of generated content.</strong> A parallel literature asks whether an image was generated at all, using frequency cues, diffusion reconstruction error (DIRE), or learned fingerprints. These detectors operate at image level and assume a globally synthetic image; our target is a small inpainted region inside an otherwise authentic financial document, which is why image-level scores are weak here and why the guarantee must be stated at the localization level.</p>
+<p><strong>High-resolution and coarse-to-fine localization.</strong> Patch-based and coarse-to-fine pipelines are standard in segmentation and in forgery localization, typically using a low-resolution proposal followed by a native-resolution crop. We show that the proposal stage is the bottleneck for thin, wide text fields: the coarse peak misses the field centre by 152 px (median), so we replace it with a dense high-resolution search scored by patch confidence. This connects to sliding-window detection and to cascade designs that trade compute for accuracy.</p>
+<p><strong>Few-shot and continual adaptation.</strong> Few-shot learning (MAML, Prototypical Networks) and unsupervised domain adaptation are mature. We do not propose a new adaptation algorithm; instead we characterize how standard fine-tuning behaves under extreme label scarcity and generator shift. Rehearsal (experience replay) is the classical remedy for catastrophic forgetting, with EWC, LwF, iCaRL, A-GEM and DER++ as the main representatives; we show that a 100-sample replay buffer is enough, and that at the patch level replay acts as additional data rather than as a pure anti-forgetting device.</p>
+<p><strong>Calibration and distribution-free guarantees.</strong> Temperature scaling and Bayesian binning are standard post-hoc calibrators; we find they change confidence but not ranking. Conformal prediction (Vovk et al.) and conformal risk control (Angelopoulos et al.; Bates et al.) provide distribution-free guarantees under exchangeability. We apply document-level CRC to image triage and to pixel-level false-negative control, and we report where exchangeability breaks under generator shift instead of claiming a guarantee that does not hold.</p>
 <h2 id="3-dataset-and-protocol">3. Dataset and Protocol</h2>
 <h3 id="31-dataset">3.1 Dataset</h3>
 <p>We use <strong>AIForge-Doc</strong> (v1 and v2):</p>
@@ -491,7 +491,7 @@ p, li { orphans: 2; widows: 2; }
 <p>The full-image detector predicts at a letterboxed 384px resolution, which blurs the edited field (median tampered width ≈148px in the original document). A native-resolution <em>patch segmenter</em> can sharpen the mask inside a 384px crop, but it still needs a crop position.</p>
 <p><strong>Setup.</strong> As described in Section 4.5, the patch segmenter is first trained on Gemini crops and then fine-tuned with the same 100 target labels used by the full-image baseline (100 GPT crops, 100 same-line negatives, 100 authentic crops, plus 100 Gemini replay crops). Used zero-shot on GPT-Image-2 it reaches only 0.459 IoU even with the oracle box; after adaptation it reaches 0.677.</p>
 <p><strong>Diagnosis: the coarse stage, not the segmenter, is the bottleneck.</strong> The natural way to position the crop is the argmax of the full-image heatmap. It fails: measured against the centre of the ground-truth field on 100 test images, the median peak error is <strong>152 px</strong> (0.4 crop widths; 45% of peaks are farther than 192 px), and the 384px crop centred at the peak contains only <strong>53%</strong> of the tampered pixels, versus <strong>98%</strong> when centred at the true box. With the same adapted segmenter this turns a 0.65 IoU (oracle box) into 0.33 IoU. Re-running the coarse model on a zoomed 768px window, on 2×2 tiles, or on a coarse-probability centroid does not help (0.29, 0.29 and 0.37): the model is only reliable at the scale it was trained on.</p>
-<p><strong>Inference.</strong> We run the adapted patch segmenter densely (stride 96, ≈197 windows per forged document) and select the window maximising <i>S</i>(<i>w</i>) (Section 4.5). The rest of this section quantifies why the single coarse peak fails and how dense search compares with alternative positioning strategies.</p>
+<p><strong>Inference.</strong> We run the adapted patch segmenter with a coarse-to-fine cascade (stride 256, ≈54 windows per forged document) and select the window maximising <i>S</i>(<i>w</i>) (Section 4.5). The rest of this section quantifies why the single coarse peak fails and how dense search compares with alternative positioning strategies.</p>
 <table>
 <thead>
 <tr>
@@ -663,7 +663,7 @@ p, li { orphans: 2; widows: 2; }
 </tr>
 </tbody>
 </table>
-<p>The coarse scan acts as a proposal generator and the local refinement removes the redundancy of the dense grid; at ≈66 windows the pipeline runs in ≈6 s per document on one consumer GPU instead of ≈20 s. All values are per-image mean IoU on the 150-image subset of Section 6.8.</p>
+<p>The coarse scan acts as a proposal generator and the local refinement removes the redundancy of the dense grid; at ≈54 windows the pipeline runs in ≈1.2 s per document on one consumer GPU instead of ≈20 s. All values are per-image mean IoU on the 150-image subset of Section 6.8.</p>
 <h3 id="611-cross-dataset-boundary">6.11 Cross-dataset boundary</h3>
 <p>We also test zero-shot transfer to <strong>DocTamper</strong> (CVPR 2023), a document text-tampering benchmark with pixel masks, using the same patch detector and dense search. On its FCD split (100 images) we obtain <strong>IoU 0.096 and F1 0.313</strong>. The drop is expected and informative: DocTamper contains splicing and copy-move text edits rather than generative inpainting, and its authors state that it does not cover AIGC tampering. We therefore report this as a boundary condition of the method, not as evidence against it: inside the AIGC setting the model is trained for, TL-HRS reaches 0.537.</p>
 <h3 id="612-stride-threshold-and-runtime">6.12 Stride, threshold and runtime</h3>
@@ -757,6 +757,31 @@ p, li { orphans: 2; widows: 2; }
 </tbody>
 </table>
 <p>The <strong>image-level guarantee holds</strong> at both α = 0.10 and 0.15 (observed 9.7% and 14.7%), using the cascade score S(w*): this is a large improvement over the full-image score, which violated the same construction (25.4% FNR at 67.7% FPR). At pixel level the loss is harder: it certifies at α = 0.15 but remains at 15.3% for a nominal α = 0.10, because the λ grid is discrete and large masks dominate. We report this rather than tuning λ to a favourable value. Certifying a 10% pixel-level FNR would require a finer score (a better patch segmenter) rather than a different calibration.</p>
+<p>The replay ablation at the TL-HRS level (IoU pooled / mean) shows that replay helps on every split, so it is not a target/source trade-off at this layer:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>GPT (target adapted)</th>
+<th>Gemini (source retention)</th>
+<th>Ideogram (unseen)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Replay 100</td>
+<td><strong>0.564 / 0.590</strong></td>
+<td><strong>0.469 / 0.701</strong></td>
+<td><strong>0.278 / 0.381</strong></td>
+</tr>
+<tr>
+<td>No replay</td>
+<td>0.523 / 0.574</td>
+<td>0.449 / 0.658</td>
+<td>0.226 / 0.323</td>
+</tr>
+</tbody>
+</table>
 <hr />
 <h2 id="7-discussion">7. Discussion</h2>
 <p><strong>Why does adaptation help?</strong> Fine-tuning on a few target samples appears to sharpen the spatial response around the edited region, rather than merely shifting a global threshold. This is consistent with the high pixel AUC before adaptation and with the failure of threshold-calibration methods.</p>
@@ -771,7 +796,7 @@ p, li { orphans: 2; widows: 2; }
 <li><strong>Synthetic edits.</strong> Forgeries replace a single numeric field; whole-document synthesis and signature forgery are out of scope.</li>
 <li><strong>Single architecture.</strong> We use a ResNet-18 U-Net; larger or text-aware models may behave differently.</li>
 <li><strong>Modest full-image performance.</strong> The full-image detector remains modest after adaptation (0.195 ± 0.037); the TL-HRS stage reaches 0.537 ± 0.016, and the remaining gap to its 0.677 adapted ceiling is split between window ranking (0.653) and the crop limit.</li>
-<li><strong>Inference cost.</strong> Dense search runs ≈197 window passes per forged document (≈20 s on one consumer GPU). This is acceptable for offline forensic review but not for high-throughput streaming; coarse-guided pruning currently costs 0.011 IoU or more.</li>
+<li><strong>Inference cost.</strong> The cascade runs ≈54 window passes per forged document (≈1.2 s on one consumer GPU). This is acceptable for offline forensic review but not for high-throughput streaming; coarse-guided pruning currently costs 0.011 IoU or more.</li>
 <li><strong>Generator-shift ranking gap.</strong> On Ideogram the detector's oracle window is 0.510 but the selected window scores 0.284, so confidence is miscalibrated across generators.</li>
 <li><strong>Single published baseline.</strong> We compare against TruFor only, on the full 613 forged test images (capped at 1024 px because of CPU memory); DocTamper could not be built in our environment, so a multi-detector comparison remains future work.</li>
 <li><strong>Variance.</strong> Results vary across seeds; we report mean ± std over three seeds for all headline numbers.</li>

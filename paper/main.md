@@ -248,7 +248,7 @@ The full-image detector predicts at a letterboxed 384px resolution, which blurs 
 
 **Diagnosis: the coarse stage, not the segmenter, is the bottleneck.** The natural way to position the crop is the argmax of the full-image heatmap. It fails: measured against the centre of the ground-truth field on 100 test images, the median peak error is **152 px** (0.4 crop widths; 45% of peaks are farther than 192 px), and the 384px crop centred at the peak contains only **53%** of the tampered pixels, versus **98%** when centred at the true box. With the same adapted segmenter this turns a 0.65 IoU (oracle box) into 0.33 IoU. Re-running the coarse model on a zoomed 768px window, on 2×2 tiles, or on a coarse-probability centroid does not help (0.29, 0.29 and 0.37): the model is only reliable at the scale it was trained on.
 
-**Inference.** We run the adapted patch segmenter densely (stride 96, ≈197 windows per forged document) and select the window maximising <i>S</i>(<i>w</i>) (Section 4.5). The rest of this section quantifies why the single coarse peak fails and how dense search compares with alternative positioning strategies.
+**Inference.** We run the adapted patch segmenter with a coarse-to-fine cascade (stride 256, ≈54 windows per forged document) and select the window maximising <i>S</i>(<i>w</i>) (Section 4.5). The rest of this section quantifies why the single coarse peak fails and how dense search compares with alternative positioning strategies.
 
 | Setup (GPT-Image-2, full forged test, 613 images) | IoU | Notes |
 |---|---|---|
@@ -310,7 +310,7 @@ Dense search (stride 96) evaluates ≈218 windows per forged document. We test a
 | Cascade, top-3 | 77 | 0.607 |
 | Oracle among visited | 77 | 0.674 |
 
-The coarse scan acts as a proposal generator and the local refinement removes the redundancy of the dense grid; at ≈66 windows the pipeline runs in ≈6 s per document on one consumer GPU instead of ≈20 s. All values are per-image mean IoU on the 150-image subset of Section 6.8.
+The coarse scan acts as a proposal generator and the local refinement removes the redundancy of the dense grid; at ≈54 windows the pipeline runs in ≈1.2 s per document on one consumer GPU instead of ≈20 s. All values are per-image mean IoU on the 150-image subset of Section 6.8.
 
 
 ### 6.11 Cross-dataset boundary
@@ -346,6 +346,14 @@ We state the guarantee where the signal lives — on pixels and on documents —
 The **image-level guarantee holds** at both α = 0.10 and 0.15 (observed 9.7% and 14.7%), using the cascade score S(w*): this is a large improvement over the full-image score, which violated the same construction (25.4% FNR at 67.7% FPR). At pixel level the loss is harder: it certifies at α = 0.15 but remains at 15.3% for a nominal α = 0.10, because the λ grid is discrete and large masks dominate. We report this rather than tuning λ to a favourable value. Certifying a 10% pixel-level FNR would require a finer score (a better patch segmenter) rather than a different calibration.
 
 
+
+The replay ablation at the TL-HRS level (IoU pooled / mean) shows that replay helps on every split, so it is not a target/source trade-off at this layer:
+
+| | GPT (target adapted) | Gemini (source retention) | Ideogram (unseen) |
+|---|---|---|---|
+| Replay 100 | **0.564 / 0.590** | **0.469 / 0.701** | **0.278 / 0.381** |
+| No replay | 0.523 / 0.574 | 0.449 / 0.658 | 0.226 / 0.323 |
+
 ---
 
 ## 7. Discussion
@@ -367,7 +375,7 @@ The **image-level guarantee holds** at both α = 0.10 and 0.15 (observed 9.7% an
 - **Synthetic edits.** Forgeries replace a single numeric field; whole-document synthesis and signature forgery are out of scope.
 - **Single architecture.** We use a ResNet-18 U-Net; larger or text-aware models may behave differently.
 - **Modest full-image performance.** The full-image detector remains modest after adaptation (0.195 ± 0.037); the TL-HRS stage reaches 0.537 ± 0.016, and the remaining gap to its 0.677 adapted ceiling is split between window ranking (0.653) and the crop limit.
-- **Inference cost.** Dense search runs ≈197 window passes per forged document (≈20 s on one consumer GPU). This is acceptable for offline forensic review but not for high-throughput streaming; coarse-guided pruning currently costs 0.011 IoU or more.
+- **Inference cost.** The cascade runs ≈54 window passes per forged document (≈1.2 s on one consumer GPU). This is acceptable for offline forensic review but not for high-throughput streaming; coarse-guided pruning currently costs 0.011 IoU or more.
 - **Generator-shift ranking gap.** On Ideogram the detector's oracle window is 0.510 but the selected window scores 0.284, so confidence is miscalibrated across generators.
 - **Single published baseline.** We compare against TruFor only, on the full 613 forged test images (capped at 1024 px because of CPU memory); DocTamper could not be built in our environment, so a multi-detector comparison remains future work.
 - **Variance.** Results vary across seeds; we report mean ± std over three seeds for all headline numbers.
