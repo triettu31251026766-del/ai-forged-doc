@@ -766,6 +766,7 @@ p, li { orphans: 2; widows: 2; }
 </tbody>
 </table>
 <p><strong>Bảo đảm mức ảnh giữ được</strong> ở cả α = 0.10 và 0.15 (quan sát 9.7% và 14.7%), dùng điểm cascade S(w*): cải thiện lớn so với score toàn ảnh, vốn vi phạm cùng cách dựng (FNR 25.4% tại FPR 67.7%). Ở mức điểm ảnh, bài toán khó hơn: chứng nhận được ở α = 0.15 nhưng vẫn 15.3% với α danh nghĩa 0.10, do lưới λ rời rạc và mask lớn chi phối. Chúng tôi báo cáo trung thực thay vì tinh chỉnh λ cho đẹp. Muốn chứng nhận FNR 10% ở mức điểm ảnh cần score tốt hơn (bộ phân đoạn patch mạnh hơn), không phải đổi cách hiệu chỉnh.</p>
+<p><strong>Cascade trên toàn tập và triage mức ảnh.</strong> Chạy cascade (stride 256) trên toàn bộ 1.226 ảnh test GPT-Image-2 (613 giả + 613 thật) mất 1.04 s/ảnh, cho IoU 0.564 pooled / 0.590 mean, F1 0.721 pooled. Dùng chính điểm S(w*) cho triage toàn ảnh tốt hơn hẳn detector toàn ảnh: image AUC 0.825 so với 0.565, image AP 0.845 so với 0.582, và <strong>Recall@1%FPR 0.286 so với 0.042</strong> (tăng 6.8 lần). Tầng định vị vì thế cũng khắc phục luôn điểm yếu triage.</p>
 <hr />
 <h2 id="7-thao-luan">7. Thảo luận</h2>
 <p><strong>Vì sao thích ứng giúp?</strong> Fine-tune trên vài mẫu đích dường như làm sắc nét phản hồi không gian quanh vùng bị sửa, thay vì chỉ dịch một ngưỡng toàn cục. Điều này phù hợp với pixel AUC cao trước thích ứng và với việc các phương pháp hiệu chỉnh ngưỡng thất bại.</p>

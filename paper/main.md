@@ -373,6 +373,9 @@ The replay ablation at the TL-HRS level (IoU pooled / mean) shows that replay he
 | Replay 100 | **0.564 / 0.590** | **0.469 / 0.701** | **0.278 / 0.381** |
 | No replay | 0.523 / 0.574 | 0.449 / 0.658 | 0.226 / 0.323 |
 
+**Full-test cascade and image-level triage.** Running the cascade (stride 256) over all 1,226 GPT-Image-2 test images (613 forged + 613 authentic) takes 1.04 s per image and gives IoU 0.564 pooled / 0.590 mean, F1 0.721 pooled. Using the same score S(w*) for whole-image triage is substantially better than the full-image detector: image AUC 0.825 versus 0.565, image AP 0.845 versus 0.582, and **Recall@1%FPR 0.286 versus 0.042** (a 6.8x gain). The localization stage therefore also fixes the triage weakness.
+
+
 ---
 
 ## 7. Discussion
