@@ -82,6 +82,10 @@ Unless stated otherwise, the base detector is trained on Gemini (2,912 forged + 
 
 ## 4. Method
 
+**Figure 1.** Overview of TL-HRS: a coarse patch scan proposes windows, a local refinement selects w*, and the adapted patch segmenter produces the mask. The same score S(w*) drives image-level triage, and the mask supports pixel-level risk control.
+
+![Hình 1](figures/fig_pipeline.png)
+
 ### 4.1 Base detector
 
 We use a U-Net with a ResNet-18 encoder pretrained on ImageNet. The model outputs a single-channel logit map. It is trained on Gemini with:
