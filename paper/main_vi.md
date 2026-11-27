@@ -103,6 +103,21 @@ Cho <i>k</i> mẫu có nhãn từ bộ sinh đích (cộng <i>k</i> mẫu thật
 Chúng tôi nghiên cứu ba chiến lược calibration: temperature scaling khớp trên một phần mẫu đích có nhãn giữ riêng; tối ưu ngưỡng toàn cục; và ngưỡng thích ứng theo ảnh (giữ top-<i>p</i>% điểm ảnh). Các phương pháp này được đánh giá nhưng, như trình bày ở Mục 6.5, không mang lại cải thiện ổn định.
 
 ### 4.5 Tìm kiếm độ phân giải cao định vị theo văn bản (TL-HRS)
+**Thuật toán 1** TL-HRS kèm kiểm soát rủi ro.
+
+```
+Đầu vào: tài liệu x, bộ phân đoạn patch f_theta, stride s1=256, s2=96, mức rủi ro alpha
+1  W <- các cửa sổ tại tâm (s1*i, s1*j)
+2  chấm điểm từng w bằng S(w) = trung bình top-1% của f_theta(x_w)
+3  C <- top-3 cửa sổ của W
+4  R <- hợp các lân cận 3x3 của C tại stride s2
+5  w* <- argmax_{w in R} S(w)
+6  p <- f_theta(x_{w*});  m <- p > 0.5
+7  điểm ảnh s* <- S(w*); gắn cờ giả nếu s* > lambda_CRC(alpha)   # hiệu chỉnh trên n_cal tài liệu
+8  trả về m, s*, w*
+```
+
+
 
 Suy luận toàn ảnh chạy ở 384×384 letterbox, nơi trường bị sửa trung vị (≈148 px rộng) chỉ chiếm vài điểm ảnh; mask thu được không chính xác về không gian. TL-HRS thêm một tầng độ phân giải gốc lên trên detector đã thích ứng.
 

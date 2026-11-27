@@ -107,6 +107,21 @@ To mitigate forgetting, we add <i>r</i> samples from the old generator (Gemini) 
 We study three calibration strategies: temperature scaling fitted on a held-out fraction of the labelled target samples; global threshold optimization; and per-image adaptive thresholding (keep the top-<i>p</i>% pixels). These are evaluated but, as shown in Section 6.5, do not provide consistent gains.
 
 ### 4.5 Text-localized high-resolution search (TL-HRS)
+**Algorithm 1** TL-HRS with risk control.
+
+```
+Input: document x, patch segmenter f_theta, stride s1=256, s2=96, risk level alpha
+1  W <- {windows at centres (s1*i, s1*j)}
+2  score each w in W by S(w) = mean of top-1% of f_theta(x_w)
+3  C <- top-3 windows of W
+4  R <- union of 3x3 neighbourhoods of C at stride s2
+5  w* <- argmax_{w in R} S(w)
+6  p <- f_theta(x_{w*});  m <- p > 0.5
+7  image score s* <- S(w*); flag forged if s* > lambda_CRC(alpha)   # calibrated on n_cal docs
+8  return m, s*, w*
+```
+
+
 
 Full-image inference runs at a letterboxed 384×384, where the median tampered field (≈148 px wide) occupies only a few pixels; the resulting mask is spatially imprecise. TL-HRS adds a native-resolution stage on top of the adapted detector.
 

@@ -124,6 +124,17 @@ p, li { orphans: 2; widows: 2; }
 <h3 id="44-calibration-nghien-cuu-nhu-ablation">4.4 Calibration (nghiên cứu như ablation)</h3>
 <p>Chúng tôi nghiên cứu ba chiến lược calibration: temperature scaling khớp trên một phần mẫu đích có nhãn giữ riêng; tối ưu ngưỡng toàn cục; và ngưỡng thích ứng theo ảnh (giữ top-<i>p</i>% điểm ảnh). Các phương pháp này được đánh giá nhưng, như trình bày ở Mục 6.5, không mang lại cải thiện ổn định.</p>
 <h3 id="45-tim-kiem-o-phan-giai-cao-inh-vi-theo-van-ban-tl-hrs">4.5 Tìm kiếm độ phân giải cao định vị theo văn bản (TL-HRS)</h3>
+<p><strong>Thuật toán 1</strong> TL-HRS kèm kiểm soát rủi ro.</p>
+<pre><code>Đầu vào: tài liệu x, bộ phân đoạn patch f_theta, stride s1=256, s2=96, mức rủi ro alpha
+1  W &lt;- các cửa sổ tại tâm (s1*i, s1*j)
+2  chấm điểm từng w bằng S(w) = trung bình top-1% của f_theta(x_w)
+3  C &lt;- top-3 cửa sổ của W
+4  R &lt;- hợp các lân cận 3x3 của C tại stride s2
+5  w* &lt;- argmax_{w in R} S(w)
+6  p &lt;- f_theta(x_{w*});  m &lt;- p &gt; 0.5
+7  điểm ảnh s* &lt;- S(w*); gắn cờ giả nếu s* &gt; lambda_CRC(alpha)   # hiệu chỉnh trên n_cal tài liệu
+8  trả về m, s*, w*
+</code></pre>
 <p>Suy luận toàn ảnh chạy ở 384×384 letterbox, nơi trường bị sửa trung vị (≈148 px rộng) chỉ chiếm vài điểm ảnh; mask thu được không chính xác về không gian. TL-HRS thêm một tầng độ phân giải gốc lên trên detector đã thích ứng.</p>
 <p><strong>Thích ứng patch.</strong> Một bộ phân đoạn patch (cùng U-Net, áp lên crop 384×384 ở tỉ lệ gốc) được fine-tune với đúng <i>k</i> nhãn đích: <i>k</i> crop quanh trường thật, <i>k</i> mẫu âm cùng dòng không chồng lấn, <i>k</i> crop ảnh thật, cộng <i>r</i> crop replay từ bộ sinh cũ. Box của crop được suy ra từ mask huấn luyện bằng connected components, nên không cần gán nhãn thêm. Cụ thể, với crop <i>x</i><sub><i>w</i></sub> đặt tại cửa sổ <i>w</i>, mô hình xuất logit <i>f</i><sub>&theta;</sub>(<i>x</i><sub><i>w</i></sub>) và xác suất <i>ŷ</i><sub><i>w</i></sub> = &sigma;(<i>f</i><sub>&theta;</sub>(<i>x</i><sub><i>w</i></sub>)).</p>
 <p><strong>Tìm kiếm dày.</strong> Khi suy luận, chúng tôi trượt crop trên tài liệu với stride <i>s</i> và chấm điểm từng cửa sổ bằng trung bình 1% điểm ảnh cao nhất,</p>

@@ -128,6 +128,17 @@ p, li { orphans: 2; widows: 2; }
 <h3 id="44-calibration-studied-as-an-ablation">4.4 Calibration (studied as an ablation)</h3>
 <p>We study three calibration strategies: temperature scaling fitted on a held-out fraction of the labelled target samples; global threshold optimization; and per-image adaptive thresholding (keep the top-<i>p</i>% pixels). These are evaluated but, as shown in Section 6.5, do not provide consistent gains.</p>
 <h3 id="45-text-localized-high-resolution-search-tl-hrs">4.5 Text-localized high-resolution search (TL-HRS)</h3>
+<p><strong>Algorithm 1</strong> TL-HRS with risk control.</p>
+<pre><code>Input: document x, patch segmenter f_theta, stride s1=256, s2=96, risk level alpha
+1  W &lt;- {windows at centres (s1*i, s1*j)}
+2  score each w in W by S(w) = mean of top-1% of f_theta(x_w)
+3  C &lt;- top-3 windows of W
+4  R &lt;- union of 3x3 neighbourhoods of C at stride s2
+5  w* &lt;- argmax_{w in R} S(w)
+6  p &lt;- f_theta(x_{w*});  m &lt;- p &gt; 0.5
+7  image score s* &lt;- S(w*); flag forged if s* &gt; lambda_CRC(alpha)   # calibrated on n_cal docs
+8  return m, s*, w*
+</code></pre>
 <p>Full-image inference runs at a letterboxed 384×384, where the median tampered field (≈148 px wide) occupies only a few pixels; the resulting mask is spatially imprecise. TL-HRS adds a native-resolution stage on top of the adapted detector.</p>
 <p><strong>Patch adaptation.</strong> A patch segmenter (the same U-Net, applied to 384×384 crops at native scale) is fine-tuned with the <em>same</em> <i>k</i> target labels: <i>k</i> crops centred on the ground-truth fields, <i>k</i> non-overlapping same-line negatives, <i>k</i> authentic crops, plus <i>r</i> replay crops from the old generator. Crop boxes are derived from the training masks by connected components, so no extra annotation is required. Formally, for a crop <i>x</i><sub><i>w</i></sub> centred at window <i>w</i> the model outputs logits <i>f</i><sub>&theta;</sub>(<i>x</i><sub><i>w</i></sub>) and probabilities <i>ŷ</i><sub><i>w</i></sub> = &sigma;(<i>f</i><sub>&theta;</sub>(<i>x</i><sub><i>w</i></sub>)).</p>
 <p><strong>Dense search.</strong> At inference we slide the crop over the document at stride <i>s</i> and score every window by the mean of its top-1% pixels,</p>
