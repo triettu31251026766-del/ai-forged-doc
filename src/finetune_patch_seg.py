@@ -55,6 +55,7 @@ def main():
     ap.add_argument("--max-test", type=int, default=0)
     ap.add_argument("--out", default="results/patch_seg_gpt")
     ap.add_argument("--jpeg-aug", action="store_true")
+    ap.add_argument("--encoder", default="resnet18")
     ap.add_argument("--arch", default=None)
     args = ap.parse_args()
 
