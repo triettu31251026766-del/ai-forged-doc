@@ -15,10 +15,11 @@
 \setlength{\LTleft}{0pt}
 \setlength{\LTright}{0pt}
 \usepackage{url}
+\usepackage{needspace}
 \usepackage[hidelinks]{hyperref}
 \providecommand{\tightlist}{} % pandoc artifact; no-op
 \newcounter{tabno}
-\newcommand{\tabcaption}[1]{\par\refstepcounter{tabno}\noindent\textbf{Table \thetabno:} #1\par\vspace{2pt}}
+\newcommand{\tabcaption}[1]{\par\needspace{9\baselineskip}\refstepcounter{tabno}\noindent\textbf{Table \thetabno:} #1\par\vspace{2pt}}
 \journal{Expert Systems with Applications}
 \begin{document}
 \begin{frontmatter}
