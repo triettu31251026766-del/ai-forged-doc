@@ -362,7 +362,7 @@ We state the guarantee where the signal lives — on pixels and on documents —
 | 0.10 | 500 | **9.90 ± 2.90** | 15.24 ± 2.95 | 18.46 ± 3.96 | 5.6% |
 | 0.15 | 300 | **14.70 ± 2.48** | **15.33 ± 1.13** | 18.29 ± 1.96 | 5.6% |
 
-The **image-level guarantee holds** at both alpha = 0.10 and 0.15 (observed 9.7% and 14.7%), using the cascade score S(w*): this is a large improvement over the full-image score, which violated the same construction (25.4% FNR at 67.7% FPR). At pixel level the loss is harder: it certifies at alpha = 0.15 but remains at 15.3% for a nominal alpha = 0.10, because the lambda grid is discrete and large masks dominate. We report this rather than tuning lambda to a favourable value. Certifying a 10% pixel-level FNR would require a finer score (a better patch segmenter) rather than a different calibration.
+The **image-level guarantee holds** at both alpha = 0.10 and 0.15 (observed 9.7% and 14.7%), using the cascade score S(w*): this is a large improvement over the full-image score, which violated the same construction (25.4% FNR at 67.7% FPR). At pixel level the loss is harder: it certifies at alpha = 0.15 but remains at 15.3% for a nominal alpha = 0.10, because for about 15% of the documents the selected window w* misses part of the annotated region; those pixels are counted as false negatives at every threshold, so no lambda can go below this window-miss floor. We report this rather than tuning lambda to a favourable value. Certifying a 10% pixel-level FNR would require a finer score (a better patch segmenter) rather than a different calibration.
 
 
 
