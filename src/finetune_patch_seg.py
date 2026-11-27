@@ -54,6 +54,7 @@ def main():
     ap.add_argument("--init", default="results/patch_seg/patch_seg.pth")
     ap.add_argument("--max-test", type=int, default=0)
     ap.add_argument("--out", default="results/patch_seg_gpt")
+    ap.add_argument("--jpeg-aug", action="store_true")
     args = ap.parse_args()
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -92,7 +93,7 @@ def main():
 
     items = pos + neg + auth_neg + rep_pos + rep_neg
     random.Random(args.seed).shuffle(items)
-    ds = PatchDataset(items, P=args.patch_size, jitter=args.jitter, rng=random.Random(args.seed))
+    ds = PatchDataset(items, P=args.patch_size, jitter=args.jitter, rng=random.Random(args.seed), jpeg_aug=args.jpeg_aug)
     loader = DataLoader(ds, batch_size=args.batch_size, shuffle=True, num_workers=0)
     print(f"Fine-tune patches: {len(ds)} (gpt_pos={len(pos)}, gpt_neg={len(neg)}, "
           f"auth={len(auth_neg)}, replay_pos={len(rep_pos)}, replay_neg={len(rep_neg)})")
