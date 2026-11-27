@@ -78,6 +78,10 @@ Trừ khi nói khác, detector gốc được train trên Gemini (2,912 giả m�
 - **Xếp hạng:** pixel AUC (trung bình theo ảnh) và image AUC.
 - **Phát hiện dưới ngân sách cảnh báo:** image Average Precision (AP) và Recall tại FPR = 1% (Recall@1%FPR), phản ánh năng lực duyệt hạn chế của ngân hàng.
 
+### 3.4 Mô hình mối đe dọa
+
+Tài sản là một tài liệu tài chính có trường số đã bị thay bằng công cụ sinh ảnh. Kẻ tấn công muốn (i) né triage mức ảnh, (ii) làm lệch hoặc thu nhỏ mask dự đoán để người rà soát không tìm thấy vùng sửa, hoặc (iii) gây báo động giả trên tài liệu thật. Ta giả định kẻ tấn công hộp đen, có thể (a) dùng bộ sinh chưa thấy khi huấn luyện, (b) hậu xử lý tài liệu bằng các phép giữ nguyên khả năng đọc — nén JPEG ở mức của ứng dụng nhắn tin/ngân hàng, thay đổi kích thước, làm mờ nhẹ — và (c) chỉ truy vấn hệ thống qua đầu ra. Nhiễu đối kháng hộp trắng, chụp lại vật lý, tổng hợp toàn tài liệu và thông đồng với người rà soát nằm ngoài phạm vi. Mô hình này cố ý khiêm tốn: nó bắt đúng dịch chuyển xảy ra khi kẻ làm giả dùng công cụ mới hoặc gửi file qua pipeline nhắn tin — đúng nơi các detector ở trên thất bại. Mục 6.14 định lượng thành phần hậu xử lý.
+
 ---
 
 ## 4. Phương pháp
@@ -374,6 +378,20 @@ CRC chỉ chặn tổn thất được đưa vào. Nó không nói gì về báo
 
 **Cascade trên toàn tập và triage mức ảnh.** Chạy cascade (stride 256) trên toàn bộ 1.226 ảnh test GPT-Image-2 (613 giả + 613 thật) mất 1.04 s/ảnh, cho IoU 0.564 pooled / 0.590 mean, F1 0.721 pooled. Dùng chính điểm S(w*) cho triage toàn ảnh tốt hơn hẳn detector toàn ảnh: image AUC 0.825 so với 0.565, image AP 0.845 so với 0.582, và **Recall@1%FPR 0.286 so với 0.042** (tăng 6.8 lần). Đây là tín hiệu xếp hạng tốt hơn, không phải triage đã được giải quyết: tại ngân sách cảnh báo 1%, 71% giấy tờ giả vẫn bị bỏ sót, và điểm vận hành conformal chặn tỉ lệ bỏ sót ở 10% gắn cờ 56% tài liệu thật. Tầng định vị vì thế cải thiện triage nhưng không khắc phục được nó.
 
+### 6.14 Độ bền với hậu xử lý
+
+Tài liệu giả hiếm khi đến ngân hàng dưới dạng PNG nguyên bản: nó bị chụp màn hình, nén lại hoặc thay đổi kích thước trên đường đi. Vì thế chúng tôi chạy lại cascade trên một tập con cố định 200 tài liệu giả + 100 tài liệu thật GPT-Image-2 dưới bốn phép biến đổi: JPEG quality 90 và 75, giảm mẫu 0.75x rồi phóng bilinear, và Gaussian blur (5x5, sigma = 1). Tập con là 200/100 tài liệu đầu tiên của danh sách test cố định và dễ hơn split đầy đủ (IoU pooled 0.705 khi không biến đổi so với 0.564 ở Mục 6.8); do đó giá trị tuyệt đối không so sánh được giữa các bảng, và bảng dưới đây chỉ đọc theo mức giữ tương đối. Với 100 tài liệu thật, điểm vận hành FPR 1% mang tính thực nghiệm và thô (khoảng một dương tính giả), nên Recall@1%FPR bị lượng tử hóa theo bước 0.005.
+
+| Biến đổi | IoU (pooled) | IoU (mean) | F1 | Image AUC | Image AP | Recall@1%FPR |
+|---|---|---|---|---|---|---|
+| Không | 0.705 | 0.725 | 0.827 | 0.908 | 0.953 | 0.520 |
+| JPEG q90 | 0.214 | 0.278 | 0.352 | 0.541 | 0.718 | 0.070 |
+| JPEG q75 | 0.081 | 0.117 | 0.149 | 0.397 | 0.594 | 0.005 |
+| Resize 0.75x | 0.629 | 0.655 | 0.772 | 0.815 | 0.903 | 0.305 |
+| Blur sigma = 1 | 0.579 | 0.617 | 0.733 | 0.778 | 0.882 | 0.240 |
+
+Ba nhận xét. **(1) JPEG tàn phá.** Quality 90 giảm IoU pooled từ 0.705 xuống 0.214 (giữ 30%) và Recall@1%FPR từ 0.520 xuống 0.070; quality 75 chỉ còn 0.081 IoU, 0.149 F1 và 0.005 Recall@1%FPR, image AUC xuống 0.397, dưới mức ngẫu nhiên trên tập con này. Điều này phù hợp với việc detector dựa vào dấu vết tần số cao của bộ sinh mà lượng tử hóa xóa đi, và quan trọng về vận hành vì nén lại là phổ biến. Chúng tôi báo cáo AUC dưới ngẫu nhiên đúng như đo được; với 200 tài liệu giả, đây cũng là ô nhiễu nhất trong bảng. **(2) Resize và blur nhẹ hơn.** Chúng giữ 89% và 82% IoU pooled (0.629 và 0.579), Recall@1%FPR còn 0.305 và 0.240, nên tín hiệu không thuần túy tần số cao. **(3) Xếp hạng và định vị suy giảm cùng nhau.** Hậu xử lý không chỉ dịch điểm vận hành, nên hiệu chỉnh lại không lấy lại được IoU đã mất. Triển khai thực tế nên thêm augmentation JPEG/resize khi thích ứng và ghi lại pipeline nén của đường vào; nghiên cứu augmentation đầy đủ để cho công việc sau.
+
 
 ---
 
@@ -399,6 +417,7 @@ CRC chỉ chặn tổn thất được đưa vào. Nó không nói gì về báo
 - **Chi phí suy luận.** Tìm kiếm dày chạy ≈197 lượt cửa sổ mỗi tài liệu giả mạo (≈20 s trên một GPU tiêu dùng). Chấp nhận được cho giám định offline nhưng không cho streaming thông lượng cao; pruning dẫn hướng bởi coarse hiện mất 0.011 IoU hoặc hơn.
 - **Khoảng cách xếp hạng dưới dịch chuyển bộ sinh.** Trên Ideogram, oracle window của detector là 0.510 nhưng cửa sổ được chọn chỉ đạt 0.284, nên độ tin cậy bị lệch chuẩn giữa các bộ sinh.
 - **Chỉ một baseline công bố.** Chúng tôi chỉ so sánh với TruFor, trên toàn bộ 613 ảnh test ở 1024 px (giới hạn RAM CPU); DocTamper không build được trong môi trường của nhóm, nên so sánh đa detector vẫn là việc tiếp theo.
+- **Hậu xử lý.** Nén JPEG quality 75 xóa phần lớn tín hiệu (Mục 6.14); các mô hình hiện tại chưa được huấn luyện với augmentation nén ảnh.
 - **Phương sai.** Kết quả thay đổi theo seed; chúng tôi báo cáo trung bình ± độ lệch chuẩn qua ba seed cho mọi con số headline.
 
 ---

@@ -78,6 +78,10 @@ Unless stated otherwise, the base detector is trained on Gemini (2,912 forged + 
 - **Ranking:** pixel AUC (mean per image) and image AUC.
 - **Detection under alert budget:** image Average Precision (AP) and Recall at FPR = 1% (Recall@1%FPR), which reflects a bank's limited review capacity.
 
+### 3.4 Threat model
+
+The asset is a financial document whose numeric field has been replaced by a generative editor. The adversary wants to (i) evade image-level triage, (ii) displace or shrink the predicted mask so that a human reviewer cannot find the edit, or (iii) trigger false alarms on genuine documents. We assume a black-box adversary who can (a) use a generator not seen in training, (b) post-process the final document with operations that preserve legibility — JPEG recompression at messenger or bank settings, resizing, and mild blur — and (c) query the deployed system only through its output. White-box adversarial perturbations, physical recapture, whole-document synthesis, and collusion with the reviewer are out of scope. The model is deliberately modest: it captures the shift that occurs when a forger uses a new tool or sends the file through a messaging pipeline, which is exactly where the detectors above fail. Section 6.14 quantifies the post-processing component.
+
 ---
 
 ## 4. Method
@@ -386,6 +390,20 @@ The replay ablation at the TL-HRS level (IoU pooled / mean) shows that replay he
 
 **Full-test cascade and image-level triage.** Running the cascade (stride 256) over all 1,226 GPT-Image-2 test images (613 forged + 613 authentic) takes 1.04 s per image and gives IoU 0.564 pooled / 0.590 mean, F1 0.721 pooled. Using the same score S(w*) for whole-image triage is substantially better than the full-image detector: image AUC 0.825 versus 0.565, image AP 0.845 versus 0.582, and **Recall@1%FPR 0.286 versus 0.042** (a 6.8x gain). This is a better ranking signal, not a solved triage stage: at a 1% alert budget 71% of forgeries are still missed, and the conformal operating point that bounds the miss rate at 10% flags 56% of authentic documents. The localization stage therefore improves triage but does not fix it.
 
+### 6.14 Robustness to post-processing
+
+A forged document rarely reaches the bank as a pristine PNG: it is screenshotted, recompressed, or resized on its way. We therefore re-run the cascade on a fixed subset of 200 forged and 100 authentic GPT-Image-2 documents under four corruptions: JPEG quality 90 and 75, a 0.75x downsample followed by bilinear upsampling, and Gaussian blur (5x5, sigma = 1). The subset is the first 200/100 documents of the fixed test list and is easier than the full split (pooled IoU 0.705 without corruption versus 0.564 in Section 6.8); absolute values are therefore not comparable across tables, and we read the table below only as relative retention. With 100 authentic documents the 1% FPR operating point is empirical and coarse (about one false positive), so Recall@1%FPR is quantized in steps of 0.005.
+
+| Corruption | IoU (pooled) | IoU (mean) | F1 | Image AUC | Image AP | Recall@1%FPR |
+|---|---|---|---|---|---|---|
+| None | 0.705 | 0.725 | 0.827 | 0.908 | 0.953 | 0.520 |
+| JPEG q90 | 0.214 | 0.278 | 0.352 | 0.541 | 0.718 | 0.070 |
+| JPEG q75 | 0.081 | 0.117 | 0.149 | 0.397 | 0.594 | 0.005 |
+| Resize 0.75x | 0.629 | 0.655 | 0.772 | 0.815 | 0.903 | 0.305 |
+| Blur sigma = 1 | 0.579 | 0.617 | 0.733 | 0.778 | 0.882 | 0.240 |
+
+Three observations follow. **(1) JPEG is catastrophic.** Quality 90 reduces pooled IoU from 0.705 to 0.214 (30% retained) and Recall@1%FPR from 0.520 to 0.070; quality 75 leaves 0.081 IoU, 0.149 F1 and 0.005 Recall@1%FPR, and image AUC falls to 0.397, below chance on this subset. This is consistent with the detector relying on high-frequency generator traces that quantization removes, and it matters operationally because recompression is ubiquitous. We report the below-chance AUC as measured; with 200 forged documents it is also the noisiest cell in the table. **(2) Resizing and blur are milder.** They retain 89% and 82% of the uncorrupted pooled IoU (0.629 and 0.579), and Recall@1%FPR stays at 0.305 and 0.240, so the signal is not purely high-frequency. **(3) Ranking and localization degrade together.** Post-processing does not merely move the operating threshold, so recalibration cannot recover the lost IoU. A practical deployment should include JPEG and resize augmentation during adaptation and record the compression pipeline of the ingestion path; a full augmentation study is left to future work.
+
 
 ---
 
@@ -411,6 +429,7 @@ The replay ablation at the TL-HRS level (IoU pooled / mean) shows that replay he
 - **Inference cost.** The cascade runs ≈54 window passes per forged document (≈1.2 s on one consumer GPU). This is acceptable for offline forensic review but not for high-throughput streaming; coarse-guided pruning currently costs 0.011 IoU or more.
 - **Generator-shift ranking gap.** On Ideogram the detector's oracle window is 0.510 but the selected window scores 0.284, so confidence is miscalibrated across generators.
 - **Single published baseline.** We compare against TruFor only, on the full 613 forged test images (capped at 1024 px because of CPU memory); DocTamper could not be built in our environment, so a multi-detector comparison remains future work.
+- **Post-processing.** JPEG recompression at quality 75 removes most of the signal (Section 6.14); the current models are not trained with compression augmentation.
 - **Variance.** Results vary across seeds; we report mean ± std over three seeds for all headline numbers.
 
 ---

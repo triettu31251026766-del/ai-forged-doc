@@ -16,7 +16,7 @@ def load(p):
 
 
 def main():
-    slide = [load(f"slide_s{i}/results.json") for i in range(3)]
+    slide = [load(f"slide_s{i}/results.json") for i in range(5)]
     tlhrs = [s["methods"]["top1"]["iou_pooled"] for s in slide]
     oracle_gpt = float(np.mean([s["oracle_window_iou_mean"] for s in slide]))
     ideo = load("slide_ideo/results.json")
@@ -61,7 +61,7 @@ def main():
         ("zoom 768", loc["zoom2"]["iou_pooled"]),
         ("tile 2x2", loc["tile2"]["iou_pooled"]),
         ("pruned top-40", float(slide2["rows"]["40"]["iou_pooled"])),
-        ("dense search", 0.5826),
+        ("dense search", 0.584),
     ]
     sub_sorted = sorted(sub, key=lambda z: z[1])
     ax.barh([z[0] for z in sub_sorted], [z[1] for z in sub_sorted],

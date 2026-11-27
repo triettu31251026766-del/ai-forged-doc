@@ -801,6 +801,24 @@ Kết luận (dùng cho §6.13):
 - Pixel FNR 15.3–16.7% (sàn window-miss ≈15%: w* không phủ hết mask ở ~15% tài liệu), pixel FPR 4.5–5.6% → guarantee 10% mức điểm ảnh **không đạt**; α=0.15 chỉ đạt sát ngưỡng tại n_cal=300.
 - B53 (12.0% / 1.8%) là một split đơn lẻ; số trung bình 100 split là 15.5% / 5.5%. Dùng B54.
 
+### B55 — Robustness to post-processing (JPEG/resize/blur) — 2026-11-27
+
+`scripts/eval_robustness.py`, cascade stride 256, **200 giả + 100 thật** đầu tiên của `test_gptimage` (tập con cố định, dễ hơn full split), checkpoint `results/patch_seg_gpt/patch_seg.pth`.
+
+| Biến đổi | IoU pooled | IoU mean | F1 | Image AUC | Image AP | R@1%FPR |
+|---|---|---|---|---|---|---|
+| None | 0.705 | 0.725 | 0.827 | 0.908 | 0.953 | 0.520 |
+| JPEG q90 | 0.214 | 0.278 | 0.352 | 0.541 | 0.718 | 0.070 |
+| JPEG q75 | 0.081 | 0.117 | 0.149 | 0.397 | 0.594 | 0.005 |
+| Resize 0.75× | 0.629 | 0.655 | 0.772 | 0.815 | 0.903 | 0.305 |
+| Blur σ=1 | 0.579 | 0.617 | 0.733 | 0.778 | 0.882 | 0.240 |
+
+Kết luận (dùng cho §6.14):
+- **Chỉ so sánh tương đối trong bảng**; IoU 0.705 của "None" cao hơn full-test 0.564 vì 200 ảnh đầu dễ hơn (thiên về CORD) — không được trích như số full-test.
+- JPEG q90 giữ 30% IoU, q75 còn 11%; R@1%FPR 0.520 → 0.070 → 0.005; AUC q75 = 0.397 (< ngẫu nhiên trên tập con, ô nhiễu nhất).
+- Resize/blur nhẹ hơn (89%/82% IoU), nên tín hiệu không thuần tần số cao.
+- Hệ quả: cần JPEG/resize augmentation khi adaptation; ghi rõ pipeline nén của đường vào.
+
 ## Cảnh báo cần kiểm tra
 
 - Model có thể "ăn gian" nhờ khác biệt **độ phân giải / kiểu nén** giữa authentic và forged → cần augmentation (JPEG, resize, blur) để kiểm chứng.

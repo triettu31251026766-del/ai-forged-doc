@@ -30,7 +30,7 @@ p, li { orphans: 2; widows: 2; }
 <p><strong>Authors:</strong> Anonymous submission (author names withheld for review).</p>
 <hr />
 <h2 id="abstract">Abstract</h2>
-<p>Generative image editing has made it possible to alter a single numeric field in a financial document in under a second, and detectors trained on traditional (e.g., Photoshop-based) forgeries are largely blind to such edits. Even a detector trained on one generative inpainter collapses when the underlying generator changes — a <em>generator shift</em>. In realistic banking deployments, collecting many labelled forgeries for every new generator is infeasible. We study <strong>label-efficient adaptation</strong> of an AI-forged document detector under generator shift, and we ask whether a small number of labelled target-generator samples is sufficient to recover localization performance without catastrophically forgetting previously seen generators. Using the AIForge-Doc benchmark (Gemini, Ideogram, GPT-Image-2), we show that: (i) a detector trained on Gemini collapses on unseen generators (IoU 0.052 on GPT-Image-2); (ii) few-shot fine-tuning recovers localization monotonically, reaching IoU 0.195 ± 0.037 with only 100 labelled target samples (≈3.7× over zero-shot); (iii) training from scratch with the same 100 labels is substantially worse (IoU 0.085), showing that base-generator pretraining matters; and (iv) rehearsal of 100 old-generator samples restores in-domain performance to 0.672 ± 0.006 (near the 0.669 zero-shot level) at a modest target-generator cost (IoU 0.162). We further report a set of negative results: temperature scaling, global and per-image threshold calibration, sample-selection strategies, encoder freezing, frequency channels, and generic anomaly detection do <strong>not</strong> provide consistent gains. Our analysis indicates that the bottleneck is <strong>localization precision</strong>, not decision-threshold calibration. Finally, we show that adapting a native-resolution patch segmenter with the same 100 labels raises the localization ceiling from 0.459 to 0.677 IoU, but that the coarse peak used to position it is the real bottleneck: it misses the field centre by 152 px (median), so the crop covers only 53% of the tampered pixels. Replacing the single peak with a dense high-resolution search over 384 px windows and selecting by patch confidence reaches <strong>0.537 ± 0.016 IoU on the full unseen generator (2.8× the full-image baseline, 79% of the adapted ceiling)</strong>, and 0.284 IoU on a completely unseen generator (Ideogram) versus 0.114 for the full-image detector. A localization study shows that centroid, grid, zoom and tiling variants all underperform dense search, that the coarse map is too unreliable to prune it, and that the residual gap is a <em>selection-confidence</em> problem under generator shift (oracle-window IoU is 0.653). We then state the guarantee where the signal lives: a split-conformal threshold calibrated on 300 labelled documents certifies a pixel-level false-negative rate of <strong>12.0% at a 1.8% pixel false-alarm rate</strong> on held-out forgeries, while the same construction fails at image level (25.4% FNR, 67.7% FPR). We release code, splits, and all results for reproducibility.</p>
+<p>Generative image editing has made it possible to alter a single numeric field in a financial document in under a second, and detectors trained on traditional (e.g., Photoshop-based) forgeries are largely blind to such edits. Even a detector trained on one generative inpainter collapses when the underlying generator changes — a <em>generator shift</em>. In realistic banking deployments, collecting many labelled forgeries for every new generator is infeasible. We study <strong>label-efficient adaptation</strong> of an AI-forged document detector under generator shift, and we ask whether a small number of labelled target-generator samples is sufficient to recover localization performance without catastrophically forgetting previously seen generators. Using the AIForge-Doc benchmark (Gemini, Ideogram, GPT-Image-2), we show that: (i) a detector trained on Gemini collapses on unseen generators (IoU 0.052 on GPT-Image-2); (ii) few-shot fine-tuning recovers localization monotonically, reaching IoU 0.195 ± 0.037 with only 100 labelled target samples (≈3.7× over zero-shot); (iii) training from scratch with the same 100 labels is substantially worse (IoU 0.085), showing that base-generator pretraining matters; and (iv) rehearsal of 100 old-generator samples restores in-domain performance to 0.672 ± 0.006 (near the 0.669 zero-shot level) at a modest target-generator cost (IoU 0.162). We further report a set of negative results: temperature scaling, global and per-image threshold calibration, sample-selection strategies, encoder freezing, frequency channels, and generic anomaly detection do <strong>not</strong> provide consistent gains. Our analysis indicates that the bottleneck is <strong>localization precision</strong>, not decision-threshold calibration. Finally, we show that adapting a native-resolution patch segmenter with the same 100 labels raises the localization ceiling from 0.459 to 0.677 IoU, but that the coarse peak used to position it is the real bottleneck: it misses the field centre by 152 px (median), so the crop covers only 53% of the tampered pixels. Replacing the single peak with a dense high-resolution search over 384 px windows and selecting by patch confidence reaches <strong>0.537 ± 0.016 IoU on the full unseen generator (2.8× the full-image baseline, 79% of the adapted ceiling)</strong>, and 0.284 IoU on a completely unseen generator (Ideogram) versus 0.114 for the full-image detector. A localization study shows that centroid, grid, zoom and tiling variants all underperform dense search, that the coarse map is too unreliable to prune it, and that the residual gap is a <em>selection-confidence</em> problem under generator shift (oracle-window IoU is 0.653). We then state the guarantee where the signal lives: with 300 labelled documents, a split-conformal threshold controls the image-level miss rate at the nominal level (9.8% at alpha = 0.10) but flags <strong>55.8% of authentic documents</strong>, and the pixel-level miss rate saturates at <strong>15.5% at 5.5% pixel false alarms</strong> because the selected window misses part of the annotation in about 15% of documents. Conformal risk control therefore gives a one-sided guarantee on misses, not a usable operating point: image triage remains the deployment bottleneck. We release code, splits, and all results for reproducibility.</p>
 <hr />
 <h2 id="1-introduction">1. Introduction</h2>
 <p>Digital document fraud is increasing rapidly. Recent generative inpainting APIs can replace a number or a date in a photographed receipt while preserving font, colour, and texture, leaving no obvious compression or copy-move traces. Detectors designed for traditional document tampering therefore degrade substantially on such forgeries.</p>
@@ -49,7 +49,7 @@ p, li { orphans: 2; widows: 2; }
 <li>Qualitative evidence (score maps) showing that adaptation sharpens localization rather than merely shifting thresholds.</li>
 <li>A <strong>text-localized high-resolution search (TL-HRS) method</strong> that adapts a patch segmenter with the same 100 target labels and searches the document densely at native resolution: the localization ceiling rises from 0.459 to 0.677, and the automatic pipeline reaches <strong>0.537 ± 0.016 IoU</strong> on the full unseen generator (2.8× the full-image baseline, 79% of the ceiling), while a single coarse peak reaches only 0.321.</li>
 <li>A localization study showing that the coarse stage, not segmentation, is the bottleneck (median peak error 152 px; crop coverage 53% vs. 98% at the true box), and that dense search beats centroid refinement, grids, zoom, tiling, coarse-guided pruning, OCR selection, multi-signal fusion and pixel gating; the remaining gap is uncalibrated selection confidence under generator shift.</li>
-<li>A <strong>risk-controlled localization</strong> formulation: with 300 labelled documents, a split-conformal threshold certifies pixel-level FNR 12.0% at 1.8% pixel FPR on held-out forgeries, and we show that the same construction collapses at image level (25.4% FNR, 67.7% FPR), motivating guarantees at the localization level.</li>
+<li>A <strong>risk-controlled localization</strong> analysis: with 300 labelled documents, split-conformal risk control holds for image-level misses (9.8% at alpha = 0.10) but only at 55.8% image false alarms, and pixel-level FNR saturates at 15.5% (5.5% pixel FPR) because of the window-miss floor. We report the guarantee as one-sided and identify image triage, not localization, as the remaining bottleneck.</li>
 </ol>
 <hr />
 <h2 id="2-related-work">2. Related Work</h2>
@@ -112,6 +112,8 @@ p, li { orphans: 2; widows: 2; }
 <li><strong>Ranking:</strong> pixel AUC (mean per image) and image AUC.</li>
 <li><strong>Detection under alert budget:</strong> image Average Precision (AP) and Recall at FPR = 1% (Recall@1%FPR), which reflects a bank's limited review capacity.</li>
 </ul>
+<h3 id="34-threat-model">3.4 Threat model</h3>
+<p>The asset is a financial document whose numeric field has been replaced by a generative editor. The adversary wants to (i) evade image-level triage, (ii) displace or shrink the predicted mask so that a human reviewer cannot find the edit, or (iii) trigger false alarms on genuine documents. We assume a black-box adversary who can (a) use a generator not seen in training, (b) post-process the final document with operations that preserve legibility — JPEG recompression at messenger or bank settings, resizing, and mild blur — and (c) query the deployed system only through its output. White-box adversarial perturbations, physical recapture, whole-document synthesis, and collusion with the reviewer are out of scope. The model is deliberately modest: it captures the shift that occurs when a forger uses a new tool or sends the file through a messaging pipeline, which is exactly where the detectors above fail. Section 6.14 quantifies the post-processing component.</p>
 <hr />
 <h2 id="4-method">4. Method</h2>
 <p><strong>Figure 1.</strong> Overview of TL-HRS: a coarse patch scan proposes windows, a local refinement selects w<em>, and the adapted patch segmenter produces the mask. The same score S(w</em>) drives image-level triage, and the mask supports pixel-level risk control.</p>
@@ -728,48 +730,91 @@ p, li { orphans: 2; widows: 2; }
 </tbody>
 </table>
 <p>Stride 256 is both the fastest (1.18 s per document, 54 windows) and the most accurate, and the IoU is flat between thresholds 0.4 and 0.6 (variation &lt; 0.005), so the operating point is not cherry-picked.</p>
-<p><strong>Image-level conformal triage fails (negative result).</strong> Calibrating a split-conformal threshold on in-domain Gemini forges (target FNR 10%) and deploying it on GPT-Image-2 gives an actual FNR of 25.4% and an FPR of 67.7% on authentic documents; even on the calibration split the FPR is 67%, i.e. the image-level score barely separates authentic from forged. Exchangeability is violated under generator shift, and the full-image score has almost no separation. Section 6.13 shows that this is a property of the score, not of the task: the cascade score S(w*) restores triage (AUC 0.825, Recall@1%FPR 0.286) and satisfies the same conformal construction.</p>
+<p><strong>Image-level conformal triage fails (negative result).</strong> Calibrating a split-conformal threshold on in-domain Gemini forges (target FNR 10%) and deploying it on GPT-Image-2 gives an actual FNR of 25.4% and an FPR of 67.7% on authentic documents; even on the calibration split the FPR is 67%, i.e. the image-level score barely separates authentic from forged. Exchangeability is violated under generator shift, and the full-image score has almost no separation. Section 6.13 shows that the cascade score S(w*) is a much better ranker (AUC 0.825, Recall@1%FPR 0.286), but that the conformal threshold which bounds the miss rate at 10% still flags 56% of authentic documents: a better signal, not a solved triage stage.</p>
 <h3 id="613-risk-controlled-localization">6.13 Risk-controlled localization</h3>
-<p>We state the guarantee where the signal lives — on pixels and on documents — using Conformal Risk Control (CRC): for a threshold lambda, let L_i(lambda) be the fraction of document i's annotated pixels missed (false negatives), and choose lambda-hat as the largest lambda whose empirical risk, corrected by n/(n+1) and 1/(n+1), is below alpha. We calibrate on 300 forged documents and evaluate on the remaining 313, repeating the random split 100 times.</p>
+<p>We state the guarantee where the signal lives — on pixels and on documents — using Conformal Risk Control (CRC), keeping the two losses separate. For a threshold lambda, L_i^img(lambda) = 1[s_i &lt;= lambda] is the image-level loss on forged document i (the document is missed entirely), and L_i^pix(lambda) is the fraction of its annotated pixels with score at most lambda. We choose lambda-hat as the largest lambda whose corrected empirical risk, (n/(n+1))(1/n) sum_i L_i(lambda) + 1/(n+1), is below alpha. We calibrate on n_cal in {25, 50, 100, 300} forged documents, evaluate on the remaining 613 - n_cal, repeat the random split 100 times, and use all 613 authentic documents only to measure the false-positive rate. The score is the cascade score S(w*) of Section 6.8; a document is caught when s_i &gt; lambda-hat.</p>
+<p>CRC bounds the loss it is given. It says nothing about false alarms, and under class imbalance and generator shift the two sides can diverge sharply. The table below therefore reports both.</p>
 <table>
 <thead>
 <tr>
 <th>alpha</th>
 <th>n_cal</th>
-<th>image FNR</th>
-<th>pixel FNR (per doc)</th>
-<th>pixel FNR (pooled)</th>
-<th>pixel FPR</th>
+<th>image FNR (%)</th>
+<th>image FPR (%)</th>
+<th>pixel FNR (%)</th>
+<th>pixel FPR (%)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>0.10</td>
-<td>300</td>
-<td><strong>9.66 ± 2.09</strong></td>
-<td>15.33 ± 1.13</td>
-<td>18.29 ± 1.96</td>
-<td>5.6%</td>
+<td>25</td>
+<td>7.0 ± 5.1</td>
+<td>64.9 ± 14.2</td>
+<td>15.3 ± 0.5</td>
+<td>5.5</td>
 </tr>
 <tr>
 <td>0.10</td>
-<td>500</td>
-<td><strong>9.90 ± 2.90</strong></td>
-<td>15.24 ± 2.95</td>
-<td>18.46 ± 3.96</td>
-<td>5.6%</td>
+<td>50</td>
+<td>9.2 ± 4.1</td>
+<td>57.8 ± 10.7</td>
+<td>15.5 ± 1.1</td>
+<td>5.5</td>
+</tr>
+<tr>
+<td>0.10</td>
+<td>100</td>
+<td>9.8 ± 3.5</td>
+<td>56.0 ± 8.4</td>
+<td>15.3 ± 0.6</td>
+<td>5.6</td>
+</tr>
+<tr>
+<td>0.10</td>
+<td>300</td>
+<td><strong>9.8 ± 2.4</strong></td>
+<td>55.8 ± 4.3</td>
+<td>15.5 ± 1.3</td>
+<td>5.5</td>
+</tr>
+<tr>
+<td>0.15</td>
+<td>25</td>
+<td>11.7 ± 5.3</td>
+<td>51.6 ± 12.2</td>
+<td>16.7 ± 3.2</td>
+<td>4.5</td>
+</tr>
+<tr>
+<td>0.15</td>
+<td>50</td>
+<td>14.3 ± 5.1</td>
+<td>45.5 ± 10.0</td>
+<td>16.3 ± 2.3</td>
+<td>4.6</td>
+</tr>
+<tr>
+<td>0.15</td>
+<td>100</td>
+<td>14.7 ± 3.3</td>
+<td>43.1 ± 5.9</td>
+<td>15.8 ± 1.8</td>
+<td>5.0</td>
 </tr>
 <tr>
 <td>0.15</td>
 <td>300</td>
-<td><strong>14.70 ± 2.48</strong></td>
-<td><strong>15.33 ± 1.13</strong></td>
-<td>18.29 ± 1.96</td>
-<td>5.6%</td>
+<td>14.9 ± 2.5</td>
+<td>42.1 ± 2.7</td>
+<td>15.5 ± 1.3</td>
+<td>5.6</td>
 </tr>
 </tbody>
 </table>
-<p>The <strong>image-level guarantee holds</strong> at both alpha = 0.10 and 0.15 (observed 9.7% and 14.7%), using the cascade score S(w*): this is a large improvement over the full-image score, which violated the same construction (25.4% FNR at 67.7% FPR). At pixel level the loss is harder: it certifies at alpha = 0.15 but remains at 15.3% for a nominal alpha = 0.10, because the lambda grid is discrete and large masks dominate. We report this rather than tuning lambda to a favourable value. Certifying a 10% pixel-level FNR would require a finer score (a better patch segmenter) rather than a different calibration.</p>
+<p>The image-level guarantee is valid but one-sided. With n_cal = 300, the miss rate is 9.8 ± 2.4% at alpha = 0.10 and 14.9 ± 2.5% at alpha = 0.15: the construction does what it promises, and the observed risk approaches alpha from below as n_cal grows (7.0% at n_cal = 25), because with few calibration documents lambda-hat is fitted to a noisy empirical risk and under-covers. The same thresholds, however, flag 55.8 ± 4.3% (alpha = 0.10) and 42.1 ± 2.7% (alpha = 0.15) of authentic documents. A bank that insists on missing at most 10% of forgeries would send more than half of all genuine documents to manual review.</p>
+<p>This does not mean that the cascade score is useless for triage. Relative to the full-image score it is a much better ranker: image AUC 0.825 versus 0.565, image AP 0.845 versus 0.582, and Recall@1%FPR 0.286 versus 0.042, a 6.8x gain. But a 6.8x improvement over a near-random ranker is not a solution: at the 1% alert budget 71% of forgeries still pass unreviewed, and the conformal threshold that bounds the miss rate at 10% operates at 56% FPR. We therefore do not claim that TL-HRS restores image-level triage. The score used for localization is a better ranking signal, but triage remains the deployment bottleneck.</p>
+<p>At pixel level the picture is different. FNR is 15.3–16.7% across all settings at 4.5–5.6% pixel FPR, and moving alpha from 0.10 to 0.15 barely changes it because a structural floor dominates: in about 15% of forged documents the selected window w* does not cover the whole annotation, and those pixels are false negatives at every threshold. No calibrator can go below this window-miss floor, so the nominal 10% pixel guarantee is not met and alpha = 0.15 is met only marginally at n_cal = 300 (15.5 ± 1.3%). The low pixel FPR is a consequence of sparsity (masks cover about 1% of the pixels): even a permissive threshold adds few false positives relative to background. Certifying a 10% pixel-level FNR requires better window selection or a finer segmenter, not a different calibration. We report these numbers as measured rather than tuning lambda to a favourable value.</p>
 <p>The replay ablation at the TL-HRS level (IoU pooled / mean) shows that replay helps on every split, so it is not a target/source trade-off at this layer:</p>
 <table>
 <thead>
@@ -795,7 +840,70 @@ p, li { orphans: 2; widows: 2; }
 </tr>
 </tbody>
 </table>
-<p><strong>Full-test cascade and image-level triage.</strong> Running the cascade (stride 256) over all 1,226 GPT-Image-2 test images (613 forged + 613 authentic) takes 1.04 s per image and gives IoU 0.564 pooled / 0.590 mean, F1 0.721 pooled. Using the same score S(w*) for whole-image triage is substantially better than the full-image detector: image AUC 0.825 versus 0.565, image AP 0.845 versus 0.582, and <strong>Recall@1%FPR 0.286 versus 0.042</strong> (a 6.8x gain). The localization stage therefore also fixes the triage weakness.</p>
+<p><strong>Full-test cascade and image-level triage.</strong> Running the cascade (stride 256) over all 1,226 GPT-Image-2 test images (613 forged + 613 authentic) takes 1.04 s per image and gives IoU 0.564 pooled / 0.590 mean, F1 0.721 pooled. Using the same score S(w*) for whole-image triage is substantially better than the full-image detector: image AUC 0.825 versus 0.565, image AP 0.845 versus 0.582, and <strong>Recall@1%FPR 0.286 versus 0.042</strong> (a 6.8x gain). This is a better ranking signal, not a solved triage stage: at a 1% alert budget 71% of forgeries are still missed, and the conformal operating point that bounds the miss rate at 10% flags 56% of authentic documents. The localization stage therefore improves triage but does not fix it.</p>
+<h3 id="614-robustness-to-post-processing">6.14 Robustness to post-processing</h3>
+<p>A forged document rarely reaches the bank as a pristine PNG: it is screenshotted, recompressed, or resized on its way. We therefore re-run the cascade on a fixed subset of 200 forged and 100 authentic GPT-Image-2 documents under four corruptions: JPEG quality 90 and 75, a 0.75x downsample followed by bilinear upsampling, and Gaussian blur (5x5, sigma = 1). The subset is the first 200/100 documents of the fixed test list and is easier than the full split (pooled IoU 0.705 without corruption versus 0.564 in Section 6.8); absolute values are therefore not comparable across tables, and we read the table below only as relative retention. With 100 authentic documents the 1% FPR operating point is empirical and coarse (about one false positive), so Recall@1%FPR is quantized in steps of 0.005.</p>
+<table>
+<thead>
+<tr>
+<th>Corruption</th>
+<th>IoU (pooled)</th>
+<th>IoU (mean)</th>
+<th>F1</th>
+<th>Image AUC</th>
+<th>Image AP</th>
+<th>Recall@1%FPR</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>None</td>
+<td>0.705</td>
+<td>0.725</td>
+<td>0.827</td>
+<td>0.908</td>
+<td>0.953</td>
+<td>0.520</td>
+</tr>
+<tr>
+<td>JPEG q90</td>
+<td>0.214</td>
+<td>0.278</td>
+<td>0.352</td>
+<td>0.541</td>
+<td>0.718</td>
+<td>0.070</td>
+</tr>
+<tr>
+<td>JPEG q75</td>
+<td>0.081</td>
+<td>0.117</td>
+<td>0.149</td>
+<td>0.397</td>
+<td>0.594</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>Resize 0.75x</td>
+<td>0.629</td>
+<td>0.655</td>
+<td>0.772</td>
+<td>0.815</td>
+<td>0.903</td>
+<td>0.305</td>
+</tr>
+<tr>
+<td>Blur sigma = 1</td>
+<td>0.579</td>
+<td>0.617</td>
+<td>0.733</td>
+<td>0.778</td>
+<td>0.882</td>
+<td>0.240</td>
+</tr>
+</tbody>
+</table>
+<p>Three observations follow. <strong>(1) JPEG is catastrophic.</strong> Quality 90 reduces pooled IoU from 0.705 to 0.214 (30% retained) and Recall@1%FPR from 0.520 to 0.070; quality 75 leaves 0.081 IoU, 0.149 F1 and 0.005 Recall@1%FPR, and image AUC falls to 0.397, below chance on this subset. This is consistent with the detector relying on high-frequency generator traces that quantization removes, and it matters operationally because recompression is ubiquitous. We report the below-chance AUC as measured; with 200 forged documents it is also the noisiest cell in the table. <strong>(2) Resizing and blur are milder.</strong> They retain 89% and 82% of the uncorrupted pooled IoU (0.629 and 0.579), and Recall@1%FPR stays at 0.305 and 0.240, so the signal is not purely high-frequency. <strong>(3) Ranking and localization degrade together.</strong> Post-processing does not merely move the operating threshold, so recalibration cannot recover the lost IoU. A practical deployment should include JPEG and resize augmentation during adaptation and record the compression pipeline of the ingestion path; a full augmentation study is left to future work.</p>
 <hr />
 <h2 id="7-discussion">7. Discussion</h2>
 <p><strong>Why does adaptation help?</strong> Fine-tuning on a few target samples appears to sharpen the spatial response around the edited region, rather than merely shifting a global threshold. This is consistent with the high pixel AUC before adaptation and with the failure of threshold-calibration methods.</p>
@@ -813,6 +921,7 @@ p, li { orphans: 2; widows: 2; }
 <li><strong>Inference cost.</strong> The cascade runs ≈54 window passes per forged document (≈1.2 s on one consumer GPU). This is acceptable for offline forensic review but not for high-throughput streaming; coarse-guided pruning currently costs 0.011 IoU or more.</li>
 <li><strong>Generator-shift ranking gap.</strong> On Ideogram the detector's oracle window is 0.510 but the selected window scores 0.284, so confidence is miscalibrated across generators.</li>
 <li><strong>Single published baseline.</strong> We compare against TruFor only, on the full 613 forged test images (capped at 1024 px because of CPU memory); DocTamper could not be built in our environment, so a multi-detector comparison remains future work.</li>
+<li><strong>Post-processing.</strong> JPEG recompression at quality 75 removes most of the signal (Section 6.14); the current models are not trained with compression augmentation.</li>
 <li><strong>Variance.</strong> Results vary across seeds; we report mean ± std over three seeds for all headline numbers.</li>
 </ul>
 <hr />

@@ -31,7 +31,7 @@ p, li { orphans: 2; widows: 2; }
 <hr />
 <h2 id="tom-tat">Tóm tắt</h2>
 <p>Các công cụ sinh ảnh có thể sửa một trường số trên hóa đơn tài chính trong chưa đầy một giây, trong khi các detector huấn luyện trên giả mạo truyền thống (ví dụ Photoshop) gần như không phát hiện được. Ngay cả một detector huấn luyện trên một bộ sinh inpainting cũng sụp đổ khi bộ sinh thay đổi — hiện tượng <em>dịch chuyển bộ sinh</em> (generator shift). Trong triển khai ngân hàng thực tế, việc thu thập nhiều mẫu giả mạo có nhãn cho từng bộ sinh mới là không khả thi. Chúng tôi nghiên cứu <strong>thích ứng tiết kiệm nhãn</strong> cho detector giấy tờ bị AI sửa dưới dịch chuyển bộ sinh, và đặt câu hỏi liệu một lượng nhỏ mẫu có nhãn từ bộ sinh mới có đủ để khôi phục năng lực định vị mà không quên hoàn toàn các bộ sinh cũ hay không. Trên benchmark AIForge-Doc (Gemini, Ideogram, GPT-Image-2), chúng tôi chỉ ra rằng: (i) detector huấn luyện trên Gemini sụp đổ trên bộ sinh chưa thấy (IoU 0.052 trên GPT-Image-2); (ii) fine-tune few-shot khôi phục định vị một cách đơn điệu, đạt IoU 0.195 ± 0.037 với chỉ 100 mẫu đích có nhãn (≈3.7× so với zero-shot); (iii) train from scratch với cùng 100 nhãn kém hơn đáng kể (IoU 0.085), cho thấy pretrain trên bộ sinh gốc quan trọng; và (iv) rehearsal 100 mẫu từ bộ sinh cũ khôi phục hiệu năng in-domain về 0.672 ± 0.006 (gần mức zero-shot 0.669) với chi phí nhỏ trên bộ sinh đích (IoU 0.162). Chúng tôi cũng báo cáo một loạt kết quả âm: temperature scaling, hiệu chỉnh ngưỡng toàn cục và theo ảnh, chiến lược chọn mẫu, đóng băng encoder, kênh tần số và phát hiện bất thường tổng quát <strong>không</strong> mang lại cải thiện ổn định. Phân tích cho thấy nút thắt là <strong>độ chính xác định vị</strong>, không phải hiệu chỉnh ngưỡng quyết định.</p>
-<p>Cuối cùng, chúng tôi chỉ ra rằng việc thích ứng một bộ phân đoạn patch ở độ phân giải gốc với cùng 100 nhãn nâng trần định vị từ 0.459 lên 0.677 IoU, nhưng <strong>đỉnh coarse dùng để đặt crop lại chính là nút thắt</strong>: nó lệch tâm trường 152 px (trung vị), khiến crop chỉ phủ 53% điểm ảnh bị sửa. Thay đỉnh đơn bằng <strong>tìm kiếm dày độ phân giải cao</strong> trên các cửa sổ 384 px và chọn theo độ tin cậy của patch đạt <strong>0.537 ± 0.016 IoU trên bộ sinh chưa thấy đầy đủ (2.8× baseline toàn ảnh, 79% trần)</strong>, và 0.284 IoU trên một bộ sinh hoàn toàn chưa thấy (Ideogram) so với 0.114 của detector toàn ảnh. Nghiên cứu định vị cho thấy các biến thể centroid, lưới, zoom và tile đều kém hơn tìm kiếm dày; bản đồ coarse không đủ tin cậy để pruning; và khoảng cách còn lại là vấn đề <strong>hiệu chỉnh độ tin cậy khi chọn cửa sổ</strong> dưới dịch chuyển bộ sinh (IoU oracle-window là 0.653). Sau đó chúng tôi phát biểu bảo đảm ở nơi tín hiệu thực sự tồn tại: ngưỡng split-conformal hiệu chỉnh trên 300 tài liệu có nhãn chứng nhận <strong>FNR điểm ảnh 12.0% với 1.8% báo động giả trên nền</strong> trên dữ liệu giữ lại, trong khi cùng cách làm thất bại ở mức ảnh (FNR 25.4%, FPR 67.7%). Chúng tôi công bố mã nguồn, split và toàn bộ kết quả để tái lập.</p>
+<p>Cuối cùng, chúng tôi chỉ ra rằng việc thích ứng một bộ phân đoạn patch ở độ phân giải gốc với cùng 100 nhãn nâng trần định vị từ 0.459 lên 0.677 IoU, nhưng <strong>đỉnh coarse dùng để đặt crop lại chính là nút thắt</strong>: nó lệch tâm trường 152 px (trung vị), khiến crop chỉ phủ 53% điểm ảnh bị sửa. Thay đỉnh đơn bằng <strong>tìm kiếm dày độ phân giải cao</strong> trên các cửa sổ 384 px và chọn theo độ tin cậy của patch đạt <strong>0.537 ± 0.016 IoU trên bộ sinh chưa thấy đầy đủ (2.8× baseline toàn ảnh, 79% trần)</strong>, và 0.284 IoU trên một bộ sinh hoàn toàn chưa thấy (Ideogram) so với 0.114 của detector toàn ảnh. Nghiên cứu định vị cho thấy các biến thể centroid, lưới, zoom và tile đều kém hơn tìm kiếm dày; bản đồ coarse không đủ tin cậy để pruning; và khoảng cách còn lại là vấn đề <strong>hiệu chỉnh độ tin cậy khi chọn cửa sổ</strong> dưới dịch chuyển bộ sinh (IoU oracle-window là 0.653). Sau đó chúng tôi phát biểu bảo đảm ở nơi tín hiệu thực sự tồn tại: ngưỡng split-conformal kiểm soát tỉ lệ bỏ sót mức ảnh đúng mức danh nghĩa (9.8% tại alpha = 0.10) nhưng gắn cờ <strong>55.8% tài liệu thật</strong>, còn tỉ lệ bỏ sót mức điểm ảnh bão hòa ở <strong>15.5% với 5.5% báo động giả trên nền</strong> vì cửa sổ được chọn bỏ sót một phần vùng gán nhãn ở khoảng 15% tài liệu. Conformal risk control vì thế chỉ cho một bảo đảm một phía trên tỉ lệ bỏ sót, không phải một điểm vận hành dùng được: triage mức ảnh vẫn là nút thắt triển khai. Chúng tôi công bố mã nguồn, split và toàn bộ kết quả để tái lập.</p>
 <hr />
 <h2 id="1-mo-au">1. Mở đầu</h2>
 <p>Gian lận tài liệu số đang gia tăng nhanh chóng. Các API inpainting sinh ảnh gần đây có thể thay một con số hoặc một ngày trên ảnh chụp hóa đơn trong khi vẫn giữ font, màu và kết cấu, không để lại dấu vết nén hay copy-move rõ ràng. Vì vậy, các detector thiết kế cho giả mạo tài liệu truyền thống suy giảm mạnh trên loại giả mạo này.</p>
@@ -110,6 +110,8 @@ p, li { orphans: 2; widows: 2; }
 <li><strong>Xếp hạng:</strong> pixel AUC (trung bình theo ảnh) và image AUC.</li>
 <li><strong>Phát hiện dưới ngân sách cảnh báo:</strong> image Average Precision (AP) và Recall tại FPR = 1% (Recall@1%FPR), phản ánh năng lực duyệt hạn chế của ngân hàng.</li>
 </ul>
+<h3 id="34-mo-hinh-moi-e-doa">3.4 Mô hình mối đe dọa</h3>
+<p>Tài sản là một tài liệu tài chính có trường số đã bị thay bằng công cụ sinh ảnh. Kẻ tấn công muốn (i) né triage mức ảnh, (ii) làm lệch hoặc thu nhỏ mask dự đoán để người rà soát không tìm thấy vùng sửa, hoặc (iii) gây báo động giả trên tài liệu thật. Ta giả định kẻ tấn công hộp đen, có thể (a) dùng bộ sinh chưa thấy khi huấn luyện, (b) hậu xử lý tài liệu bằng các phép giữ nguyên khả năng đọc — nén JPEG ở mức của ứng dụng nhắn tin/ngân hàng, thay đổi kích thước, làm mờ nhẹ — và (c) chỉ truy vấn hệ thống qua đầu ra. Nhiễu đối kháng hộp trắng, chụp lại vật lý, tổng hợp toàn tài liệu và thông đồng với người rà soát nằm ngoài phạm vi. Mô hình này cố ý khiêm tốn: nó bắt đúng dịch chuyển xảy ra khi kẻ làm giả dùng công cụ mới hoặc gửi file qua pipeline nhắn tin — đúng nơi các detector ở trên thất bại. Mục 6.14 định lượng thành phần hậu xử lý.</p>
 <hr />
 <h2 id="4-phuong-phap">4. Phương pháp</h2>
 <h3 id="41-detector-goc">4.1 Detector gốc</h3>
@@ -726,47 +728,153 @@ p, li { orphans: 2; widows: 2; }
 <p>Stride 256 vừa nhanh nhất (1.18 s/tài liệu, 54 cửa sổ) vừa chính xác nhất, và IoU phẳng giữa ngưỡng 0.4–0.6 (biến thiên &lt;0.005), nên điểm vận hành không phải chọn có lợi.</p>
 <p><strong>Conformal mức ảnh thất bại (kết quả âm).</strong> Hiệu chỉnh ngưỡng split-conformal trên Gemini in-domain (mục tiêu FNR 10%) rồi triển khai trên GPT-Image-2 cho FNR thực tế 25.4% và FPR 67.7% trên ảnh thật; ngay trên tập hiệu chỉnh FPR đã là 67%, tức score mức ảnh gần như không tách được thật/giả. Exchangeability bị vi phạm dưới dịch chuyển bộ sinh, và bản thân tín hiệu ở mức ảnh quá yếu. Vì vậy các bảo đảm cần phát biểu ở mức <strong>định vị</strong>, không phải triage toàn ảnh.</p>
 <h3 id="613-inh-vi-co-kiem-soat-rui-ro">6.13 Định vị có kiểm soát rủi ro</h3>
-<p>Chúng tôi phát biểu bảo đảm ở nơi tín hiệu thực sự tồn tại — trên điểm ảnh và trên tài liệu — dùng Conformal Risk Control (CRC): với ngưỡng lambda, gọi L_i(lambda) là tỉ lệ điểm ảnh bị sót của tài liệu i (false negative), chọn lambda-hat là lambda lớn nhất mà rủi ro thực nghiệm sau hiệu chỉnh n/(n+1) và 1/(n+1) vẫn dưới alpha. Hiệu chỉnh trên 300 tài liệu giả mạo, đánh giá trên 313 tài liệu còn lại, lặp 100 lần chia ngẫu nhiên.</p>
+<p>Chúng tôi phát biểu bảo đảm ở nơi tín hiệu thực sự tồn tại — trên điểm ảnh và trên tài liệu — dùng Conformal Risk Control (CRC), tách riêng hai loại tổn thất. Với ngưỡng lambda, L_i^img(lambda) = 1[s_i &lt;= lambda] là tổn thất mức ảnh trên tài liệu giả mạo i (bỏ sót hoàn toàn tài liệu), và L_i^pix(lambda) là tỉ lệ điểm ảnh được gán nhãn có điểm không vượt quá lambda. Chọn lambda-hat là lambda lớn nhất mà rủi ro thực nghiệm sau hiệu chỉnh, (n/(n+1))(1/n) sum_i L_i(lambda) + 1/(n+1), vẫn dưới alpha. Hiệu chỉnh trên n_cal thuộc {25, 50, 100, 300} tài liệu giả mạo, đánh giá trên 613 - n_cal tài liệu còn lại, lặp 100 lần chia ngẫu nhiên, và chỉ dùng toàn bộ 613 tài liệu thật để đo tỉ lệ báo động giả. Điểm dùng ở đây là điểm cascade S(w*) của Mục 6.8; một tài liệu được bắt khi s_i &gt; lambda-hat.</p>
+<p>CRC chỉ chặn tổn thất được đưa vào. Nó không nói gì về báo động giả, và dưới mất cân bằng lớp cùng dịch chuyển bộ sinh, hai phía có thể lệch nhau rất mạnh. Bảng dưới đây vì thế báo cáo cả hai.</p>
 <table>
 <thead>
 <tr>
 <th>alpha</th>
 <th>n_cal</th>
-<th>image FNR</th>
-<th>pixel FNR (mỗi tài liệu)</th>
-<th>pixel FNR (pooled)</th>
-<th>pixel FPR</th>
+<th>image FNR (%)</th>
+<th>image FPR (%)</th>
+<th>pixel FNR (%)</th>
+<th>pixel FPR (%)</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>0.10</td>
-<td>300</td>
-<td><strong>9.66 ± 2.09</strong></td>
-<td>15.33 ± 1.13</td>
-<td>18.29 ± 1.96</td>
-<td>5.6%</td>
+<td>25</td>
+<td>7.0 ± 5.1</td>
+<td>64.9 ± 14.2</td>
+<td>15.3 ± 0.5</td>
+<td>5.5</td>
 </tr>
 <tr>
 <td>0.10</td>
-<td>500</td>
-<td><strong>9.90 ± 2.90</strong></td>
-<td>15.24 ± 2.95</td>
-<td>18.46 ± 3.96</td>
-<td>5.6%</td>
+<td>50</td>
+<td>9.2 ± 4.1</td>
+<td>57.8 ± 10.7</td>
+<td>15.5 ± 1.1</td>
+<td>5.5</td>
+</tr>
+<tr>
+<td>0.10</td>
+<td>100</td>
+<td>9.8 ± 3.5</td>
+<td>56.0 ± 8.4</td>
+<td>15.3 ± 0.6</td>
+<td>5.6</td>
+</tr>
+<tr>
+<td>0.10</td>
+<td>300</td>
+<td><strong>9.8 ± 2.4</strong></td>
+<td>55.8 ± 4.3</td>
+<td>15.5 ± 1.3</td>
+<td>5.5</td>
+</tr>
+<tr>
+<td>0.15</td>
+<td>25</td>
+<td>11.7 ± 5.3</td>
+<td>51.6 ± 12.2</td>
+<td>16.7 ± 3.2</td>
+<td>4.5</td>
+</tr>
+<tr>
+<td>0.15</td>
+<td>50</td>
+<td>14.3 ± 5.1</td>
+<td>45.5 ± 10.0</td>
+<td>16.3 ± 2.3</td>
+<td>4.6</td>
+</tr>
+<tr>
+<td>0.15</td>
+<td>100</td>
+<td>14.7 ± 3.3</td>
+<td>43.1 ± 5.9</td>
+<td>15.8 ± 1.8</td>
+<td>5.0</td>
 </tr>
 <tr>
 <td>0.15</td>
 <td>300</td>
-<td><strong>14.70 ± 2.48</strong></td>
-<td><strong>15.33 ± 1.13</strong></td>
-<td>18.29 ± 1.96</td>
-<td>5.6%</td>
+<td>14.9 ± 2.5</td>
+<td>42.1 ± 2.7</td>
+<td>15.5 ± 1.3</td>
+<td>5.6</td>
 </tr>
 </tbody>
 </table>
-<p><strong>Bảo đảm mức ảnh giữ được</strong> ở cả alpha = 0.10 và 0.15 (quan sát 9.7% và 14.7%), dùng điểm cascade S(w*): cải thiện lớn so với score toàn ảnh, vốn vi phạm cùng cách dựng (FNR 25.4% tại FPR 67.7%). Ở mức điểm ảnh, bài toán khó hơn: chứng nhận được ở alpha = 0.15 nhưng vẫn 15.3% với alpha danh nghĩa 0.10, do lưới lambda rời rạc và mask lớn chi phối. Chúng tôi báo cáo trung thực thay vì tinh chỉnh lambda cho đẹp. Muốn chứng nhận FNR 10% ở mức điểm ảnh cần score tốt hơn (bộ phân đoạn patch mạnh hơn), không phải đổi cách hiệu chỉnh.</p>
-<p><strong>Cascade trên toàn tập và triage mức ảnh.</strong> Chạy cascade (stride 256) trên toàn bộ 1.226 ảnh test GPT-Image-2 (613 giả + 613 thật) mất 1.04 s/ảnh, cho IoU 0.564 pooled / 0.590 mean, F1 0.721 pooled. Dùng chính điểm S(w*) cho triage toàn ảnh tốt hơn hẳn detector toàn ảnh: image AUC 0.825 so với 0.565, image AP 0.845 so với 0.582, và <strong>Recall@1%FPR 0.286 so với 0.042</strong> (tăng 6.8 lần). Tầng định vị vì thế cũng khắc phục luôn điểm yếu triage.</p>
+<p><strong>Bảo đảm mức ảnh đúng nhưng chỉ một phía.</strong> Với n_cal = 300, tỉ lệ bỏ sót là 9.8 ± 2.4% tại alpha = 0.10 và 14.9 ± 2.5% tại alpha = 0.15: cách dựng làm đúng điều nó hứa, và rủi ro quan sát tiến về alpha từ phía dưới khi n_cal tăng (7.0% tại n_cal = 25), vì với ít tài liệu hiệu chỉnh, lambda-hat bị khớp vào rủi ro thực nghiệm nhiễu nên under-cover. Tuy nhiên chính các ngưỡng đó gắn cờ 55.8 ± 4.3% (alpha = 0.10) và 42.1 ± 2.7% (alpha = 0.15) tài liệu thật. Một ngân hàng yêu cầu bỏ sót tối đa 10% giấy tờ giả sẽ phải đưa hơn một nửa giấy tờ thật đi rà soát thủ công.</p>
+<p>Điều này không có nghĩa điểm cascade vô dụng cho triage. So với điểm toàn ảnh, nó là bộ xếp hạng tốt hơn nhiều: image AUC 0.825 so với 0.565, image AP 0.845 so với 0.582, và Recall@1%FPR 0.286 so với 0.042, tức tăng 6.8 lần. Nhưng cải thiện 6.8 lần so với một bộ xếp hạng gần ngẫu nhiên không phải là giải pháp: tại ngân sách cảnh báo 1%, 71% giấy tờ giả vẫn lọt, và ngưỡng conformal chặn tỉ lệ bỏ sót ở 10% vận hành tại FPR 56%. Vì thế chúng tôi không tuyên bố TL-HRS khôi phục được triage mức ảnh. Điểm dùng cho định vị là một tín hiệu xếp hạng tốt hơn, nhưng triage vẫn là nút thắt triển khai.</p>
+<p>Ở mức điểm ảnh, bức tranh khác. FNR là 15.3–16.7% trong mọi cấu hình tại 4.5–5.6% pixel FPR, và tăng alpha từ 0.10 lên 0.15 gần như không thay đổi vì một sàn cấu trúc chi phối: ở khoảng 15% tài liệu giả mạo, cửa sổ được chọn w* không phủ toàn bộ vùng gán nhãn, và các điểm ảnh đó là false negative ở mọi ngưỡng. Không bộ hiệu chỉnh nào xuống dưới sàn bỏ sót cửa sổ này, nên bảo đảm 10% danh nghĩa ở mức điểm ảnh không đạt, và alpha = 0.15 chỉ đạt sát ngưỡng tại n_cal = 300 (15.5 ± 1.3%). Pixel FPR thấp là hệ quả của độ thưa (mask phủ khoảng 1% số điểm ảnh): ngay cả ngưỡng dễ dãi cũng thêm ít dương tính giả so với nền. Muốn chứng nhận FNR 10% ở mức điểm ảnh cần chọn cửa sổ tốt hơn hoặc bộ phân đoạn mịn hơn, không phải đổi cách hiệu chỉnh. Chúng tôi báo cáo đúng số đo thay vì tinh chỉnh lambda cho đẹp.</p>
+<p><strong>Cascade trên toàn tập và triage mức ảnh.</strong> Chạy cascade (stride 256) trên toàn bộ 1.226 ảnh test GPT-Image-2 (613 giả + 613 thật) mất 1.04 s/ảnh, cho IoU 0.564 pooled / 0.590 mean, F1 0.721 pooled. Dùng chính điểm S(w*) cho triage toàn ảnh tốt hơn hẳn detector toàn ảnh: image AUC 0.825 so với 0.565, image AP 0.845 so với 0.582, và <strong>Recall@1%FPR 0.286 so với 0.042</strong> (tăng 6.8 lần). Đây là tín hiệu xếp hạng tốt hơn, không phải triage đã được giải quyết: tại ngân sách cảnh báo 1%, 71% giấy tờ giả vẫn bị bỏ sót, và điểm vận hành conformal chặn tỉ lệ bỏ sót ở 10% gắn cờ 56% tài liệu thật. Tầng định vị vì thế cải thiện triage nhưng không khắc phục được nó.</p>
+<h3 id="614-o-ben-voi-hau-xu-ly">6.14 Độ bền với hậu xử lý</h3>
+<p>Tài liệu giả hiếm khi đến ngân hàng dưới dạng PNG nguyên bản: nó bị chụp màn hình, nén lại hoặc thay đổi kích thước trên đường đi. Vì thế chúng tôi chạy lại cascade trên một tập con cố định 200 tài liệu giả + 100 tài liệu thật GPT-Image-2 dưới bốn phép biến đổi: JPEG quality 90 và 75, giảm mẫu 0.75x rồi phóng bilinear, và Gaussian blur (5x5, sigma = 1). Tập con là 200/100 tài liệu đầu tiên của danh sách test cố định và dễ hơn split đầy đủ (IoU pooled 0.705 khi không biến đổi so với 0.564 ở Mục 6.8); do đó giá trị tuyệt đối không so sánh được giữa các bảng, và bảng dưới đây chỉ đọc theo mức giữ tương đối. Với 100 tài liệu thật, điểm vận hành FPR 1% mang tính thực nghiệm và thô (khoảng một dương tính giả), nên Recall@1%FPR bị lượng tử hóa theo bước 0.005.</p>
+<table>
+<thead>
+<tr>
+<th>Biến đổi</th>
+<th>IoU (pooled)</th>
+<th>IoU (mean)</th>
+<th>F1</th>
+<th>Image AUC</th>
+<th>Image AP</th>
+<th>Recall@1%FPR</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Không</td>
+<td>0.705</td>
+<td>0.725</td>
+<td>0.827</td>
+<td>0.908</td>
+<td>0.953</td>
+<td>0.520</td>
+</tr>
+<tr>
+<td>JPEG q90</td>
+<td>0.214</td>
+<td>0.278</td>
+<td>0.352</td>
+<td>0.541</td>
+<td>0.718</td>
+<td>0.070</td>
+</tr>
+<tr>
+<td>JPEG q75</td>
+<td>0.081</td>
+<td>0.117</td>
+<td>0.149</td>
+<td>0.397</td>
+<td>0.594</td>
+<td>0.005</td>
+</tr>
+<tr>
+<td>Resize 0.75x</td>
+<td>0.629</td>
+<td>0.655</td>
+<td>0.772</td>
+<td>0.815</td>
+<td>0.903</td>
+<td>0.305</td>
+</tr>
+<tr>
+<td>Blur sigma = 1</td>
+<td>0.579</td>
+<td>0.617</td>
+<td>0.733</td>
+<td>0.778</td>
+<td>0.882</td>
+<td>0.240</td>
+</tr>
+</tbody>
+</table>
+<p>Ba nhận xét. <strong>(1) JPEG tàn phá.</strong> Quality 90 giảm IoU pooled từ 0.705 xuống 0.214 (giữ 30%) và Recall@1%FPR từ 0.520 xuống 0.070; quality 75 chỉ còn 0.081 IoU, 0.149 F1 và 0.005 Recall@1%FPR, image AUC xuống 0.397, dưới mức ngẫu nhiên trên tập con này. Điều này phù hợp với việc detector dựa vào dấu vết tần số cao của bộ sinh mà lượng tử hóa xóa đi, và quan trọng về vận hành vì nén lại là phổ biến. Chúng tôi báo cáo AUC dưới ngẫu nhiên đúng như đo được; với 200 tài liệu giả, đây cũng là ô nhiễu nhất trong bảng. <strong>(2) Resize và blur nhẹ hơn.</strong> Chúng giữ 89% và 82% IoU pooled (0.629 và 0.579), Recall@1%FPR còn 0.305 và 0.240, nên tín hiệu không thuần túy tần số cao. <strong>(3) Xếp hạng và định vị suy giảm cùng nhau.</strong> Hậu xử lý không chỉ dịch điểm vận hành, nên hiệu chỉnh lại không lấy lại được IoU đã mất. Triển khai thực tế nên thêm augmentation JPEG/resize khi thích ứng và ghi lại pipeline nén của đường vào; nghiên cứu augmentation đầy đủ để cho công việc sau.</p>
 <hr />
 <h2 id="7-thao-luan">7. Thảo luận</h2>
 <p><strong>Vì sao thích ứng giúp?</strong> Fine-tune trên vài mẫu đích dường như làm sắc nét phản hồi không gian quanh vùng bị sửa, thay vì chỉ dịch một ngưỡng toàn cục. Điều này phù hợp với pixel AUC cao trước thích ứng và với việc các phương pháp hiệu chỉnh ngưỡng thất bại.</p>
@@ -784,6 +892,7 @@ p, li { orphans: 2; widows: 2; }
 <li><strong>Chi phí suy luận.</strong> Tìm kiếm dày chạy ≈197 lượt cửa sổ mỗi tài liệu giả mạo (≈20 s trên một GPU tiêu dùng). Chấp nhận được cho giám định offline nhưng không cho streaming thông lượng cao; pruning dẫn hướng bởi coarse hiện mất 0.011 IoU hoặc hơn.</li>
 <li><strong>Khoảng cách xếp hạng dưới dịch chuyển bộ sinh.</strong> Trên Ideogram, oracle window của detector là 0.510 nhưng cửa sổ được chọn chỉ đạt 0.284, nên độ tin cậy bị lệch chuẩn giữa các bộ sinh.</li>
 <li><strong>Chỉ một baseline công bố.</strong> Chúng tôi chỉ so sánh với TruFor, trên toàn bộ 613 ảnh test ở 1024 px (giới hạn RAM CPU); DocTamper không build được trong môi trường của nhóm, nên so sánh đa detector vẫn là việc tiếp theo.</li>
+<li><strong>Hậu xử lý.</strong> Nén JPEG quality 75 xóa phần lớn tín hiệu (Mục 6.14); các mô hình hiện tại chưa được huấn luyện với augmentation nén ảnh.</li>
 <li><strong>Phương sai.</strong> Kết quả thay đổi theo seed; chúng tôi báo cáo trung bình ± độ lệch chuẩn qua ba seed cho mọi con số headline.</li>
 </ul>
 <hr />
