@@ -84,7 +84,7 @@ Unless stated otherwise, the base detector is trained on Gemini (2,912 forged + 
 
 **Figure 1.** Overview of TL-HRS: a coarse patch scan proposes windows, a local refinement selects w*, and the adapted patch segmenter produces the mask. The same score S(w*) drives image-level triage, and the mask supports pixel-level risk control.
 
-![Hình 1](figures/fig_pipeline.png)
+![Figure 1](figures/fig_pipeline.png)
 
 ### 4.1 Base detector
 
@@ -277,7 +277,7 @@ The full-image detector predicts at a letterboxed 384px resolution, which blurs 
 | Coarse peak + adapted patch | 0.321 | median peak error 152 px |
 | + centroid re-centring | 0.358 | truncation biases the centroid |
 | + 3×3 local grid around the peak | 0.400 | helps, but the peak is too far |
-| **TL-HRS, dense search (stride 96)** | **0.537 ± 0.016** | 5 seeds (5 seeds; per-seed values in Sec. 6.8) |
+| **TL-HRS, dense search (stride 96)** | **0.537 ± 0.016** | 5 seeds; per-seed values in Sec. 6.8 |
 | — oracle window (upper bound of search) | 0.653 | selection loses 0.11 |
 | Ideogram (unseen generator), TL-HRS | 0.284 | oracle window 0.510 |
 | Ideogram, full-image detector | 0.114 | same split (422 forged) |
@@ -349,20 +349,20 @@ We sweep the coarse stride of the cascade on 60 forged test images, keeping the 
 
 Stride 256 is both the fastest (1.18 s per document, 54 windows) and the most accurate, and the IoU is flat between thresholds 0.4 and 0.6 (variation < 0.005), so the operating point is not cherry-picked.
 
-**Image-level conformal triage fails (negative result).** Calibrating a split-conformal threshold on in-domain Gemini forges (target FNR 10%) and deploying it on GPT-Image-2 gives an actual FNR of 25.4% and an FPR of 67.7% on authentic documents; even on the calibration split the FPR is 67%, i.e. the image-level score barely separates authentic from forged. Exchangeability is violated under generator shift, and, more fundamentally, the signal is too weak at image level. This is why the guarantees we target must be stated at the *localization* level rather than for whole-image triage.
+**Image-level conformal triage fails (negative result).** Calibrating a split-conformal threshold on in-domain Gemini forges (target FNR 10%) and deploying it on GPT-Image-2 gives an actual FNR of 25.4% and an FPR of 67.7% on authentic documents; even on the calibration split the FPR is 67%, i.e. the image-level score barely separates authentic from forged. Exchangeability is violated under generator shift, and the full-image score has almost no separation. Section 6.13 shows that this is a property of the score, not of the task: the cascade score S(w*) restores triage (AUC 0.825, Recall@1%FPR 0.286) and satisfies the same conformal construction.
 
 
 ### 6.13 Risk-controlled localization
 
-We state the guarantee where the signal lives — on pixels and on documents — using Conformal Risk Control (CRC): for a threshold λ, let L_i(λ) be the fraction of document i's annotated pixels missed (false negatives), and choose λ̂ as the largest λ whose empirical risk, corrected by n/(n+1) and 1/(n+1), is below α. We calibrate on 300 forged documents and evaluate on the remaining 313, repeating the random split 100 times.
+We state the guarantee where the signal lives — on pixels and on documents — using Conformal Risk Control (CRC): for a threshold lambda, let L_i(lambda) be the fraction of document i's annotated pixels missed (false negatives), and choose lambda-hat as the largest lambda whose empirical risk, corrected by n/(n+1) and 1/(n+1), is below alpha. We calibrate on 300 forged documents and evaluate on the remaining 313, repeating the random split 100 times.
 
-| α | n_cal | image FNR | pixel FNR (per doc) | pixel FNR (pooled) | pixel FPR |
+| alpha | n_cal | image FNR | pixel FNR (per doc) | pixel FNR (pooled) | pixel FPR |
 |---|---|---|---|---|---|
 | 0.10 | 300 | **9.66 ± 2.09** | 15.33 ± 1.13 | 18.29 ± 1.96 | 5.6% |
 | 0.10 | 500 | **9.90 ± 2.90** | 15.24 ± 2.95 | 18.46 ± 3.96 | 5.6% |
 | 0.15 | 300 | **14.70 ± 2.48** | **15.33 ± 1.13** | 18.29 ± 1.96 | 5.6% |
 
-The **image-level guarantee holds** at both α = 0.10 and 0.15 (observed 9.7% and 14.7%), using the cascade score S(w*): this is a large improvement over the full-image score, which violated the same construction (25.4% FNR at 67.7% FPR). At pixel level the loss is harder: it certifies at α = 0.15 but remains at 15.3% for a nominal α = 0.10, because the λ grid is discrete and large masks dominate. We report this rather than tuning λ to a favourable value. Certifying a 10% pixel-level FNR would require a finer score (a better patch segmenter) rather than a different calibration.
+The **image-level guarantee holds** at both alpha = 0.10 and 0.15 (observed 9.7% and 14.7%), using the cascade score S(w*): this is a large improvement over the full-image score, which violated the same construction (25.4% FNR at 67.7% FPR). At pixel level the loss is harder: it certifies at alpha = 0.15 but remains at 15.3% for a nominal alpha = 0.10, because the lambda grid is discrete and large masks dominate. We report this rather than tuning lambda to a favourable value. Certifying a 10% pixel-level FNR would require a finer score (a better patch segmenter) rather than a different calibration.
 
 
 

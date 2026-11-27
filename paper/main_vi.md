@@ -350,15 +350,15 @@ Stride 256 vừa nhanh nhất (1.18 s/tài liệu, 54 cửa sổ) vừa chính x
 
 ### 6.13 Định vị có kiểm soát rủi ro
 
-Chúng tôi phát biểu bảo đảm ở nơi tín hiệu thực sự tồn tại — trên điểm ảnh và trên tài liệu — dùng Conformal Risk Control (CRC): với ngưỡng λ, gọi L_i(λ) là tỉ lệ điểm ảnh bị sót của tài liệu i (false negative), chọn λ̂ là λ lớn nhất mà rủi ro thực nghiệm sau hiệu chỉnh n/(n+1) và 1/(n+1) vẫn dưới α. Hiệu chỉnh trên 300 tài liệu giả mạo, đánh giá trên 313 tài liệu còn lại, lặp 100 lần chia ngẫu nhiên.
+Chúng tôi phát biểu bảo đảm ở nơi tín hiệu thực sự tồn tại — trên điểm ảnh và trên tài liệu — dùng Conformal Risk Control (CRC): với ngưỡng lambda, gọi L_i(lambda) là tỉ lệ điểm ảnh bị sót của tài liệu i (false negative), chọn lambda-hat là lambda lớn nhất mà rủi ro thực nghiệm sau hiệu chỉnh n/(n+1) và 1/(n+1) vẫn dưới alpha. Hiệu chỉnh trên 300 tài liệu giả mạo, đánh giá trên 313 tài liệu còn lại, lặp 100 lần chia ngẫu nhiên.
 
-| α | n_cal | image FNR | pixel FNR (mỗi tài liệu) | pixel FNR (pooled) | pixel FPR |
+| alpha | n_cal | image FNR | pixel FNR (mỗi tài liệu) | pixel FNR (pooled) | pixel FPR |
 |---|---|---|---|---|---|
 | 0.10 | 300 | **9.66 ± 2.09** | 15.33 ± 1.13 | 18.29 ± 1.96 | 5.6% |
 | 0.10 | 500 | **9.90 ± 2.90** | 15.24 ± 2.95 | 18.46 ± 3.96 | 5.6% |
 | 0.15 | 300 | **14.70 ± 2.48** | **15.33 ± 1.13** | 18.29 ± 1.96 | 5.6% |
 
-**Bảo đảm mức ảnh giữ được** ở cả α = 0.10 và 0.15 (quan sát 9.7% và 14.7%), dùng điểm cascade S(w*): cải thiện lớn so với score toàn ảnh, vốn vi phạm cùng cách dựng (FNR 25.4% tại FPR 67.7%). Ở mức điểm ảnh, bài toán khó hơn: chứng nhận được ở α = 0.15 nhưng vẫn 15.3% với α danh nghĩa 0.10, do lưới λ rời rạc và mask lớn chi phối. Chúng tôi báo cáo trung thực thay vì tinh chỉnh λ cho đẹp. Muốn chứng nhận FNR 10% ở mức điểm ảnh cần score tốt hơn (bộ phân đoạn patch mạnh hơn), không phải đổi cách hiệu chỉnh.
+**Bảo đảm mức ảnh giữ được** ở cả alpha = 0.10 và 0.15 (quan sát 9.7% và 14.7%), dùng điểm cascade S(w*): cải thiện lớn so với score toàn ảnh, vốn vi phạm cùng cách dựng (FNR 25.4% tại FPR 67.7%). Ở mức điểm ảnh, bài toán khó hơn: chứng nhận được ở alpha = 0.15 nhưng vẫn 15.3% với alpha danh nghĩa 0.10, do lưới lambda rời rạc và mask lớn chi phối. Chúng tôi báo cáo trung thực thay vì tinh chỉnh lambda cho đẹp. Muốn chứng nhận FNR 10% ở mức điểm ảnh cần score tốt hơn (bộ phân đoạn patch mạnh hơn), không phải đổi cách hiệu chỉnh.
 
 
 **Cascade trên toàn tập và triage mức ảnh.** Chạy cascade (stride 256) trên toàn bộ 1.226 ảnh test GPT-Image-2 (613 giả + 613 thật) mất 1.04 s/ảnh, cho IoU 0.564 pooled / 0.590 mean, F1 0.721 pooled. Dùng chính điểm S(w*) cho triage toàn ảnh tốt hơn hẳn detector toàn ảnh: image AUC 0.825 so với 0.565, image AP 0.845 so với 0.582, và **Recall@1%FPR 0.286 so với 0.042** (tăng 6.8 lần). Tầng định vị vì thế cũng khắc phục luôn điểm yếu triage.

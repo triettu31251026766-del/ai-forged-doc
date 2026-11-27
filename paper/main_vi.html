@@ -726,11 +726,11 @@ p, li { orphans: 2; widows: 2; }
 <p>Stride 256 vừa nhanh nhất (1.18 s/tài liệu, 54 cửa sổ) vừa chính xác nhất, và IoU phẳng giữa ngưỡng 0.4–0.6 (biến thiên &lt;0.005), nên điểm vận hành không phải chọn có lợi.</p>
 <p><strong>Conformal mức ảnh thất bại (kết quả âm).</strong> Hiệu chỉnh ngưỡng split-conformal trên Gemini in-domain (mục tiêu FNR 10%) rồi triển khai trên GPT-Image-2 cho FNR thực tế 25.4% và FPR 67.7% trên ảnh thật; ngay trên tập hiệu chỉnh FPR đã là 67%, tức score mức ảnh gần như không tách được thật/giả. Exchangeability bị vi phạm dưới dịch chuyển bộ sinh, và bản thân tín hiệu ở mức ảnh quá yếu. Vì vậy các bảo đảm cần phát biểu ở mức <strong>định vị</strong>, không phải triage toàn ảnh.</p>
 <h3 id="613-inh-vi-co-kiem-soat-rui-ro">6.13 Định vị có kiểm soát rủi ro</h3>
-<p>Chúng tôi phát biểu bảo đảm ở nơi tín hiệu thực sự tồn tại — trên điểm ảnh và trên tài liệu — dùng Conformal Risk Control (CRC): với ngưỡng λ, gọi L_i(λ) là tỉ lệ điểm ảnh bị sót của tài liệu i (false negative), chọn λ̂ là λ lớn nhất mà rủi ro thực nghiệm sau hiệu chỉnh n/(n+1) và 1/(n+1) vẫn dưới α. Hiệu chỉnh trên 300 tài liệu giả mạo, đánh giá trên 313 tài liệu còn lại, lặp 100 lần chia ngẫu nhiên.</p>
+<p>Chúng tôi phát biểu bảo đảm ở nơi tín hiệu thực sự tồn tại — trên điểm ảnh và trên tài liệu — dùng Conformal Risk Control (CRC): với ngưỡng lambda, gọi L_i(lambda) là tỉ lệ điểm ảnh bị sót của tài liệu i (false negative), chọn lambda-hat là lambda lớn nhất mà rủi ro thực nghiệm sau hiệu chỉnh n/(n+1) và 1/(n+1) vẫn dưới alpha. Hiệu chỉnh trên 300 tài liệu giả mạo, đánh giá trên 313 tài liệu còn lại, lặp 100 lần chia ngẫu nhiên.</p>
 <table>
 <thead>
 <tr>
-<th>α</th>
+<th>alpha</th>
 <th>n_cal</th>
 <th>image FNR</th>
 <th>pixel FNR (mỗi tài liệu)</th>
@@ -765,7 +765,7 @@ p, li { orphans: 2; widows: 2; }
 </tr>
 </tbody>
 </table>
-<p><strong>Bảo đảm mức ảnh giữ được</strong> ở cả α = 0.10 và 0.15 (quan sát 9.7% và 14.7%), dùng điểm cascade S(w*): cải thiện lớn so với score toàn ảnh, vốn vi phạm cùng cách dựng (FNR 25.4% tại FPR 67.7%). Ở mức điểm ảnh, bài toán khó hơn: chứng nhận được ở α = 0.15 nhưng vẫn 15.3% với α danh nghĩa 0.10, do lưới λ rời rạc và mask lớn chi phối. Chúng tôi báo cáo trung thực thay vì tinh chỉnh λ cho đẹp. Muốn chứng nhận FNR 10% ở mức điểm ảnh cần score tốt hơn (bộ phân đoạn patch mạnh hơn), không phải đổi cách hiệu chỉnh.</p>
+<p><strong>Bảo đảm mức ảnh giữ được</strong> ở cả alpha = 0.10 và 0.15 (quan sát 9.7% và 14.7%), dùng điểm cascade S(w*): cải thiện lớn so với score toàn ảnh, vốn vi phạm cùng cách dựng (FNR 25.4% tại FPR 67.7%). Ở mức điểm ảnh, bài toán khó hơn: chứng nhận được ở alpha = 0.15 nhưng vẫn 15.3% với alpha danh nghĩa 0.10, do lưới lambda rời rạc và mask lớn chi phối. Chúng tôi báo cáo trung thực thay vì tinh chỉnh lambda cho đẹp. Muốn chứng nhận FNR 10% ở mức điểm ảnh cần score tốt hơn (bộ phân đoạn patch mạnh hơn), không phải đổi cách hiệu chỉnh.</p>
 <p><strong>Cascade trên toàn tập và triage mức ảnh.</strong> Chạy cascade (stride 256) trên toàn bộ 1.226 ảnh test GPT-Image-2 (613 giả + 613 thật) mất 1.04 s/ảnh, cho IoU 0.564 pooled / 0.590 mean, F1 0.721 pooled. Dùng chính điểm S(w*) cho triage toàn ảnh tốt hơn hẳn detector toàn ảnh: image AUC 0.825 so với 0.565, image AP 0.845 so với 0.582, và <strong>Recall@1%FPR 0.286 so với 0.042</strong> (tăng 6.8 lần). Tầng định vị vì thế cũng khắc phục luôn điểm yếu triage.</p>
 <hr />
 <h2 id="7-thao-luan">7. Thảo luận</h2>

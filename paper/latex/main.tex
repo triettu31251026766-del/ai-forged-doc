@@ -133,14 +133,14 @@ Unless stated otherwise, the base detector is trained on Gemini (2,912 forged + 
 
 \section{Method}\label{method}
 
-\textbf{Figure 1.} Overview of TL-HRS: a coarse patch scan proposes windows, a local refinement selects w\emph{, and the adapted patch segmenter produces the mask. The same score S(w}) drives image-level triage, and the mask supports pixel-level risk control.
+ Overview of TL-HRS: a coarse patch scan proposes windows, a local refinement selects w\emph{, and the adapted patch segmenter produces the mask. The same score S(w}) drives image-level triage, and the mask supports pixel-level risk control.
 
 \begin{figure}
 \centering
 \begin{figure}[htbp]\centering
-\includegraphics[keepaspectratio,alt={Hình 1}]{figures/fig_pipeline.png}
+\includegraphics[keepaspectratio,alt={Figure 1}]{figures/fig_pipeline.png}
 \end{figure}
-\caption{Hình 1}
+\caption{Figure 1}
 \end{figure}
 
 \subsection{Base detector}\label{base-detector}
@@ -281,7 +281,7 @@ Image-level discrimination improves with labels but remains weak at a 1\% alert 
 
 Adaptation improves localization monotonically, reaching a \textbf{3.7×} IoU gain with only 100 labelled target samples. The cost is forgetting: in-domain Gemini drops from 0.669 to 0.494. Figure 1(a) visualizes the curve; Figure 1(b) compares standard fine-tuning, rehearsal, and training from scratch at k=100.
 
-\textbf{Figure 1.} (a) Few-shot adaptation curve: IoU on the unseen GPT-Image-2 generator and on the old Gemini generator as a function of the number of labelled target samples (mean ± std over seeds). (b) Forgetting at k=100: standard fine-tuning vs.~rehearsal vs.~training from scratch.
+ (a) Few-shot adaptation curve: IoU on the unseen GPT-Image-2 generator and on the old Gemini generator as a function of the number of labelled target samples (mean ± std over seeds). (b) Forgetting at k=100: standard fine-tuning vs.~rehearsal vs.~training from scratch.
 
 \begin{figure}
 \centering
@@ -381,7 +381,7 @@ PatchCore (ResNet-18 / DINOv2) & ≈0.05 (image AUC ≈0.5) & --- & fails \\
 
 Figure 2 shows score maps for the same forged GPT-Image-2 documents under three settings. Zero-shot predictions (Fig. 2a) are diffuse, often off-target, and sometimes nearly blank. After adaptation (Fig. 2b), score maps concentrate on the edited field. In-domain maps (Fig. 2c) are sharp and closely match the ground truth. The qualitative evolution mirrors the quantitative gains.
 
-\textbf{Figure 2.} Predicted score maps for the same GPT-Image-2 forged documents. (a) Zero-shot detector: diffuse and often off-target. (b) After few-shot adaptation (k=100): concentrated on the edited field. (c) In-domain Gemini: sharp and closely matching the ground truth.
+ Predicted score maps for the same GPT-Image-2 forged documents. (a) Zero-shot detector: diffuse and often off-target. (b) After few-shot adaptation (k=100): concentrated on the edited field. (c) In-domain Gemini: sharp and closely matching the ground truth.
 
 \begin{figure}[htbp]\centering
 \includegraphics[width=\textwidth,height=0.30\textheight,keepaspectratio]{figures/fig_xai_zero_shot_gpt.png}
@@ -461,14 +461,14 @@ Patch, zero-shot (GT box) & 0.459 & Gemini-only patch \\
 Coarse peak + adapted patch & 0.321 & median peak error 152 px \\
 + centroid re-centring & 0.358 & truncation biases the centroid \\
 + 3×3 local grid around the peak & 0.400 & helps, but the peak is too far \\
-\textbf{TL-HRS, dense search (stride 96)} & \textbf{0.537 ± 0.016} & 5 seeds (5 seeds; per-seed values in Sec. 6.8) \\
+\textbf{TL-HRS, dense search (stride 96)} & \textbf{0.537 ± 0.016} & 5 seeds; per-seed values in Sec. 6.8 \\
 --- oracle window (upper bound of search) & 0.653 & selection loses 0.11 \\
 Ideogram (unseen generator), TL-HRS & 0.284 & oracle window 0.510 \\
 Ideogram, full-image detector & 0.114 & same split (422 forged) \\
 \end{longtable}
 }
 
-\textbf{Figure 3.} (a) Stage-wise IoU on the full forged test: the adapted patch alone (coarse peak) recovers little, while dense search recovers most of the oracle-window and GT-box ceilings. (b) Localization variants on a 150-image subset: exhaustive dense search dominates centroid refinement, grids, zoom, tiling and coarse-guided pruning. (c) The same 100 labels on the target and on a completely unseen generator.
+ (a) Stage-wise IoU on the full forged test: the adapted patch alone (coarse peak) recovers little, while dense search recovers most of the oracle-window and GT-box ceilings. (b) Localization variants on a 150-image subset: exhaustive dense search dominates centroid refinement, grids, zoom, tiling and coarse-guided pruning. (c) The same 100 labels on the target and on a completely unseen generator.
 
 \begin{figure}
 \centering
@@ -599,13 +599,13 @@ Stride 256 is both the fastest (1.18 s per document, 54 windows) and the most ac
 
 \subsection{Risk-controlled localization}\label{risk-controlled-localization}
 
-We state the guarantee where the signal lives --- on pixels and on documents --- using Conformal Risk Control (CRC): for a threshold λ, let L\_i(λ) be the fraction of document i's annotated pixels missed (false negatives), and choose λ̂ as the largest λ whose empirical risk, corrected by n/(n+1) and 1/(n+1), is below α. We calibrate on 300 forged documents and evaluate on the remaining 313, repeating the random split 100 times.
+We state the guarantee where the signal lives --- on pixels and on documents --- using Conformal Risk Control (CRC): for a threshold $\lambda$, let L\_i($\lambda$) be the fraction of document i's annotated pixels missed (false negatives), and choose $\hat{\lambda}$ as the largest $\lambda$ whose empirical risk, corrected by n/(n+1) and 1/(n+1), is below $\alpha$. We calibrate on 300 forged documents and evaluate on the remaining 313, repeating the random split 100 times.
 
 {\def\LTcaptype{none} % do not increment counter
 \begin{longtable}[]{@{}llll@{}}
 \toprule\noalign{}
 
-α
+$\alpha$
  & 
 n\_cal
  & 
@@ -627,7 +627,7 @@ pixel FPR
 \end{longtable}
 }
 
-The \textbf{image-level guarantee holds} at both α = 0.10 and 0.15 (observed 9.7\% and 14.7\%), using the cascade score S(w*): this is a large improvement over the full-image score, which violated the same construction (25.4\% FNR at 67.7\% FPR). At pixel level the loss is harder: it certifies at α = 0.15 but remains at 15.3\% for a nominal α = 0.10, because the λ grid is discrete and large masks dominate. We report this rather than tuning λ to a favourable value. Certifying a 10\% pixel-level FNR would require a finer score (a better patch segmenter) rather than a different calibration.
+The \textbf{image-level guarantee holds} at both $\alpha$ = 0.10 and 0.15 (observed 9.7\% and 14.7\%), using the cascade score S(w*): this is a large improvement over the full-image score, which violated the same construction (25.4\% FNR at 67.7\% FPR). At pixel level the loss is harder: it certifies at $\alpha$ = 0.15 but remains at 15.3\% for a nominal $\alpha$ = 0.10, because the $\lambda$ grid is discrete and large masks dominate. We report this rather than tuning $\lambda$ to a favourable value. Certifying a 10\% pixel-level FNR would require a finer score (a better patch segmenter) rather than a different calibration.
 
 The replay ablation at the TL-HRS level (IoU pooled / mean) shows that replay helps on every split, so it is not a target/source trade-off at this layer:
 
@@ -706,45 +706,6 @@ Other directions include: (i) calibrating the patch confidence across generators
 We studied label-efficient adaptation of AI-forged document detectors under generator shift. A detector trained on one generator collapses on unseen generators, but a small number of labelled target samples recovers localization substantially, and a small rehearsal buffer preserves old-generator performance with negligible forgetting. Our analysis shows that the remaining bottleneck is localization precision rather than threshold calibration, and that several intuitive remedies (calibration, adaptive thresholding, sample selection, encoder freezing) do not provide consistent gains. Adapting a native-resolution patch segmenter with the same 100 labels raises the localization ceiling from 0.459 to 0.677. The coarse peak used to position that segmenter is itself the wall --- it misses the field centre by 152 px (median) and covers only 53\% of the tampered pixels --- and replacing it with dense high-resolution search yields \textbf{0.537 ± 0.016 IoU} on the full unseen generator (2.8× the full-image baseline, 79\% of the ceiling). The same pipeline reaches 0.284 IoU on a completely unseen generator (Ideogram) versus 0.114 for the full-image detector, with an oracle window of 0.510: the detector finds the field, but cross-generator confidence ranking remains the open problem. We hope these results provide a realistic foundation for deploying and adapting document-fraud detectors in banking workflows.
 
 \bigskip
-
-\section{References}\label{references}
-
-\begin{enumerate}
-\def\labelenumi{\arabic{enumi}.}
-\tightlist
-\item
-  J. Wu, Y. Zhou, M. Xu, et al.~\emph{AIForge-Doc: A Benchmark for Detecting AI-Forged Tampering in Financial and Form Documents.} arXiv:2602.20569, 2026.
-\item
-  Z. Zhao, W. Xia, E. Wei, et al.~\emph{DOCFORGE-BENCH: A Comprehensive 0-shot Benchmark for Document Forgery Detection and Analysis.} arXiv:2603.01433, 2026.
-\item
-  J. Wu, Y. Zhou, et al.~\emph{When the Forger Is the Judge: GPT-Image-2 Cannot Recognize Its Own Faked Documents.} arXiv:2604.25213, 2026.
-\item
-  C. Qu, C. Li, et al.~\emph{Towards Robust Tampered Text Detection in Document Image: New Dataset and New Solution.} CVPR, 2023. (DocTamper)
-\item
-  F. Guillaro, D. Cozzolino, et al.~\emph{TruFor: Leveraging All-Round Clues for Trustworthy Image Forgery Detection and Localization.} CVPR, 2023.
-\item
-  K. He, X. Zhang, S. Ren, J. Sun. \emph{Deep Residual Learning for Image Recognition.} CVPR, 2016.
-\item
-  O. Ronneberger, P. Fischer, T. Brox. \emph{U-Net: Convolutional Networks for Biomedical Image Segmentation.} MICCAI, 2015.
-\item
-  M. Oquab, T. Darcet, et al.~\emph{DINOv2: Learning Robust Visual Features without Supervision.} TMLR, 2024.
-\item
-  K. Roth, L. Pemula, et al.~\emph{Towards Total Recall in Industrial Anomaly Detection.} CVPR, 2022. (PatchCore)
-\item
-  C. Guo, G. Pleiss, Y. Sun, K. Weinberger. \emph{On Calibration of Modern Neural Networks.} ICML, 2017.
-\item
-  M. P. Naeini, G. Cooper, M. Hauskrecht. \emph{Obtaining Well Calibrated Probabilities Using Bayesian Binning.} AAAI, 2015.
-\item
-  S.-A. Rebuffi, A. Kolesnikov, G. Sperl, C. Lampert. \emph{iCaRL: Incremental Classifier and Representation Learning.} CVPR, 2017.
-\item
-  D. Rolnick, A. Ahuja, et al.~\emph{Experience Replay for Continual Learning.} NeurIPS, 2019.
-\item
-  B. McMahan, E. Moore, et al.~\emph{Communication-Efficient Learning of Deep Networks from Decentralized Data.} AISTATS, 2017. (FedAvg)
-\item
-  C. Finn, P. Abbeel, S. Levine. \emph{Model-Agnostic Meta-Learning for Fast Adaptation of Deep Networks.} ICML, 2017.
-\item
-  J. Snell, K. Swersky, R. Zemel. \emph{Prototypical Networks for Few-Shot Learning.} NeurIPS, 2017.
-\end{enumerate}
 
 \bibliographystyle{elsarticle-num}
 \bibliography{references}
