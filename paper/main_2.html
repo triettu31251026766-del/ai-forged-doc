@@ -114,6 +114,8 @@ p, li { orphans: 2; widows: 2; }
 </ul>
 <hr />
 <h2 id="4-method">4. Method</h2>
+<p><strong>Figure 1.</strong> Overview of TL-HRS: a coarse patch scan proposes windows, a local refinement selects w<em>, and the adapted patch segmenter produces the mask. The same score S(w</em>) drives image-level triage, and the mask supports pixel-level risk control.</p>
+<p><img alt="Hình 1" src="figures/fig_pipeline.png" /></p>
 <h3 id="41-base-detector">4.1 Base detector</h3>
 <p>We use a U-Net with a ResNet-18 encoder pretrained on ImageNet. The model outputs a single-channel logit map. It is trained on Gemini with:</p>
 <p align="center"><i>L</i> = BCEWithLogits(<i>ŷ</i>, <i>y</i>; <i>w</i> = 20) + <i>L</i><sub>Dice</sub></p>
