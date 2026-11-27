@@ -1,4 +1,4 @@
-# Label-Efficient Adaptation of AI-Forged Document Detectors under Generator Shift via Rehearsal and Dense High-Resolution Search
+# Label-Efficient and Risk-Controlled Adaptation of AI-Forged Document Detectors under Generator Shift
 
 **Authors:** Anonymous submission (author names withheld for review).
 
