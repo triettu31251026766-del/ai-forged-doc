@@ -55,6 +55,8 @@ def main():
     ap.add_argument("--max-test", type=int, default=0)
     ap.add_argument("--out", default="results/patch_seg_gpt")
     ap.add_argument("--jpeg-aug", action="store_true")
+    ap.add_argument("--arch", default=None)
+    ap.add_argument("--encoder", default="resnet18")
     args = ap.parse_args()
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -98,7 +100,7 @@ def main():
     print(f"Fine-tune patches: {len(ds)} (gpt_pos={len(pos)}, gpt_neg={len(neg)}, "
           f"auth={len(auth_neg)}, replay_pos={len(rep_pos)}, replay_neg={len(rep_neg)})")
 
-    model = build_segmentation("resnet18").to(device)
+    model = build_segmentation(args.encoder, arch=args.arch).to(device)
     model.load_state_dict(torch.load(ROOT / args.init, map_location=device))
     bce = nn.BCEWithLogitsLoss(pos_weight=torch.tensor(args.pos_weight, device=device))
     opt = torch.optim.AdamW(model.parameters(), lr=args.lr)

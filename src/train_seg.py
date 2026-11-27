@@ -104,6 +104,8 @@ def main():
     ap.add_argument("--augment", action="store_true")
     ap.add_argument("--freq", action="store_true", help="dung 6 kenh: RGB + tan so/nhieu")
     ap.add_argument("--out", default="results/seg")
+    ap.add_argument("--arch", default=None)
+    ap.add_argument("--encoder", default="resnet18")
     args = ap.parse_args()
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
