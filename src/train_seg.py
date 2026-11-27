@@ -93,7 +93,6 @@ def eval_image_auc(model, loader, device):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--protocol", default="p1", choices=["p1", "p2", "p3"])
-    ap.add_argument("--encoder", default="resnet18")
     ap.add_argument("--epochs", type=int, default=3)
     ap.add_argument("--batch-size", type=int, default=8)
     ap.add_argument("--lr", type=float, default=1e-4)
@@ -105,7 +104,6 @@ def main():
     ap.add_argument("--freq", action="store_true", help="dung 6 kenh: RGB + tan so/nhieu")
     ap.add_argument("--out", default="results/seg")
     ap.add_argument("--arch", default=None)
-    ap.add_argument("--encoder", default="resnet18")
     args = ap.parse_args()
 
     device = "cuda" if torch.cuda.is_available() else "cpu"

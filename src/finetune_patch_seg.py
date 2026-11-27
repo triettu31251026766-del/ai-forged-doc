@@ -56,7 +56,6 @@ def main():
     ap.add_argument("--out", default="results/patch_seg_gpt")
     ap.add_argument("--jpeg-aug", action="store_true")
     ap.add_argument("--arch", default=None)
-    ap.add_argument("--encoder", default="resnet18")
     args = ap.parse_args()
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
