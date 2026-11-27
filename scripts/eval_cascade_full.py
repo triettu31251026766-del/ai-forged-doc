@@ -69,6 +69,8 @@ def hist_counts(values, mask_vals):
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument("--arch", default=None)
+    ap.add_argument("--encoder", default="resnet18")
     ap.add_argument("--ckpt", default="results/patch_seg_gpt/patch_seg.pth")
     ap.add_argument("--splits", default="test_gptimage")
     ap.add_argument("--P", type=int, default=384)
@@ -77,7 +79,7 @@ def main():
     args = ap.parse_args()
 
     dev = "cuda" if torch.cuda.is_available() else "cpu"
-    model = build_segmentation("resnet18").to(dev)
+    model = build_segmentation(args.encoder, arch=args.arch).to(dev)
     model.load_state_dict(torch.load(ROOT / args.ckpt, map_location=dev))
     model.eval()
 
