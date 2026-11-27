@@ -777,6 +777,30 @@ Conformal ảnh (calib Gemini, α=0.1): threshold 0.0666 → GPT FNR 25.4%, FPR 
 → Guarantee mức điểm ảnh giữ được (12% vs mục tiêu 10%); khác hẳn mức ảnh (25.4% FNR, 67.7% FPR).
 Script: `scripts/eval_pixel_conformal.py`.
 
+> **Đính chính (B54):** 12.0% / 1.8% là kết quả một split đơn lẻ. Trung bình 100 split: pixel FNR 15.5% / pixel FPR 5.5% (α=0.10, n_cal=300). Guarantee 10% mức điểm ảnh **không đạt**. Xem B54.
+
+### B54 — CRC sweep n_cal + image FPR (supersedes B53) — 2026-11-27
+
+`scripts/eval_crc.py` trên `results/cascade_gpt/test_gptimage.npz` (cascade stride 256), 613 giả / 613 thật, 100 split ngẫu nhiên, λ grid từ npz.
+
+| α | n_cal | image FNR (%) | image FPR (%) | pixel FNR (%) | pixel FPR (%) |
+|---|---|---|---|---|---|
+| 0.10 | 25 | 7.0 ± 5.1 | 64.9 ± 14.2 | 15.3 ± 0.5 | 5.5 |
+| 0.10 | 50 | 9.2 ± 4.1 | 57.8 ± 10.7 | 15.5 ± 1.1 | 5.5 |
+| 0.10 | 100 | 9.8 ± 3.5 | 56.0 ± 8.4 | 15.3 ± 0.6 | 5.6 |
+| 0.10 | 300 | 9.8 ± 2.4 | 55.8 ± 4.3 | 15.5 ± 1.3 | 5.5 |
+| 0.15 | 25 | 11.7 ± 5.3 | 51.6 ± 12.2 | 16.7 ± 3.2 | 4.5 |
+| 0.15 | 50 | 14.3 ± 5.1 | 45.5 ± 10.0 | 16.3 ± 2.3 | 4.6 |
+| 0.15 | 100 | 14.7 ± 3.3 | 43.1 ± 5.9 | 15.8 ± 1.8 | 5.0 |
+| 0.15 | 300 | 14.9 ± 2.5 | 42.1 ± 2.7 | 15.5 ± 1.3 | 5.6 |
+
+Kết luận (dùng cho §6.13):
+- CRC chỉ ràng buộc **FNR**. Image FNR bám α (9.8% tại α=0.10; 14.9% tại α=0.15, n_cal=300); n_cal nhỏ under-cover (7.0% tại 25) vì λ̂ khớp rủi ro nhiễu.
+- Image FPR **55.8% / 42.1%** → không phải điểm vận hành dùng được; **không được viết "cascade khôi phục triage"**.
+- S(w*) vẫn là ranker tốt hơn full-image: AUC 0.825 vs 0.565, AP 0.845 vs 0.582, R@1%FPR 0.286 vs 0.042 (6.8×), nhưng tại ngưỡng conformal FNR 10% thì FPR 56% → triage vẫn là điểm yếu.
+- Pixel FNR 15.3–16.7% (sàn window-miss ≈15%: w* không phủ hết mask ở ~15% tài liệu), pixel FPR 4.5–5.6% → guarantee 10% mức điểm ảnh **không đạt**; α=0.15 chỉ đạt sát ngưỡng tại n_cal=300.
+- B53 (12.0% / 1.8%) là một split đơn lẻ; số trung bình 100 split là 15.5% / 5.5%. Dùng B54.
+
 ## Cảnh báo cần kiểm tra
 
 - Model có thể "ăn gian" nhờ khác biệt **độ phân giải / kiểu nén** giữa authentic và forged → cần augmentation (JPEG, resize, blur) để kiểm chứng.

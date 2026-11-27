@@ -68,11 +68,12 @@ class PatchDataset(Dataset):
     """items: list of dict {img, mask, bbox, pos}.
     pos=True: window quanh bbox (jitter khi train). pos=False: window random."""
 
-    def __init__(self, items, P=384, jitter=0.0, rng=None):
+    def __init__(self, items, P=384, jitter=0.0, rng=None, jpeg_aug=False):
         self.items = items
         self.P = P
         self.jitter = jitter
         self.rng = rng or random.Random(0)
+        self.jpeg_aug = jpeg_aug
 
     def __len__(self):
         return len(self.items)
@@ -108,6 +109,13 @@ class PatchDataset(Dataset):
                 cy = self.rng.randint(0, max(1, H - 1))
 
         crop_img, crop_mask = crop_window(img, mask, cx, cy, self.P)
+        if getattr(self, "jpeg_aug", False) and self.rng.random() < 0.5:
+            q = self.rng.randint(50, 95)
+            u8 = (np.clip(crop_img, 0, 1) * 255).astype(np.uint8)[:, :, ::-1]
+            ok, buf = cv2.imencode(".jpg", u8, [cv2.IMWRITE_JPEG_QUALITY, q])
+            if ok:
+                dec = cv2.imdecode(buf, cv2.IMREAD_COLOR)
+                crop_img = cv2.cvtColor(dec, cv2.COLOR_BGR2RGB).astype(np.float32) / 255.0
         arr = (crop_img - MEAN) / STD
         image = torch.from_numpy(np.transpose(arr, (2, 0, 1))).float()
         m = torch.from_numpy(crop_mask.astype(np.float32)).unsqueeze(0)
