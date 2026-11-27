@@ -68,7 +68,7 @@ We use the AIForge-Doc benchmark, which provides AI-inpainted financial and form
 
 \section{Related Work}\label{related-work}
 
-\textbf{AI-forged document detection.} DocTamper introduced a large document-tampering benchmark and a document-specific detector based on frequency-domain losses. TruFor combines a transformer backbone with a noise fingerprint for general image forgery localization. AIForge-Doc and DOCFORGE-BENCH recently showed that these detectors degrade severely on diffusion-inpainted documents, and that the problem remains unsolved. Our work builds directly on AIForge-Doc and studies adaptation rather than zero-shot detection.
+\textbf{AI-forged document detection.} DocTamper introduced a large document-tampering benchmark and a document-specific detector based on frequency-domain losses. TruFor~\cite{guillaro2023trufor} combines a transformer backbone with a noise fingerprint for general image forgery localization. AIForge-Doc and DOCFORGE-BENCH recently showed that these detectors degrade severely on diffusion-inpainted documents, and that the problem remains unsolved. Our work builds directly on AIForge-Doc and studies adaptation rather than zero-shot detection.
 
 \textbf{Few-shot and domain adaptation.} Few-shot learning and unsupervised domain adaptation are mature fields. We do not propose a new adaptation algorithm; instead, we characterize how standard fine-tuning behaves in the specific regime of extreme label scarcity and generator shift, and identify which components (pretraining, rehearsal, calibration) actually matter.
 
