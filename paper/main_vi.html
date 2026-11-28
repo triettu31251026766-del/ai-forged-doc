@@ -931,6 +931,45 @@ p, li { orphans: 2; widows: 2; }
 </tbody>
 </table>
 <p>Ba nhận xét. <strong>(1) Không có augmentation nén, JPEG tàn phá.</strong> Quality 90 giảm IoU pooled từ 0.705 xuống 0.214 (giữ 30%) và Recall@1%FPR từ 0.520 xuống 0.070; quality 75 chỉ còn 0.081 IoU, 0.149 F1 và 0.005 Recall@1%FPR, image AUC xuống 0.397, dưới mức ngẫu nhiên trên tập con này. Điều này phù hợp với việc detector dựa vào dấu vết tần số cao của bộ sinh mà lượng tử hóa xóa đi, và quan trọng về vận hành vì nén lại là phổ biến. Chúng tôi báo cáo AUC dưới ngẫu nhiên đúng như đo được; với 200 tài liệu giả, đây cũng là ô nhiễu nhất trong bảng. <strong>(2) Augmentation JPEG lấy lại phần lớn mất mát.</strong> Với đúng 100 nhãn và ngân sách replay, quality 90 tăng từ 0.214 lên 0.512 IoU pooled và quality 75 từ 0.081 lên 0.449 (72% mức sạch 0.621 của chính mô hình có augmentation); image AUC tăng từ 0.541/0.397 lên 0.669/0.623, và Recall@1%FPR ở quality 75 tăng từ 0.005 lên 0.130. <strong>(3) Lợi ích có mục tiêu và không miễn phí.</strong> Mô hình có augmentation trả giá trên tài liệu sạch (0.705 -&gt; 0.621 IoU pooled; Recall@1%FPR 0.520 -&gt; 0.345) và trên hai phép nó không được huấn luyện (resize 0.629 -&gt; 0.505; blur 0.579 -&gt; 0.476). Vì thế khớp augmentation với pipeline đầu vào quan trọng hơn là thêm mù quáng. Ngay cả khi có augmentation, quality 75 vẫn mất 28% IoU sạch và triage tại FPR 1% chỉ bắt 13% giấy tờ giả so với 34.5% khi sạch, nên khoảng cách được thu hẹp nhưng chưa đóng. Xếp hạng và định vị suy giảm cùng nhau, nên hiệu chỉnh lại không lấy lại được IoU đã mất.</p>
+<h3 id="615-tinh-tong-quat-theo-kien-truc">6.15 Tính tổng quát theo kiến trúc</h3>
+<p>Để kiểm tra phát hiện không phải đặc thù của ResNet-18, chúng tôi lặp lại pipeline với backbone SegFormer-B2 (pretrain ImageNet, train trên Gemini cùng công thức, patch-adapt với đúng 100 nhãn GPT và đánh giá bằng cùng cascade).</p>
+<table>
+<thead>
+<tr>
+<th>Backbone</th>
+<th>Trần GT-box</th>
+<th>IoU pooled / mean</th>
+<th>F1 pooled</th>
+<th>Image AUC</th>
+<th>Image AP</th>
+<th>R@1%FPR</th>
+<th>s/ảnh</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ResNet-18 U-Net</td>
+<td>0.677</td>
+<td>0.564 / 0.590</td>
+<td>0.721</td>
+<td>0.825</td>
+<td>0.845</td>
+<td>0.286</td>
+<td>1.04</td>
+</tr>
+<tr>
+<td><strong>SegFormer-B2</strong></td>
+<td><strong>0.776</strong></td>
+<td><strong>0.658 / 0.670</strong></td>
+<td><strong>0.794</strong></td>
+<td><strong>0.891</strong></td>
+<td><strong>0.911</strong></td>
+<td><strong>0.527</strong></td>
+<td>2.44</td>
+</tr>
+</tbody>
+</table>
+<p>SegFormer-B2 cải thiện mọi chỉ số: trần từ 0.677 lên 0.776, IoU tự động từ 0.564 lên 0.658 (3.4 lần baseline toàn ảnh, 85% trần của nó), và Recall@1%FPR từ 0.286 lên 0.527, đổi lại 2.4 s thay vì 1.0 s mỗi tài liệu. Hiện tượng ta nghiên cứu vì thế không phụ thuộc kiến trúc, và transformer là lựa chọn triển khai tốt hơn khi độ trễ cho phép.</p>
 <hr />
 <h2 id="7-thao-luan">7. Thảo luận</h2>
 <p><strong>Vì sao thích ứng giúp?</strong> Fine-tune trên vài mẫu đích dường như làm sắc nét phản hồi không gian quanh vùng bị sửa, thay vì chỉ dịch một ngưỡng toàn cục. Điều này phù hợp với pixel AUC cao trước thích ứng và với việc các phương pháp hiệu chỉnh ngưỡng thất bại.</p>

@@ -410,6 +410,18 @@ A forged document rarely reaches the bank as a pristine PNG: it is screenshotted
 Three observations follow. **(1) Without compression augmentation, JPEG is catastrophic.** Quality 90 reduces pooled IoU from 0.705 to 0.214 (30% retained) and Recall@1%FPR from 0.520 to 0.070; quality 75 leaves 0.081 IoU, 0.149 F1 and 0.005 Recall@1%FPR, and image AUC falls to 0.397, below chance on this subset. This is consistent with the detector relying on high-frequency generator traces that quantization removes, and it matters operationally because recompression is ubiquitous. We report the below-chance AUC as measured; with 200 forged documents it is also the noisiest cell in the table. **(2) JPEG augmentation removes most of that loss.** Under the same 100 labels and replay budget, quality 90 improves from 0.214 to 0.512 pooled IoU and quality 75 from 0.081 to 0.449 (72% of the augmented model's own clean 0.621); image AUC rises from 0.541/0.397 to 0.669/0.623, and Recall@1%FPR at quality 75 rises from 0.005 to 0.130. **(3) The gain is targeted and not free.** The augmented model pays on clean documents (0.705 -> 0.621 pooled IoU; Recall@1%FPR 0.520 -> 0.345) and on the two corruptions it was not trained for (resize 0.629 -> 0.505; blur 0.579 -> 0.476). Matching augmentation to the ingestion pipeline therefore matters more than adding it blindly. Even with augmentation, quality 75 still loses 28% of the clean IoU and triage at 1% FPR catches 13% of forgeries versus 34.5% clean, so the gap is narrowed but not closed. Ranking and localization degrade together, so recalibration cannot recover the lost IoU.
 
 
+
+### 6.15 Backbone generality
+
+To check that the findings are not an artefact of ResNet-18, we repeat the pipeline with a SegFormer-B2 backbone (pre-trained on ImageNet, trained on Gemini with the same recipe, then patch-adapted with the same 100 GPT labels and evaluated with the same cascade).
+
+| Backbone | GT-box ceiling | IoU pooled / mean | F1 pooled | Image AUC | Image AP | R@1%FPR | s/image |
+|---|---|---|---|---|---|---|---|
+| ResNet-18 U-Net | 0.677 | 0.564 / 0.590 | 0.721 | 0.825 | 0.845 | 0.286 | 1.04 |
+| **SegFormer-B2** | **0.776** | **0.658 / 0.670** | **0.794** | **0.891** | **0.911** | **0.527** | 2.44 |
+
+SegFormer-B2 improves every metric: the ceiling rises from 0.677 to 0.776, the automatic IoU from 0.564 to 0.658 (3.4x the full-image baseline, 85% of its own ceiling), and Recall@1%FPR from 0.286 to 0.527, at the cost of 2.4 s instead of 1.0 s per document. The phenomenon we study is therefore backbone-agnostic, and the transformer backbone is the better deployment choice when latency allows.
+
 ---
 
 ## 7. Discussion

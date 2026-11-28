@@ -709,6 +709,23 @@ Three observations follow. \textbf{(1) Without compression augmentation, JPEG is
 
 \bigskip
 
+
+\section{Backbone generality}
+To check that the findings are not an artefact of ResNet-18, we repeat the pipeline with SegFormer-B2 (ImageNet pre-training, the same Gemini training recipe, the same 100 GPT labels and the same cascade).
+
+\begin{table}[H]\centering\small
+\begin{tabular}{lccccccc}
+\toprule
+Backbone & GT-box & IoU pooled/mean & F1 & Img AUC & Img AP & R@1\% & s/img \\
+\midrule
+ResNet-18 & 0.677 & 0.564 / 0.590 & 0.721 & 0.825 & 0.845 & 0.286 & 1.04 \\
+SegFormer-B2 & \textbf{0.776} & \textbf{0.658} / \textbf{0.670} & \textbf{0.794} & \textbf{0.891} & \textbf{0.911} & \textbf{0.527} & 2.44 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+SegFormer-B2 improves every metric: the ceiling rises from 0.677 to 0.776, the automatic IoU from 0.564 to 0.658 (3.4x the full-image baseline, 85\% of its ceiling), and Recall@1\%FPR from 0.286 to 0.527, at 2.4\,s instead of 1.0\,s per document. The phenomenon is backbone-agnostic, and the transformer is the better deployment choice when latency allows.
+
 \section{Discussion}\label{discussion}
 
 \textbf{Why does adaptation help?} Fine-tuning on a few target samples appears to sharpen the spatial response around the edited region, rather than merely shifting a global threshold. This is consistent with the high pixel AUC before adaptation and with the failure of threshold-calibration methods.

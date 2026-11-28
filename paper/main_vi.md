@@ -398,6 +398,18 @@ Tài liệu giả hiếm khi đến ngân hàng dưới dạng PNG nguyên bản
 Ba nhận xét. **(1) Không có augmentation nén, JPEG tàn phá.** Quality 90 giảm IoU pooled từ 0.705 xuống 0.214 (giữ 30%) và Recall@1%FPR từ 0.520 xuống 0.070; quality 75 chỉ còn 0.081 IoU, 0.149 F1 và 0.005 Recall@1%FPR, image AUC xuống 0.397, dưới mức ngẫu nhiên trên tập con này. Điều này phù hợp với việc detector dựa vào dấu vết tần số cao của bộ sinh mà lượng tử hóa xóa đi, và quan trọng về vận hành vì nén lại là phổ biến. Chúng tôi báo cáo AUC dưới ngẫu nhiên đúng như đo được; với 200 tài liệu giả, đây cũng là ô nhiễu nhất trong bảng. **(2) Augmentation JPEG lấy lại phần lớn mất mát.** Với đúng 100 nhãn và ngân sách replay, quality 90 tăng từ 0.214 lên 0.512 IoU pooled và quality 75 từ 0.081 lên 0.449 (72% mức sạch 0.621 của chính mô hình có augmentation); image AUC tăng từ 0.541/0.397 lên 0.669/0.623, và Recall@1%FPR ở quality 75 tăng từ 0.005 lên 0.130. **(3) Lợi ích có mục tiêu và không miễn phí.** Mô hình có augmentation trả giá trên tài liệu sạch (0.705 -> 0.621 IoU pooled; Recall@1%FPR 0.520 -> 0.345) và trên hai phép nó không được huấn luyện (resize 0.629 -> 0.505; blur 0.579 -> 0.476). Vì thế khớp augmentation với pipeline đầu vào quan trọng hơn là thêm mù quáng. Ngay cả khi có augmentation, quality 75 vẫn mất 28% IoU sạch và triage tại FPR 1% chỉ bắt 13% giấy tờ giả so với 34.5% khi sạch, nên khoảng cách được thu hẹp nhưng chưa đóng. Xếp hạng và định vị suy giảm cùng nhau, nên hiệu chỉnh lại không lấy lại được IoU đã mất.
 
 
+
+### 6.15 Tính tổng quát theo kiến trúc
+
+Để kiểm tra phát hiện không phải đặc thù của ResNet-18, chúng tôi lặp lại pipeline với backbone SegFormer-B2 (pretrain ImageNet, train trên Gemini cùng công thức, patch-adapt với đúng 100 nhãn GPT và đánh giá bằng cùng cascade).
+
+| Backbone | Trần GT-box | IoU pooled / mean | F1 pooled | Image AUC | Image AP | R@1%FPR | s/ảnh |
+|---|---|---|---|---|---|---|---|
+| ResNet-18 U-Net | 0.677 | 0.564 / 0.590 | 0.721 | 0.825 | 0.845 | 0.286 | 1.04 |
+| **SegFormer-B2** | **0.776** | **0.658 / 0.670** | **0.794** | **0.891** | **0.911** | **0.527** | 2.44 |
+
+SegFormer-B2 cải thiện mọi chỉ số: trần từ 0.677 lên 0.776, IoU tự động từ 0.564 lên 0.658 (3.4 lần baseline toàn ảnh, 85% trần của nó), và Recall@1%FPR từ 0.286 lên 0.527, đổi lại 2.4 s thay vì 1.0 s mỗi tài liệu. Hiện tượng ta nghiên cứu vì thế không phụ thuộc kiến trúc, và transformer là lựa chọn triển khai tốt hơn khi độ trễ cho phép.
+
 ---
 
 ## 7. Thảo luận

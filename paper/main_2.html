@@ -960,6 +960,45 @@ p, li { orphans: 2; widows: 2; }
 </tbody>
 </table>
 <p>Three observations follow. <strong>(1) Without compression augmentation, JPEG is catastrophic.</strong> Quality 90 reduces pooled IoU from 0.705 to 0.214 (30% retained) and Recall@1%FPR from 0.520 to 0.070; quality 75 leaves 0.081 IoU, 0.149 F1 and 0.005 Recall@1%FPR, and image AUC falls to 0.397, below chance on this subset. This is consistent with the detector relying on high-frequency generator traces that quantization removes, and it matters operationally because recompression is ubiquitous. We report the below-chance AUC as measured; with 200 forged documents it is also the noisiest cell in the table. <strong>(2) JPEG augmentation removes most of that loss.</strong> Under the same 100 labels and replay budget, quality 90 improves from 0.214 to 0.512 pooled IoU and quality 75 from 0.081 to 0.449 (72% of the augmented model's own clean 0.621); image AUC rises from 0.541/0.397 to 0.669/0.623, and Recall@1%FPR at quality 75 rises from 0.005 to 0.130. <strong>(3) The gain is targeted and not free.</strong> The augmented model pays on clean documents (0.705 -&gt; 0.621 pooled IoU; Recall@1%FPR 0.520 -&gt; 0.345) and on the two corruptions it was not trained for (resize 0.629 -&gt; 0.505; blur 0.579 -&gt; 0.476). Matching augmentation to the ingestion pipeline therefore matters more than adding it blindly. Even with augmentation, quality 75 still loses 28% of the clean IoU and triage at 1% FPR catches 13% of forgeries versus 34.5% clean, so the gap is narrowed but not closed. Ranking and localization degrade together, so recalibration cannot recover the lost IoU.</p>
+<h3 id="615-backbone-generality">6.15 Backbone generality</h3>
+<p>To check that the findings are not an artefact of ResNet-18, we repeat the pipeline with a SegFormer-B2 backbone (pre-trained on ImageNet, trained on Gemini with the same recipe, then patch-adapted with the same 100 GPT labels and evaluated with the same cascade).</p>
+<table>
+<thead>
+<tr>
+<th>Backbone</th>
+<th>GT-box ceiling</th>
+<th>IoU pooled / mean</th>
+<th>F1 pooled</th>
+<th>Image AUC</th>
+<th>Image AP</th>
+<th>R@1%FPR</th>
+<th>s/image</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ResNet-18 U-Net</td>
+<td>0.677</td>
+<td>0.564 / 0.590</td>
+<td>0.721</td>
+<td>0.825</td>
+<td>0.845</td>
+<td>0.286</td>
+<td>1.04</td>
+</tr>
+<tr>
+<td><strong>SegFormer-B2</strong></td>
+<td><strong>0.776</strong></td>
+<td><strong>0.658 / 0.670</strong></td>
+<td><strong>0.794</strong></td>
+<td><strong>0.891</strong></td>
+<td><strong>0.911</strong></td>
+<td><strong>0.527</strong></td>
+<td>2.44</td>
+</tr>
+</tbody>
+</table>
+<p>SegFormer-B2 improves every metric: the ceiling rises from 0.677 to 0.776, the automatic IoU from 0.564 to 0.658 (3.4x the full-image baseline, 85% of its own ceiling), and Recall@1%FPR from 0.286 to 0.527, at the cost of 2.4 s instead of 1.0 s per document. The phenomenon we study is therefore backbone-agnostic, and the transformer backbone is the better deployment choice when latency allows.</p>
 <hr />
 <h2 id="7-discussion">7. Discussion</h2>
 <p><strong>Why does adaptation help?</strong> Fine-tuning on a few target samples appears to sharpen the spatial response around the edited region, rather than merely shifting a global threshold. This is consistent with the high pixel AUC before adaptation and with the failure of threshold-calibration methods.</p>
