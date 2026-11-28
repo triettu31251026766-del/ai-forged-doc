@@ -441,7 +441,7 @@ SegFormer-B2 improves every metric: the ceiling rises from 0.677 to 0.776, the a
 - **Small, narrow benchmark.** AIForge-Doc contains ≈4k forged receipts/forms; generalization to other document types, languages, and bank-specific data is unverified.
 - **Three generators.** Gemini, Ideogram, and GPT-Image-2 do not cover the full space of generative editors.
 - **Synthetic edits.** Forgeries replace a single numeric field; whole-document synthesis and signature forgery are out of scope.
-- **Single architecture.** We use a ResNet-18 U-Net; larger or text-aware models may behave differently.
+- **Two backbones.** We evaluate ResNet-18 and SegFormer-B2; larger or text-aware models may behave differently, but the trend is consistent across the two.
 - **Modest full-image performance.** The full-image detector remains modest after adaptation (0.195 ± 0.037); the TL-HRS stage reaches 0.537 ± 0.016, and the remaining gap to its 0.677 adapted ceiling is split between window ranking (0.653) and the crop limit.
 - **Inference cost.** The cascade runs ≈54 window passes per forged document (≈1.2 s on one consumer GPU). This is acceptable for offline forensic review but not for high-throughput streaming; coarse-guided pruning currently costs 0.011 IoU or more.
 - **Generator-shift ranking gap.** On Ideogram the detector's oracle window is 0.510 but the selected window scores 0.284, so confidence is miscalibrated across generators.
